@@ -114,6 +114,7 @@ export default async function BienDetailPage({
                 <Field label="Quartier" value={bien.quartier} />
                 <Field label="Pays" value={bien.pays} />
                 <Field label="Numéro de clef" value={bien.numeroClef} icon={Key} />
+                <Field label="Meublé" value={boolLabelOuiNon(bien.meuble)} />
                 <Field
                   label="DPE — consommation"
                   value={bien.energieConsommation ? `${bien.energieConsommation.toString()} kWh/m²/an` : undefined}
@@ -189,24 +190,74 @@ export default async function BienDetailPage({
                           }
                           icon={User}
                         />
+                        <Field
+                          label="Locataire"
+                          value={
+                            mandat.locataire ? (
+                              <Link
+                                href={`/contacts/${mandat.locataire.id}`}
+                                className="text-primary hover:underline"
+                              >
+                                {mandat.locataire.prenom} {mandat.locataire.nom}
+                              </Link>
+                            ) : undefined
+                          }
+                          icon={User}
+                        />
                         <Field label="Co-agent" value={mandat.coAgent} />
+                        <Field label="Numéro de mandat" value={mandat.numero} />
                         <Field label="Démarrage mandat" value={dateLabel(mandat.dateSignature)} icon={Calendar} />
                         <Field label="Fin mandat" value={dateLabel(mandat.finMandat)} icon={Calendar} />
-                        <Field
-                          label="Montant propriétaire"
-                          value={moneyLabel(mandat.montantProprietaire, bien.devise)}
-                          icon={Wallet}
-                        />
-                        <Field
-                          label="Montant compromis"
-                          value={moneyLabel(mandat.montantCompromis, bien.devise)}
-                          icon={Wallet}
-                        />
-                        <Field label="Honoraires propriétaire" value={moneyLabel(mandat.honorairesProprietaire, bien.devise)} />
-                        <Field label="Honoraires acheteur" value={moneyLabel(mandat.honorairesAcheteur, bien.devise)} />
-                        <Field label="Vendu le" value={dateLabel(mandat.venduLe)} />
                         <Field label="Origine" value={[mandat.origine, mandat.originePrecise].filter(Boolean).join(" — ") || undefined} />
                       </dl>
+
+                      {(mandat.montantProprietaire ||
+                        mandat.montantCompromis ||
+                        mandat.honorairesProprietaire ||
+                        mandat.honorairesAcheteur ||
+                        mandat.venduLe) && (
+                        <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3">
+                          <Field
+                            label="Montant propriétaire"
+                            value={moneyLabel(mandat.montantProprietaire, bien.devise)}
+                            icon={Wallet}
+                          />
+                          <Field
+                            label="Montant compromis"
+                            value={moneyLabel(mandat.montantCompromis, bien.devise)}
+                            icon={Wallet}
+                          />
+                          <Field
+                            label="Honoraires propriétaire"
+                            value={moneyLabel(mandat.honorairesProprietaire, bien.devise)}
+                          />
+                          <Field
+                            label="Honoraires acheteur"
+                            value={moneyLabel(mandat.honorairesAcheteur, bien.devise)}
+                          />
+                          <Field label="Vendu le" value={dateLabel(mandat.venduLe)} />
+                        </dl>
+                      )}
+
+                      {(mandat.montantLoyer || mandat.locataire) && (
+                        <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3">
+                          <Field label="Loyer mensuel" value={moneyLabel(mandat.montantLoyer, "EUR")} icon={Wallet} />
+                          <Field label="Charges (provisions)" value={moneyLabel(mandat.montantCharges, "EUR")} />
+                          <Field label="Dépôt de garantie" value={moneyLabel(mandat.montantDepotGarantie, "EUR")} />
+                          <Field label="Frais d'agence" value={moneyLabel(mandat.fraisAgence, "EUR")} />
+                          <Field
+                            label="Honoraires de gestion"
+                            value={
+                              mandat.pourcentageHonorairesGestion
+                                ? `${mandat.pourcentageHonorairesGestion.toString()} %`
+                                : moneyLabel(mandat.honorairesGestion, "EUR")
+                            }
+                          />
+                          <Field label="Type de bail" value={mandat.typeBail} />
+                          <Field label="Usage" value={mandat.usage} />
+                          <Field label="Régime fiscal" value={mandat.regimeFiscal} />
+                        </dl>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -350,6 +401,11 @@ function EmptyState({ label }: { label: string }) {
 
 function dateLabel(value: Date | null | undefined): string | undefined {
   return value ? new Date(value).toLocaleDateString("fr-FR") : undefined
+}
+
+function boolLabelOuiNon(value: boolean | null | undefined): string | undefined {
+  if (value === null || value === undefined) return undefined
+  return value ? "Oui" : "Non"
 }
 
 function moneyLabel(

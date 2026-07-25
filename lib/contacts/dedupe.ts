@@ -58,7 +58,7 @@ export function resolveContactMatch(
   return byIdentity?.id ?? null
 }
 
-export type OwnerMatchCandidate = {
+export type IdentityMatchCandidate = {
   id: string
   email: string | null
   telephone: string | null
@@ -66,23 +66,25 @@ export type OwnerMatchCandidate = {
   prenom: string
 }
 
-export type IncomingOwner = {
+export type IncomingIdentity = {
   email?: string
   telephone?: string
   nom?: string
   prenom?: string
 }
 
-// Résolution d'un propriétaire de bien (export Apimo "Produits") contre les
-// contacts déjà en base, tous pôles confondus (cf. "fiche contact unifiée
-// cross-pôle" — un même propriétaire peut déjà exister comme prospect). Contrairement
-// à `resolveContactMatch` (prospects/Septéo, où nom+prénom sont fiables), la
-// colonne "Propriétaire" de cet export est souvent tronquée ("Mme M. BERGAUD", pas
-// de prénom du tout) — on priorise donc email puis téléphone, le nom seul en
-// dernier recours seulement s'il y a aussi un prénom.
-export function resolveOwnerContactMatch(
-  candidates: OwnerMatchCandidate[],
-  incoming: IncomingOwner
+// Résolution d'une personne physique (propriétaire OU locataire, exports Apimo
+// "Produits" et Septéo "biens/mandats") contre les contacts déjà en base, tous
+// pôles ET toutes sources confondus (cf. "fiche contact unifiée cross-pôle" —
+// un même propriétaire peut déjà exister comme prospect Apimo, un même locataire
+// peut réapparaître d'un import Septéo à l'autre, etc.). Contrairement à
+// `resolveContactMatch` (imports "personnes" où nom+prénom sont la donnée la
+// plus fiable), ces colonnes sont parfois tronquées côté Apimo ("Mme M.
+// BERGAUD", pas de prénom du tout) — on priorise donc email puis téléphone, le
+// nom seul en dernier recours seulement s'il y a aussi un prénom.
+export function resolveContactByIdentity(
+  candidates: IdentityMatchCandidate[],
+  incoming: IncomingIdentity
 ): string | null {
   if (incoming.email) {
     const email = incoming.email.trim().toLowerCase()

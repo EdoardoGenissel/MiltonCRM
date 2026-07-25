@@ -89,6 +89,7 @@ export function ImportForm() {
           <option value="apimo_prospects">Apimo — prospects (.xlsx)</option>
           <option value="apimo_biens">Apimo — biens et mandats (.xlsx)</option>
           <option value="septeo_contacts">Septéo — propriétaires ou locataires (.csv)</option>
+          <option value="septeo_biens">Septéo — biens et mandats (.csv)</option>
         </select>
       </div>
 

@@ -2,9 +2,9 @@ import { randomUUID } from "node:crypto"
 import { prisma } from "@/lib/db/prisma"
 import { Source } from "@/lib/generated/prisma/enums"
 import {
-  resolveOwnerContactMatch,
-  type IncomingOwner,
-  type OwnerMatchCandidate,
+  resolveContactByIdentity,
+  type IncomingIdentity,
+  type IdentityMatchCandidate,
 } from "@/lib/contacts/dedupe"
 import { parseTabularBuffer } from "@/lib/imports/excel-parser"
 import { buildHeaderIndex } from "@/lib/imports/header-index"
@@ -14,6 +14,7 @@ import { parseApimoDateTime } from "@/lib/imports/parse-datetime"
 import { parseNumber } from "@/lib/imports/parse-number"
 import { chunk } from "@/lib/imports/batch"
 import { mapWithConcurrency } from "@/lib/imports/concurrency"
+import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
 // Import de l'export Apimo "Produits" (biens + mandats, un couple par ligne) —
@@ -30,7 +31,7 @@ function parseInt(value: string | undefined): number | undefined {
   return n === undefined ? undefined : Math.round(n)
 }
 
-async function loadOwnerCandidates(): Promise<OwnerMatchCandidate[]> {
+async function loadOwnerCandidates(): Promise<IdentityMatchCandidate[]> {
   // Tous pôles/sources confondus : un propriétaire peut déjà exister comme
   // prospect Apimo ou contact Septéo — cf. "fiche contact unifiée cross-pôle".
   return prisma.contact.findMany({
@@ -146,13 +147,13 @@ export async function importApimoBiens(
     let proprietaireId: string | null = null
     const parsed = parseApimoProprietaire(mapped.proprietaireLabel)
     if (parsed?.nom) {
-      const incoming: IncomingOwner = {
+      const incoming: IncomingIdentity = {
         email: mapped.proprietaireEmail,
         telephone: mapped.proprietaireTelephone,
         nom: parsed.nom,
         prenom: parsed.prenom,
       }
-      const matchId = resolveOwnerContactMatch(ownerCandidates, incoming)
+      const matchId = resolveContactByIdentity(ownerCandidates, incoming)
       if (matchId) {
         proprietaireId = matchId
         ownerIdsToTag.add(matchId)
@@ -189,8 +190,15 @@ export async function importApimoBiens(
     })
 
     const existingMandatId = mandatIdByRef.get(mapped.apinumber)
+    const mandatId = existingMandatId ?? randomUUID()
+    // Filet de sécurité si jamais un même "Apinumber" apparaissait deux fois
+    // dans l'export (cf. même correctif sur l'import biens Septéo, où un doublon
+    // réel a révélé l'absence de ce `set`) : sans lui, deux lignes partageant le
+    // même id généreraient deux `createMany` en conflit sur la contrainte unique
+    // (source, sourceRef) plutôt que de fusionner en une mise à jour.
+    if (!existingMandatId) mandatIdByRef.set(mapped.apinumber, mandatId)
     mandatPlans.push({
-      id: existingMandatId ?? randomUUID(),
+      id: mandatId,
       isNew: !existingMandatId,
       sourceRef: mapped.apinumber,
       bienId,
@@ -241,7 +249,7 @@ export async function importApimoBiens(
     batch.forEach(tick)
   }
   await mapWithConcurrency(existingBienPlans, WRITE_CONCURRENCY, async (b) => {
-    await prisma.bien.update({ where: { id: b.id }, data: b.data })
+    await prisma.bien.update({ where: { id: b.id }, data: nullifyUndefined(b.data) })
     tick()
   })
 
@@ -261,7 +269,7 @@ export async function importApimoBiens(
   await mapWithConcurrency(existingMandatPlans, WRITE_CONCURRENCY, async (m) => {
     await prisma.mandat.update({
       where: { id: m.id },
-      data: buildMandatData(m.mapped, m.bienId, m.proprietaireId),
+      data: nullifyUndefined(buildMandatData(m.mapped, m.bienId, m.proprietaireId)),
     })
   })
 

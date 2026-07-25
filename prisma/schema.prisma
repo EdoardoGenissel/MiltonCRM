@@ -209,11 +209,12 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  prospectDetail ProspectDetail?
-  mandats        Mandat[]
-  callLogs       CallLog[]
-  estimations    Estimation[]
-  ringoverEvents RingoverEvent[]
+  prospectDetail   ProspectDetail?
+  mandats          Mandat[]        @relation("MandatProprietaire")
+  mandatsLocataire Mandat[]        @relation("MandatLocataire")
+  callLogs         CallLog[]
+  estimations      Estimation[]
+  ringoverEvents   RingoverEvent[]
 
   @@unique([source, sourceRef])
   @@index([nom, prenom])
@@ -276,7 +277,7 @@ model Mandat {
   type           String // "simple" | "exclusif"
   statut         String? // "en_cours" | "termine" | "annule"
   proprietaireId String?
-  proprietaire   Contact?  @relation(fields: [proprietaireId], references: [id])
+  proprietaire   Contact?  @relation("MandatProprietaire", fields: [proprietaireId], references: [id])
   bienId         String?
   bien           Bien?     @relation(fields: [bienId], references: [id])
   dateSignature  DateTime?
@@ -297,6 +298,23 @@ model Mandat {
   montantProprietaire    Decimal?  @db.Decimal(12, 2)
   montantCompromis       Decimal?  @db.Decimal(12, 2)
   venduLe                DateTime?
+
+  // Gestion locative (export Septéo "biens/mandats") — cf.
+  // lib/imports/mapping-biens-septeo.ts `mapSepteoBienRow`. `locataireId` : le
+  // locataire actuel du lot, snapshot Septéo au moment de l'export (pas
+  // d'historique des baux successifs pour l'instant).
+  locataireId                  String?
+  locataire                    Contact? @relation("MandatLocataire", fields: [locataireId], references: [id])
+  numero                       String? // "Mandat_Numero" — numéro de mandat lisible (IDMandat interne sert de sourceRef)
+  typeBail                     String?
+  usage                        String? // "Habitation" | "Commercial" | "Mixte Habitation et commerce" | "Professionnel"
+  regimeFiscal                 String?
+  montantLoyer                 Decimal? @db.Decimal(10, 2)
+  montantCharges               Decimal? @db.Decimal(10, 2) // provisions sur charges
+  montantDepotGarantie         Decimal? @db.Decimal(10, 2)
+  fraisAgence                  Decimal? @db.Decimal(10, 2)
+  honorairesGestion            Decimal? @db.Decimal(10, 2)
+  pourcentageHonorairesGestion Decimal? @db.Decimal(5, 2)
 
   @@unique([source, sourceRef])
 }
@@ -342,6 +360,7 @@ model Bien {
   proprietaireLabel   String? // texte brut colonne "Propriétaire" (peut lister plusieurs co-propriétaires)
   creeLe              DateTime?
   majLe               DateTime?
+  meuble              Boolean? // gestion locative Septéo — "MandatLot_Meuble"
 
   @@unique([source, sourceRef])
 }

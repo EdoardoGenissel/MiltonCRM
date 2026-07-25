@@ -10,7 +10,7 @@ import { at, buildHeaderIndex, cell, communeCell, type HeaderIndex } from "./hea
 export type { HeaderIndex }
 export { buildHeaderIndex }
 
-export type ImportKind = "apimo_prospects" | "septeo_contacts" | "apimo_biens"
+export type ImportKind = "apimo_prospects" | "septeo_contacts" | "apimo_biens" | "septeo_biens"
 
 export type ApimoProspectRow = {
   sourceRef?: string

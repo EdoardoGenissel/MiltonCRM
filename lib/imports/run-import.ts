@@ -14,7 +14,9 @@ import { chunk } from "@/lib/imports/batch"
 import { mapWithConcurrency } from "@/lib/imports/concurrency"
 import { parseFrDate } from "@/lib/imports/parse-date"
 import { parseNumber } from "@/lib/imports/parse-number"
+import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
 import { importApimoBiens } from "@/lib/imports/run-import-biens"
+import { importSepteoBiens } from "@/lib/imports/run-import-biens-septeo"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
 export type { ImportResult, ImportProgress, OnProgress } from "@/lib/imports/import-types"
@@ -43,6 +45,36 @@ async function loadCandidates(source: Source): Promise<CandidateWithPersonas[]> 
       telephone: true,
       personas: true,
     },
+  })
+}
+
+// `resolveContactMatch` ne compare que des contacts de même source (cf. son
+// contrat : "les candidats doivent déjà être pré-filtrés par l'appelant") — un
+// prospect Apimo et un propriétaire/locataire Septéo pour la même personne ne
+// matchaient donc jamais, même avec un email identique. Repéré lors de l'audit
+// du 2026-07-24 (166 paires de contacts dupliqués par email, cf. mémoire du
+// projet) : la fiche la plus ancienne restait orpheline, la plus récente
+// n'était jamais reliée dessus. Ce filet de secours vérifie l'email tous
+// sources confondues *avant* de créer une nouvelle fiche ; volontairement
+// conservateur (persona ajouté, aucun champ écrasé) — cf. `PersonResolver`
+// (import biens), même logique.
+async function loadContactIdsByEmail(): Promise<Map<string, string>> {
+  const rows = await prisma.contact.findMany({
+    where: { email: { not: null } },
+    select: { id: true, email: true },
+  })
+  const index = new Map<string, string>()
+  for (const row of rows) {
+    if (row.email) index.set(row.email.trim().toLowerCase(), row.id)
+  }
+  return index
+}
+
+async function tagCrossSourcePersonas(ids: Map<string, Set<string>>): Promise<void> {
+  await mapWithConcurrency([...ids.entries()], UPDATE_CONCURRENCY, async ([id, personasToAdd]) => {
+    const contact = await prisma.contact.findUnique({ where: { id }, select: { personas: true } })
+    const merged = Array.from(new Set([...(contact?.personas ?? []), ...personasToAdd]))
+    await prisma.contact.update({ where: { id }, data: { personas: { set: merged } } })
   })
 }
 
@@ -97,6 +129,7 @@ async function importApimoProspects(
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
   const candidates = await loadCandidates(Source.APIMO)
+  const emailIndex = await loadContactIdsByEmail()
 
   // Phase 1 — dédup en mémoire, aucun accès DB : rapide même sur des milliers de
   // lignes, donc pas besoin d'y reporter de progression.
@@ -104,6 +137,7 @@ async function importApimoProspects(
   type ToUpdate = { matchId: string; mapped: NonNullable<ReturnType<typeof mapApimoRow>> }
   const toCreate: ToCreate[] = []
   const toUpdate: ToUpdate[] = []
+  const crossSourceTags = new Map<string, Set<string>>()
 
   for (const row of rows) {
     const mapped = mapApimoRow(headerIndex, row)
@@ -117,8 +151,14 @@ async function importApimoProspects(
       telephone: mapped.telephone,
     })
 
+    const emailMatchId = matchId ? null : (mapped.email && emailIndex.get(mapped.email.trim().toLowerCase())) || null
+
     if (matchId) {
       toUpdate.push({ matchId, mapped })
+    } else if (emailMatchId) {
+      const personas = crossSourceTags.get(emailMatchId) ?? new Set<string>()
+      personas.add("prospect")
+      crossSourceTags.set(emailMatchId, personas)
     } else {
       const id = randomUUID()
       toCreate.push({ id, mapped })
@@ -134,10 +174,11 @@ async function importApimoProspects(
         telephone: mapped.telephone ?? null,
         personas: ["prospect"],
       })
+      if (mapped.email) emailIndex.set(mapped.email.trim().toLowerCase(), id)
     }
   }
 
-  const total = toCreate.length + toUpdate.length
+  const total = toCreate.length + toUpdate.length + crossSourceTags.size
   let processed = 0
 
   // Phase 2a — nouvelles fiches, par lots.
@@ -208,7 +249,7 @@ async function importApimoProspects(
         loyerMax,
         ...extras,
       },
-      update: {
+      update: nullifyUndefined({
         alerteAbonne: mapped.alerteAbonne,
         classification: mapped.classification,
         origine: mapped.origine,
@@ -216,11 +257,19 @@ async function importApimoProspects(
         typeBien: mapped.typeBien,
         loyerMax,
         ...extras,
-      },
+      }),
     })
     processed += 1
     onProgress?.({ processed, total })
   })
+
+  // Phase 2c — doublons cross-source détectés par email (contact déjà existant
+  // côté Septéo) : on ajoute seulement le persona, sans écraser ses champs.
+  await tagCrossSourcePersonas(crossSourceTags)
+  processed += crossSourceTags.size
+  onProgress?.({ processed, total })
+
+  const duplicatesFound = toUpdate.length + crossSourceTags.size
 
   await prisma.syncRun.create({
     data: {
@@ -228,12 +277,12 @@ async function importApimoProspects(
       status: "success",
       finishedAt: new Date(),
       recordsUpserted: total,
-      duplicatesFound: toUpdate.length,
+      duplicatesFound,
       fileName,
     },
   })
 
-  return { status: "success", recordsUpserted: total, duplicatesFound: toUpdate.length }
+  return { status: "success", recordsUpserted: total, duplicatesFound }
 }
 
 async function importSepteoContacts(
@@ -244,6 +293,7 @@ async function importSepteoContacts(
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
   const candidates = await loadCandidates(Source.SEPTEO)
+  const emailIndex = await loadContactIdsByEmail()
 
   type ToCreate = { id: string; mapped: NonNullable<ReturnType<typeof mapSepteoRow>> }
   type ToUpdate = {
@@ -253,6 +303,7 @@ async function importSepteoContacts(
   }
   const toCreate: ToCreate[] = []
   const toUpdate: ToUpdate[] = []
+  const crossSourceTags = new Map<string, Set<string>>()
 
   for (const row of rows) {
     const mapped = mapSepteoRow(headerIndex, row)
@@ -265,10 +316,16 @@ async function importSepteoContacts(
       telephone: mapped.telephone,
     })
 
+    const emailMatchId = matchId ? null : (mapped.email && emailIndex.get(mapped.email.trim().toLowerCase())) || null
+
     if (matchId) {
       const existingPersonas = candidates.find((c) => c.id === matchId)?.personas ?? []
       const mergedPersonas = Array.from(new Set([...existingPersonas, ...mapped.personas]))
       toUpdate.push({ matchId, mapped, mergedPersonas })
+    } else if (emailMatchId) {
+      const personas = crossSourceTags.get(emailMatchId) ?? new Set<string>()
+      mapped.personas.forEach((p) => personas.add(p))
+      crossSourceTags.set(emailMatchId, personas)
     } else {
       const id = randomUUID()
       toCreate.push({ id, mapped })
@@ -281,10 +338,11 @@ async function importSepteoContacts(
         telephone: mapped.telephone ?? null,
         personas: mapped.personas,
       })
+      if (mapped.email) emailIndex.set(mapped.email.trim().toLowerCase(), id)
     }
   }
 
-  const total = toCreate.length + toUpdate.length
+  const total = toCreate.length + toUpdate.length + crossSourceTags.size
   let processed = 0
 
   for (const batch of chunk(toCreate, CREATE_BATCH_SIZE)) {
@@ -318,18 +376,23 @@ async function importSepteoContacts(
     onProgress?.({ processed, total })
   })
 
+  await tagCrossSourcePersonas(crossSourceTags)
+  processed += crossSourceTags.size
+  onProgress?.({ processed, total })
+  const duplicatesFound = toUpdate.length + crossSourceTags.size
+
   await prisma.syncRun.create({
     data: {
       source: Source.SEPTEO,
       status: "success",
       finishedAt: new Date(),
       recordsUpserted: total,
-      duplicatesFound: toUpdate.length,
+      duplicatesFound,
       fileName,
     },
   })
 
-  return { status: "success", recordsUpserted: total, duplicatesFound: toUpdate.length }
+  return { status: "success", recordsUpserted: total, duplicatesFound }
 }
 
 export async function runImport(
@@ -346,12 +409,14 @@ export async function runImport(
         return await importApimoBiens(buffer, fileName, onProgress)
       case "septeo_contacts":
         return await importSepteoContacts(buffer, fileName, onProgress)
+      case "septeo_biens":
+        return await importSepteoBiens(buffer, fileName, onProgress)
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur inconnue"
     await prisma.syncRun.create({
       data: {
-        source: kind === "septeo_contacts" ? Source.SEPTEO : Source.APIMO,
+        source: kind === "septeo_contacts" || kind === "septeo_biens" ? Source.SEPTEO : Source.APIMO,
         status: "error",
         finishedAt: new Date(),
         error: message,

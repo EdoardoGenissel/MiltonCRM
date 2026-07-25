@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest"
 import {
   normalizePhone,
   resolveContactMatch,
-  resolveOwnerContactMatch,
+  resolveContactByIdentity,
   type ContactMatchCandidate,
-  type OwnerMatchCandidate,
+  type IdentityMatchCandidate,
 } from "./dedupe"
 
 function candidate(overrides: Partial<ContactMatchCandidate> = {}): ContactMatchCandidate {
@@ -111,7 +111,7 @@ describe("resolveContactMatch", () => {
   })
 })
 
-function ownerCandidate(overrides: Partial<OwnerMatchCandidate> = {}): OwnerMatchCandidate {
+function identityCandidate(overrides: Partial<IdentityMatchCandidate> = {}): IdentityMatchCandidate {
   return {
     id: "c1",
     email: "marie.dupont@example.com",
@@ -122,9 +122,9 @@ function ownerCandidate(overrides: Partial<OwnerMatchCandidate> = {}): OwnerMatc
   }
 }
 
-describe("resolveOwnerContactMatch", () => {
+describe("resolveContactByIdentity", () => {
   it("priorité 1 : email (insensible à la casse)", () => {
-    const matchId = resolveOwnerContactMatch([ownerCandidate()], {
+    const matchId = resolveContactByIdentity([identityCandidate()], {
       email: "Marie.Dupont@EXAMPLE.com",
       nom: "Nom tronqué différent",
     })
@@ -132,14 +132,14 @@ describe("resolveOwnerContactMatch", () => {
   })
 
   it("priorité 2 : téléphone si pas d'email fourni ou pas de match email", () => {
-    const matchId = resolveOwnerContactMatch([ownerCandidate()], {
+    const matchId = resolveContactByIdentity([identityCandidate()], {
       telephone: "0612345678",
     })
     expect(matchId).toBe("c1")
   })
 
   it("priorité 3 : nom + prénom si ni email ni téléphone ne matchent", () => {
-    const matchId = resolveOwnerContactMatch([ownerCandidate({ email: null, telephone: null })], {
+    const matchId = resolveContactByIdentity([identityCandidate({ email: null, telephone: null })], {
       nom: "Dupont",
       prenom: "Marie",
     })
@@ -147,14 +147,14 @@ describe("resolveOwnerContactMatch", () => {
   })
 
   it("ne matche pas sur le nom seul (sans prénom) — trop peu fiable", () => {
-    const matchId = resolveOwnerContactMatch([ownerCandidate({ email: null, telephone: null })], {
+    const matchId = resolveContactByIdentity([identityCandidate({ email: null, telephone: null })], {
       nom: "Dupont",
     })
     expect(matchId).toBeNull()
   })
 
   it("retourne null si aucun candidat ne correspond", () => {
-    const matchId = resolveOwnerContactMatch([ownerCandidate()], {
+    const matchId = resolveContactByIdentity([identityCandidate()], {
       email: "inconnu@example.com",
       telephone: "0700000000",
       nom: "Inconnu",

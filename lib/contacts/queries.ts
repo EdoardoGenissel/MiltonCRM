@@ -109,6 +109,7 @@ export function getContactById(id: string) {
     include: {
       prospectDetail: true,
       mandats: { include: { bien: true }, orderBy: { updatedAt: "desc" } },
+      mandatsLocataire: { include: { bien: true }, orderBy: { updatedAt: "desc" } },
       callLogs: { orderBy: { receivedAt: "desc" }, take: 20 },
       estimations: { include: { bien: true }, orderBy: { createdAt: "desc" } },
     },

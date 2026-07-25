@@ -87,7 +87,13 @@ export async function listBiens(filters: BienListFilters = {}) {
   const [items, total] = await prisma.$transaction([
     prisma.bien.findMany({
       where,
-      include: { mandats: { include: { proprietaire: true }, orderBy: { updatedAt: "desc" }, take: 1 } },
+      include: {
+        mandats: {
+          include: { proprietaire: true, locataire: true },
+          orderBy: { updatedAt: "desc" },
+          take: 1,
+        },
+      },
       orderBy: buildBienOrderBy(sort, dir),
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
@@ -102,7 +108,10 @@ export function getBienById(id: string) {
   return prisma.bien.findUnique({
     where: { id },
     include: {
-      mandats: { include: { proprietaire: true }, orderBy: { updatedAt: "desc" } },
+      mandats: {
+        include: { proprietaire: true, locataire: true },
+        orderBy: { updatedAt: "desc" },
+      },
       estimations: { include: { contact: true }, orderBy: { createdAt: "desc" } },
     },
   })

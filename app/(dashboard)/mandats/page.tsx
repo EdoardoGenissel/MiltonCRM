@@ -142,6 +142,7 @@ export default async function MandatsPage({
                   </div>
                 </th>
                 <th className="px-5 py-3">Propriétaire</th>
+                <th className="px-5 py-3">Locataire</th>
                 <th className="px-5 py-3">Bien</th>
                 <th className="px-5 py-3">
                   <div className="flex items-center gap-1.5">
@@ -185,6 +186,18 @@ export default async function MandatsPage({
                       <span className="text-muted-foreground">—</span>
                     )}
                   </td>
+                  <td className="px-5 py-3">
+                    {mandat.locataire ? (
+                      <Link
+                        href={`/contacts/${mandat.locataire.id}`}
+                        className="text-foreground hover:underline"
+                      >
+                        {mandat.locataire.prenom} {mandat.locataire.nom}
+                      </Link>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
                   <td className="px-5 py-3 text-muted-foreground">
                     {mandat.bien?.titre || mandat.bien?.adresse || mandat.bien?.commune || "—"}
                   </td>
@@ -195,7 +208,7 @@ export default async function MandatsPage({
               ))}
               {mandats.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-16 py-14 text-center">
+                  <td colSpan={7} className="px-16 py-14 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <FileText className="h-8 w-8 opacity-40" />
                       <p>Aucun mandat ne correspond à ces filtres.</p>

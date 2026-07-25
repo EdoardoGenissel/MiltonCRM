@@ -18,4 +18,11 @@ describe("parseNumber", () => {
   it("extracts the leading number from a free-text range", () => {
     expect(parseNumber("≥ 3.0 pièces")).toBeCloseTo(3.0)
   })
+
+  it("returns undefined for text with no digit at all (ne doit pas devenir 0)", () => {
+    // Number("") vaut 0 en JS — régression réelle : "Local commercial" comme
+    // valeur de "Pièces" affichait "0" au lieu de "—" sur une fiche bien.
+    expect(parseNumber("Local commercial")).toBeUndefined()
+    expect(parseNumber("m²")).toBeUndefined()
+  })
 })

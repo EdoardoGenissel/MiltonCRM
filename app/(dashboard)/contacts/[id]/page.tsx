@@ -212,6 +212,39 @@ export default async function ContactDetailPage({
               )}
             </Card>
 
+            {contact.mandatsLocataire.length > 0 && (
+              <Card title="Location(s) en tant que locataire" icon={FileText}>
+                <ul className="flex flex-col gap-2">
+                  {contact.mandatsLocataire.map((mandat) => (
+                    <li
+                      key={mandat.id}
+                      className="rounded-lg border border-border p-3 text-sm transition-colors hover:bg-muted/50"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-foreground">
+                          {mandat.montantLoyer
+                            ? `${moneyLabel(mandat.montantLoyer, undefined)} / mois`
+                            : mandat.type}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {mandat.finMandat ? `Jusqu'au ${dateLabel(mandat.finMandat)}` : "en cours"}
+                        </span>
+                      </div>
+                      {mandat.bien && (
+                        <Link
+                          href={`/biens/${mandat.bien.id}`}
+                          className="mt-1 flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline"
+                        >
+                          <MapPin className="h-3 w-3 shrink-0" />
+                          {mandat.bien.titre || mandat.bien.adresse || mandat.bien.commune || "Bien sans adresse"}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
+
             <Card title="Estimations" icon={Building2}>
               {contact.estimations.length === 0 ? (
                 <EmptyState label="Aucune estimation liée. Elles apparaissent après soumission d'un formulaire JotForm." />
