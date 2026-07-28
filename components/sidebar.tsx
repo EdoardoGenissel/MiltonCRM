@@ -52,7 +52,7 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        "flex items-center gap-3 rounded-[8px] px-3 py-2.5 text-sm font-medium transition-colors",
         active
           ? "bg-muted text-foreground"
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -89,7 +89,7 @@ export function Sidebar({ user }: { user: SidebarUser | null }) {
 
       <div className="flex items-center gap-2 border-t border-border p-3.5">
         {user && (
-          <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 py-1">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-[8px] px-1 py-1">
             <div
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
               style={{ backgroundColor: avatarColor?.bg, color: avatarColor?.fg }}
@@ -106,7 +106,7 @@ export function Sidebar({ user }: { user: SidebarUser | null }) {
           <button
             type="submit"
             title="Déconnexion"
-            className="flex shrink-0 items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="flex shrink-0 items-center justify-center rounded-[8px] p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <LogOut className="h-4 w-4" />
           </button>

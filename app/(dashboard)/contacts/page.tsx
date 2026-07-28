@@ -8,10 +8,10 @@ import { ContactAvatar } from "@/components/contact-avatar"
 import { Pagination } from "@/components/pagination"
 import { SortableHeader } from "@/components/sortable-header"
 import { ColumnFilter } from "@/components/column-filter"
+import { PersonaTabs } from "@/components/persona-tabs"
 import { listContacts } from "@/lib/contacts/queries"
 import { parsePage } from "@/lib/pagination"
 import { toArray } from "@/lib/search-params"
-import { PERSONA_LABELS } from "@/lib/contacts/personas"
 
 export const dynamic = "force-dynamic"
 
@@ -67,28 +67,31 @@ export default async function ContactsPage({
     <>
       <Topbar title="Contacts" />
       <div className="flex-1 overflow-auto p-8">
-        <form className="mb-4 flex flex-wrap items-end justify-end gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Input
-              id="search"
-              name="search"
-              defaultValue={params.search}
-              placeholder="Nom, prénom, téléphone, email…"
-              className="w-72"
-            />
-          </div>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <PersonaTabs searchParams={params} />
 
-          <Button type="submit">Rechercher</Button>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="lg" nativeButton={false} render={<Link href="/contacts" />}>
-              <RotateCcw className="h-3.5 w-3.5" />
-              Réinitialiser
-            </Button>
-          )}
+          <form className="flex flex-wrap items-end gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Input
+                id="search"
+                name="search"
+                defaultValue={params.search}
+                placeholder="Nom, prénom, téléphone, email…"
+                className="w-72"
+              />
+            </div>
 
-        </form>
+            <Button type="submit">Rechercher</Button>
+            {hasActiveFilters && (
+              <Button variant="ghost" size="lg" nativeButton={false} render={<Link href="/contacts" />}>
+                <RotateCcw className="h-3.5 w-3.5" />
+                Réinitialiser
+              </Button>
+            )}
+          </form>
+        </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+        <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
@@ -143,18 +146,7 @@ export default async function ContactsPage({
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    Type
-                    <ColumnFilter
-                      column="persona"
-                      label="Type"
-                      selected={filters.persona}
-                      searchParams={params}
-                      labelMap={PERSONA_LABELS}
-                    />
-                  </div>
-                </th>
+                <th className="px-5 py-3 text-center">Type</th>
                 <th className="px-5 py-3 text-center">
                   <div className="flex items-center justify-center gap-1.5">
                     <SortableHeader

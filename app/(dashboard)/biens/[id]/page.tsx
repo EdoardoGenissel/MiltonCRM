@@ -62,7 +62,7 @@ export default async function BienDetailPage({
           Biens
         </Link>
 
-        <div className="mb-6 flex flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
+        <div className="mb-6 flex flex-col justify-between gap-4 rounded-[8px] border border-border bg-card p-6 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
               <Building2 className="h-5 w-5" />
@@ -146,7 +146,7 @@ export default async function BienDetailPage({
                       key={url}
                       src={url}
                       alt=""
-                      className="aspect-[4/3] w-full rounded-lg border border-border object-cover"
+                      className="aspect-[4/3] w-full rounded-[8px] border border-border object-cover"
                     />
                   ))}
                 </div>
@@ -162,7 +162,7 @@ export default async function BienDetailPage({
                     <li
                       key={mandat.id}
                       id={`mandat-${mandat.id}`}
-                      className="scroll-mt-8 rounded-lg border border-border p-4 text-sm target:ring-2 target:ring-primary"
+                      className="scroll-mt-8 rounded-[8px] border border-border p-4 text-sm target:ring-2 target:ring-primary"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
@@ -272,10 +272,10 @@ export default async function BienDetailPage({
                   {bien.estimations.map((estimation) => (
                     <li
                       key={estimation.id}
-                      className="flex items-center justify-between rounded-lg border border-border p-3 text-sm"
+                      className="flex items-center justify-between rounded-[8px] border border-border p-3 text-sm"
                     >
                       <span
-                        className={`rounded-md px-2 py-0.5 text-xs font-medium ${
+                        className={`rounded-[8px] px-2 py-0.5 text-xs font-medium ${
                           ESTIMATION_STATUT_STYLES[estimation.statut] ?? "bg-secondary text-secondary-foreground"
                         }`}
                       >
@@ -357,7 +357,7 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+    <div className="rounded-[8px] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
       <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
         {title}
@@ -369,7 +369,7 @@ function Card({
 
 function Badge({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+    <span className="inline-flex items-center rounded-[8px] bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
       {children}
     </span>
   )

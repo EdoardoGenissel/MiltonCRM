@@ -9,7 +9,7 @@ export default async function LoginPage({
   const { next } = await searchParams
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-card)]">
+    <div className="rounded-[8px] border border-border bg-card p-7 shadow-[var(--shadow-card)]">
       <h1 className="text-lg font-semibold tracking-tight text-foreground">Connexion</h1>
       <p className="mt-1 text-sm text-muted-foreground">Accédez au CRM Milton Immobilier.</p>
 

@@ -131,7 +131,7 @@ export function ColumnFilter({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="start">
-          <Popover.Popup className="w-64 rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-lg">
+          <Popover.Popup className="w-64 rounded-[8px] border border-border bg-popover p-3 text-popover-foreground shadow-lg">
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -157,7 +157,7 @@ export function ColumnFilter({
               </button>
             </div>
 
-            <div className="max-h-56 overflow-auto rounded-lg border border-border">
+            <div className="max-h-56 overflow-auto rounded-[8px] border border-border">
               {loading && <p className="p-3 text-xs text-muted-foreground">Chargement…</p>}
               {!loading && values.length === 0 && (
                 <p className="p-3 text-xs text-muted-foreground">Aucune valeur.</p>

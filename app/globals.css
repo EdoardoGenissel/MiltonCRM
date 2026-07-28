@@ -33,11 +33,14 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-bg: var(--warning-bg);
 
-  --radius-sm: calc(var(--radius) * 0.6);
+  /* Un seul radius partout dans l'app (boutons, inputs, cards, popovers, tags,
+     hover sidebar...) : les tailles rounded-sm/md/lg/xl/2xl pointent toutes vers
+     la même valeur de 8px plutôt que sur une échelle progressive. */
+  --radius-sm: 0.5rem;
   --radius-md: 0.5rem;
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.5rem;
 
   --font-sans: var(--font-inter-stack);
 

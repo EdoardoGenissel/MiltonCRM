@@ -2,7 +2,7 @@ import { ResetPasswordForm } from "./reset-password-form"
 
 export default function ResetPasswordPage() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-card)]">
+    <div className="rounded-[8px] border border-border bg-card p-7 shadow-[var(--shadow-card)]">
       <h1 className="text-lg font-semibold tracking-tight text-foreground">
         Nouveau mot de passe
       </h1>

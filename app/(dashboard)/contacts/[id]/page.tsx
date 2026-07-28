@@ -61,7 +61,7 @@ export default async function ContactDetailPage({
           Contacts
         </Link>
 
-        <div className="mb-6 flex flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
+        <div className="mb-6 flex flex-col justify-between gap-4 rounded-[8px] border border-border bg-card p-6 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
           <div className="flex items-center gap-4">
             <ContactAvatar prenom={contact.prenom} nom={contact.nom} size="lg" />
             <div>
@@ -189,7 +189,7 @@ export default async function ContactDetailPage({
                   {contact.mandats.map((mandat) => (
                     <li
                       key={mandat.id}
-                      className="rounded-lg border border-border p-3 text-sm transition-colors hover:bg-muted/50"
+                      className="rounded-[8px] border border-border p-3 text-sm transition-colors hover:bg-muted/50"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-foreground">{mandat.type}</span>
@@ -218,7 +218,7 @@ export default async function ContactDetailPage({
                   {contact.mandatsLocataire.map((mandat) => (
                     <li
                       key={mandat.id}
-                      className="rounded-lg border border-border p-3 text-sm transition-colors hover:bg-muted/50"
+                      className="rounded-[8px] border border-border p-3 text-sm transition-colors hover:bg-muted/50"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-foreground">
@@ -253,10 +253,10 @@ export default async function ContactDetailPage({
                   {contact.estimations.map((estimation) => (
                     <li
                       key={estimation.id}
-                      className="flex items-center justify-between rounded-lg border border-border p-3 text-sm"
+                      className="flex items-center justify-between rounded-[8px] border border-border p-3 text-sm"
                     >
                       <span
-                        className={`rounded-md px-2 py-0.5 text-xs font-medium ${
+                        className={`rounded-[8px] px-2 py-0.5 text-xs font-medium ${
                           ESTIMATION_STATUT_STYLES[estimation.statut] ?? "bg-secondary text-secondary-foreground"
                         }`}
                       >
@@ -339,7 +339,7 @@ export default async function ContactDetailPage({
               ) : (
                 <ul className="flex flex-col gap-2">
                   {contact.callLogs.map((call) => (
-                    <li key={call.id} className="rounded-lg border border-border p-3 text-sm">
+                    <li key={call.id} className="rounded-[8px] border border-border p-3 text-sm">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {new Date(call.receivedAt).toLocaleString("fr-FR")}
@@ -369,7 +369,7 @@ function Card({
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+    <div className="rounded-[8px] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
       <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
         {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
         {title}

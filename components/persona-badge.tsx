@@ -5,7 +5,7 @@ export function PersonaBadge({ persona, className }: { persona: string; classNam
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground",
+        "inline-flex items-center rounded-[8px] bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground",
         className
       )}
     >

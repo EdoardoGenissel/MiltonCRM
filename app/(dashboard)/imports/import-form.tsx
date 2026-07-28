@@ -104,7 +104,7 @@ export function ImportForm() {
           accept=".xlsx,.xls,.csv"
           required
           disabled={pending}
-          className="text-sm text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground disabled:opacity-50"
+          className="text-sm text-foreground file:mr-3 file:rounded-[8px] file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground disabled:opacity-50"
         />
       </div>
 

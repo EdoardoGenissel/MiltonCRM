@@ -3,7 +3,7 @@ import { ForgotPasswordForm } from "./forgot-password-form"
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-card)]">
+    <div className="rounded-[8px] border border-border bg-card p-7 shadow-[var(--shadow-card)]">
       <h1 className="text-lg font-semibold tracking-tight text-foreground">
         Mot de passe oublié
       </h1>

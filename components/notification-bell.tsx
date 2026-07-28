@@ -86,7 +86,7 @@ export function NotificationBell() {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="w-80 rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-lg">
+          <Popover.Popup className="w-80 rounded-[8px] border border-border bg-popover p-2 text-popover-foreground shadow-lg">
             <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Notifications</p>
             {items.length === 0 ? (
               <p className="px-2 py-4 text-center text-sm text-muted-foreground">
@@ -98,7 +98,7 @@ export function NotificationBell() {
                   <li
                     key={item.id}
                     className={cn(
-                      "flex flex-col gap-0.5 rounded-lg px-2 py-2 text-sm",
+                      "flex flex-col gap-0.5 rounded-[8px] px-2 py-2 text-sm",
                       !viewingSinceAt || item.createdAt > viewingSinceAt ? "bg-muted/60" : ""
                     )}
                   >
