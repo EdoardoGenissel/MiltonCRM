@@ -86,7 +86,7 @@ export default async function ContactDetailPage({
             {contact.telephone && (
               <Button
                 variant="outline"
-                size="sm"
+                size="lg"
                 nativeButton={false}
                 render={<a href={`tel:${contact.telephone}`} />}
               >
@@ -97,7 +97,7 @@ export default async function ContactDetailPage({
             {contact.email && (
               <Button
                 variant="outline"
-                size="sm"
+                size="lg"
                 nativeButton={false}
                 render={<a href={`mailto:${contact.email}`} />}
               >
@@ -397,7 +397,7 @@ function Field({
         {label}
       </dt>
       <dd className={`mt-0.5 text-foreground ${wrap ? "whitespace-pre-wrap" : ""}`}>
-        {value || "—"}
+        {value || "-"}
       </dd>
     </div>
   )

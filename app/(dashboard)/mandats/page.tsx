@@ -3,7 +3,7 @@ import { FileText, RotateCcw } from "lucide-react"
 import { Topbar } from "@/components/topbar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { SourceBadge } from "@/components/source-badge"
+import { MandatTypeBadge } from "@/components/mandat-type-badge"
 import { Pagination } from "@/components/pagination"
 import { SortableHeader } from "@/components/sortable-header"
 import { ColumnFilter } from "@/components/column-filter"
@@ -56,11 +56,8 @@ export default async function MandatsPage({
     <>
       <Topbar title="Mandats" />
       <div className="flex-1 overflow-auto p-8">
-        <form className="mb-4 flex flex-wrap items-end gap-3">
+        <form className="mb-4 flex flex-wrap items-end justify-end gap-3">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="search" className="text-xs font-medium text-muted-foreground">
-              Recherche rapide
-            </label>
             <Input
               id="search"
               name="search"
@@ -72,23 +69,19 @@ export default async function MandatsPage({
 
           <Button type="submit">Rechercher</Button>
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/mandats" />}>
+            <Button variant="ghost" size="lg" nativeButton={false} render={<Link href="/mandats" />}>
               <RotateCcw className="h-3.5 w-3.5" />
-              Réinitialiser les filtres
+              Réinitialiser
             </Button>
           )}
-
-          <span className="ml-auto self-end pb-2 text-xs text-muted-foreground">
-            Cliquez une ligne pour ouvrir la fiche du bien. Filtrez et triez depuis les en-têtes.
-          </span>
         </form>
 
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
+                <th className="px-5 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
                     <SortableHeader
                       label="Type"
                       sortKey="type"
@@ -105,8 +98,8 @@ export default async function MandatsPage({
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
+                <th className="px-5 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
                     <SortableHeader
                       label="Statut"
                       sortKey="statut"
@@ -123,8 +116,8 @@ export default async function MandatsPage({
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
+                <th className="px-5 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
                     <SortableHeader
                       label="Catégorie"
                       sortKey="categorie"
@@ -144,24 +137,6 @@ export default async function MandatsPage({
                 <th className="px-5 py-3">Propriétaire</th>
                 <th className="px-5 py-3">Locataire</th>
                 <th className="px-5 py-3">Bien</th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
-                    <SortableHeader
-                      label="Source"
-                      sortKey="source"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="source"
-                      label="Source"
-                      selected={filters.source}
-                      searchParams={params}
-                      endpoint="/api/mandats/column-values"
-                    />
-                  </div>
-                </th>
               </tr>
             </thead>
             <tbody>
@@ -171,9 +146,11 @@ export default async function MandatsPage({
                   href={mandat.bien ? `/biens/${mandat.bien.id}#mandat-${mandat.id}` : "#"}
                   className="border-b border-border last:border-0 hover:bg-muted/50"
                 >
-                  <td className="px-5 py-3 font-medium text-foreground">{mandat.type}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{mandat.statut ?? "—"}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{mandat.categorie ?? "—"}</td>
+                  <td className="px-5 py-3 text-center">
+                    <MandatTypeBadge type={mandat.type} />
+                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">{mandat.statut ?? "-"}</td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">{mandat.categorie ?? "-"}</td>
                   <td className="px-5 py-3">
                     {mandat.proprietaire ? (
                       <Link
@@ -183,7 +160,7 @@ export default async function MandatsPage({
                         {mandat.proprietaire.prenom} {mandat.proprietaire.nom}
                       </Link>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </td>
                   <td className="px-5 py-3">
@@ -195,20 +172,17 @@ export default async function MandatsPage({
                         {mandat.locataire.prenom} {mandat.locataire.nom}
                       </Link>
                     ) : (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-muted-foreground">-</span>
                     )}
                   </td>
                   <td className="px-5 py-3 text-muted-foreground">
-                    {mandat.bien?.titre || mandat.bien?.adresse || mandat.bien?.commune || "—"}
-                  </td>
-                  <td className="px-5 py-3">
-                    <SourceBadge source={mandat.source} />
+                    {mandat.bien?.titre || mandat.bien?.adresse || mandat.bien?.commune || "-"}
                   </td>
                 </ClickableRow>
               ))}
               {mandats.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-16 py-14 text-center">
+                  <td colSpan={6} className="px-16 py-14 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <FileText className="h-8 w-8 opacity-40" />
                       <p>Aucun mandat ne correspond à ces filtres.</p>

@@ -52,11 +52,11 @@ export default async function EstimationsPage({
                         {estimation.contact.prenom} {estimation.contact.nom}
                       </Link>
                     ) : (
-                      "—"
+                      "-"
                     )}
                   </td>
                   <td className="px-5 py-3 text-muted-foreground">
-                    {estimation.bien?.adresse ?? estimation.bien?.commune ?? "—"}
+                    {estimation.bien?.adresse ?? estimation.bien?.commune ?? "-"}
                   </td>
                   <td className="px-5 py-3 text-foreground">
                     {STATUT_LABELS[estimation.statut] ?? estimation.statut}
@@ -71,7 +71,7 @@ export default async function EstimationsPage({
                         Voir le rapport
                       </Link>
                     ) : (
-                      "—"
+                      "-"
                     )}
                   </td>
                 </tr>

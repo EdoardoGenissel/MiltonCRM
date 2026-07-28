@@ -55,7 +55,7 @@ export function IncomingCallBanner() {
     <div className="flex items-center justify-between gap-4 border-b border-border bg-primary/10 px-6 py-3">
       <div className="flex items-center gap-2.5 text-sm">
         <Phone className="h-4 w-4 text-primary" />
-        <span className="font-medium text-foreground">Appel en cours — {label}</span>
+        <span className="font-medium text-foreground">Appel en cours - {label}</span>
         {!call.matchedContact && (
           <span className="text-muted-foreground">(contact inconnu, {call.phoneNumber})</span>
         )}

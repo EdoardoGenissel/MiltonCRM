@@ -181,15 +181,15 @@ export function ColumnFilter({
 
             {hasMore && (
               <p className="mt-1.5 text-xs text-muted-foreground">
-                Plus de {values.length} résultats — affinez la recherche.
+                Plus de {values.length} résultats - affinez la recherche.
               </p>
             )}
 
             <div className="mt-3 flex justify-end gap-2">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
+              <Button type="button" variant="ghost" size="lg" onClick={() => setOpen(false)}>
                 Annuler
               </Button>
-              <Button type="button" size="sm" onClick={apply}>
+              <Button type="button" size="lg" onClick={apply}>
                 Appliquer
               </Button>
             </div>

@@ -4,7 +4,6 @@ import { Topbar } from "@/components/topbar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PersonaBadge } from "@/components/persona-badge"
-import { SourceBadge } from "@/components/source-badge"
 import { ContactAvatar } from "@/components/contact-avatar"
 import { Pagination } from "@/components/pagination"
 import { SortableHeader } from "@/components/sortable-header"
@@ -13,7 +12,6 @@ import { listContacts } from "@/lib/contacts/queries"
 import { parsePage } from "@/lib/pagination"
 import { toArray } from "@/lib/search-params"
 import { PERSONA_LABELS } from "@/lib/contacts/personas"
-import { SOURCE_LABELS } from "@/lib/contacts/sources"
 
 export const dynamic = "force-dynamic"
 
@@ -69,11 +67,8 @@ export default async function ContactsPage({
     <>
       <Topbar title="Contacts" />
       <div className="flex-1 overflow-auto p-8">
-        <form className="mb-4 flex flex-wrap items-end gap-3">
+        <form className="mb-4 flex flex-wrap items-end justify-end gap-3">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="search" className="text-xs font-medium text-muted-foreground">
-              Recherche rapide
-            </label>
             <Input
               id="search"
               name="search"
@@ -85,15 +80,12 @@ export default async function ContactsPage({
 
           <Button type="submit">Rechercher</Button>
           {hasActiveFilters && (
-            <Button variant="ghost" size="sm" nativeButton={false} render={<Link href="/contacts" />}>
+            <Button variant="ghost" size="lg" nativeButton={false} render={<Link href="/contacts" />}>
               <RotateCcw className="h-3.5 w-3.5" />
-              Réinitialiser les filtres
+              Réinitialiser
             </Button>
           )}
 
-          <span className="ml-auto self-end pb-2 text-xs text-muted-foreground">
-            Filtrez et triez directement depuis les en-têtes de colonne, comme dans un tableur.
-          </span>
         </form>
 
         <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
@@ -117,8 +109,8 @@ export default async function ContactsPage({
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
+                <th className="px-5 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
                     <SortableHeader
                       label="Téléphone"
                       sortKey="telephone"
@@ -134,8 +126,8 @@ export default async function ContactsPage({
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
+                <th className="px-5 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
                     <SortableHeader
                       label="Email"
                       sortKey="email"
@@ -151,20 +143,20 @@ export default async function ContactsPage({
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
-                    Personas
+                <th className="px-5 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
+                    Type
                     <ColumnFilter
                       column="persona"
-                      label="Personas"
+                      label="Type"
                       selected={filters.persona}
                       searchParams={params}
                       labelMap={PERSONA_LABELS}
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
+                <th className="px-5 py-3 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
                     <SortableHeader
                       label="Commune"
                       sortKey="commune"
@@ -177,24 +169,6 @@ export default async function ContactsPage({
                       label="Commune"
                       selected={filters.commune}
                       searchParams={params}
-                    />
-                  </div>
-                </th>
-                <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
-                    <SortableHeader
-                      label="Source"
-                      sortKey="source"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="source"
-                      label="Source"
-                      selected={filters.source}
-                      searchParams={params}
-                      labelMap={SOURCE_LABELS}
                     />
                   </div>
                 </th>
@@ -211,24 +185,21 @@ export default async function ContactsPage({
                       </span>
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-muted-foreground">{contact.telephone ?? "—"}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{contact.email ?? "—"}</td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">{contact.telephone ?? "-"}</td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">{contact.email ?? "-"}</td>
                   <td className="px-5 py-3">
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap justify-center gap-1.5">
                       {contact.personas.map((persona) => (
                         <PersonaBadge key={persona} persona={persona} />
                       ))}
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-muted-foreground">{contact.commune ?? "—"}</td>
-                  <td className="px-5 py-3">
-                    <SourceBadge source={contact.source} />
-                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">{contact.commune ?? "-"}</td>
                 </tr>
               ))}
               {contacts.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-16 py-14 text-center">
+                  <td colSpan={5} className="px-16 py-14 text-center">
                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
                       <Users className="h-8 w-8 opacity-40" />
                       <p>Aucun contact ne correspond à ces filtres.</p>

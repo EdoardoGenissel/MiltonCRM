@@ -17,6 +17,7 @@ import { parseNumber } from "@/lib/imports/parse-number"
 import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
 import { importApimoBiens } from "@/lib/imports/run-import-biens"
 import { importSepteoBiens } from "@/lib/imports/run-import-biens-septeo"
+import { recordImportRun } from "@/lib/imports/record-import-run"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
 export type { ImportResult, ImportProgress, OnProgress } from "@/lib/imports/import-types"
@@ -271,15 +272,13 @@ async function importApimoProspects(
 
   const duplicatesFound = toUpdate.length + crossSourceTags.size
 
-  await prisma.syncRun.create({
-    data: {
-      source: Source.APIMO,
-      status: "success",
-      finishedAt: new Date(),
-      recordsUpserted: total,
-      duplicatesFound,
-      fileName,
-    },
+  await recordImportRun({
+    source: Source.APIMO,
+    kind: "contacts",
+    fileName,
+    status: "success",
+    recordsUpserted: total,
+    duplicatesFound,
   })
 
   return { status: "success", recordsUpserted: total, duplicatesFound }
@@ -381,15 +380,13 @@ async function importSepteoContacts(
   onProgress?.({ processed, total })
   const duplicatesFound = toUpdate.length + crossSourceTags.size
 
-  await prisma.syncRun.create({
-    data: {
-      source: Source.SEPTEO,
-      status: "success",
-      finishedAt: new Date(),
-      recordsUpserted: total,
-      duplicatesFound,
-      fileName,
-    },
+  await recordImportRun({
+    source: Source.SEPTEO,
+    kind: "contacts",
+    fileName,
+    status: "success",
+    recordsUpserted: total,
+    duplicatesFound,
   })
 
   return { status: "success", recordsUpserted: total, duplicatesFound }
@@ -414,14 +411,14 @@ export async function runImport(
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur inconnue"
-    await prisma.syncRun.create({
-      data: {
-        source: kind === "septeo_contacts" || kind === "septeo_biens" ? Source.SEPTEO : Source.APIMO,
-        status: "error",
-        finishedAt: new Date(),
-        error: message,
-        fileName,
-      },
+    await recordImportRun({
+      source: kind === "septeo_contacts" || kind === "septeo_biens" ? Source.SEPTEO : Source.APIMO,
+      kind: kind === "septeo_contacts" || kind === "apimo_prospects" ? "contacts" : "biens_mandats",
+      fileName,
+      status: "error",
+      recordsUpserted: 0,
+      duplicatesFound: 0,
+      error: message,
     })
     return { status: "error", recordsUpserted: 0, duplicatesFound: 0, error: message }
   }

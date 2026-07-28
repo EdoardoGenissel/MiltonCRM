@@ -15,6 +15,7 @@ import { parseNumber } from "@/lib/imports/parse-number"
 import { chunk } from "@/lib/imports/batch"
 import { mapWithConcurrency } from "@/lib/imports/concurrency"
 import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
+import { recordImportRun } from "@/lib/imports/record-import-run"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
 // Import de l'export Apimo "Produits" (biens + mandats, un couple par ligne) —
@@ -275,15 +276,13 @@ export async function importApimoBiens(
 
   const duplicatesFound = existingBienPlans.length
 
-  await prisma.syncRun.create({
-    data: {
-      source: Source.APIMO,
-      status: "success",
-      finishedAt: new Date(),
-      recordsUpserted: total,
-      duplicatesFound,
-      fileName,
-    },
+  await recordImportRun({
+    source: Source.APIMO,
+    kind: "biens_mandats",
+    fileName,
+    status: "success",
+    recordsUpserted: total,
+    duplicatesFound,
   })
 
   return { status: "success", recordsUpserted: total, duplicatesFound }

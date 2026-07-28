@@ -77,7 +77,7 @@ export default async function BienDetailPage({
               <div className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5 shrink-0" />
                 {adresseComplete || "Adresse inconnue"}
-                {localisation ? ` — ${localisation}` : ""}
+                {localisation ? ` - ${localisation}` : ""}
               </div>
             </div>
           </div>
@@ -116,12 +116,12 @@ export default async function BienDetailPage({
                 <Field label="Numéro de clef" value={bien.numeroClef} icon={Key} />
                 <Field label="Meublé" value={boolLabelOuiNon(bien.meuble)} />
                 <Field
-                  label="DPE — consommation"
+                  label="DPE - consommation"
                   value={bien.energieConsommation ? `${bien.energieConsommation.toString()} kWh/m²/an` : undefined}
                   icon={Zap}
                 />
                 <Field
-                  label="DPE — émissions"
+                  label="DPE - émissions"
                   value={bien.energieEmission ? `${bien.energieEmission.toString()} kg CO₂/m²/an` : undefined}
                   icon={Leaf}
                 />
@@ -208,7 +208,7 @@ export default async function BienDetailPage({
                         <Field label="Numéro de mandat" value={mandat.numero} />
                         <Field label="Démarrage mandat" value={dateLabel(mandat.dateSignature)} icon={Calendar} />
                         <Field label="Fin mandat" value={dateLabel(mandat.finMandat)} icon={Calendar} />
-                        <Field label="Origine" value={[mandat.origine, mandat.originePrecise].filter(Boolean).join(" — ") || undefined} />
+                        <Field label="Origine" value={[mandat.origine, mandat.originePrecise].filter(Boolean).join(" - ") || undefined} />
                       </dl>
 
                       {(mandat.montantProprietaire ||
@@ -390,7 +390,7 @@ function Field({
         {Icon && <Icon className="h-3 w-3" />}
         {label}
       </dt>
-      <dd className="mt-0.5 text-foreground">{value || "—"}</dd>
+      <dd className="mt-0.5 text-foreground">{value || "-"}</dd>
     </div>
   )
 }

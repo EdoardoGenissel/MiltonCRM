@@ -10,6 +10,7 @@ import { chunk } from "@/lib/imports/batch"
 import { mapWithConcurrency } from "@/lib/imports/concurrency"
 import { PersonResolver } from "@/lib/imports/person-resolver"
 import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
+import { recordImportRun } from "@/lib/imports/record-import-run"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
 // Import de l'export Septéo "biens/mandats" (gestion locative) — un lot + son
@@ -247,15 +248,13 @@ export async function importSepteoBiens(
 
   const duplicatesFound = existingBienPlans.length
 
-  await prisma.syncRun.create({
-    data: {
-      source: Source.SEPTEO,
-      status: "success",
-      finishedAt: new Date(),
-      recordsUpserted: total,
-      duplicatesFound,
-      fileName,
-    },
+  await recordImportRun({
+    source: Source.SEPTEO,
+    kind: "biens_mandats",
+    fileName,
+    status: "success",
+    recordsUpserted: total,
+    duplicatesFound,
   })
 
   return { status: "success", recordsUpserted: total, duplicatesFound }

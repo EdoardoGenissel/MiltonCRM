@@ -72,6 +72,23 @@ model SyncRun {
   duplicatesFound Int       @default(0)
 }
 
+/// Statistiques détaillées d'un import CRM réussi (Lot 3) — table propre au CRM,
+/// pas partagée avec Cockpit (contrairement à SyncRun ci-dessus) : elle complète
+/// un SyncRun sans modifier son schéma, pour ne pas risquer de dériver de celui
+/// de Cockpit. Alimente la page Imports (stats du dernier import) et la cloche
+/// de notifications (cf. lib/notifications/queries.ts).
+model ImportLog {
+  id        String   @id @default(cuid())
+  syncRunId String   @unique
+  source    Source
+  kind      String // "contacts" | "biens_mandats"
+  fileName  String?
+  created   Int      @default(0)
+  updated   Int      @default(0)
+  total     Int      @default(0)
+  startedAt DateTime @default(now())
+}
+
 /// CA facturé par mois/pôle — Pennylane
 model FactCa {
   id          String   @id @default(cuid())

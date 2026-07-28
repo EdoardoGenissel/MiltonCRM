@@ -11,7 +11,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Milton CRM",
-  description: "Fiche contact unifiée cross-pôle — Milton Immobilier",
+  description: "Fiche contact unifiée cross-pôle - Milton Immobilier",
 }
 
 export default function RootLayout({

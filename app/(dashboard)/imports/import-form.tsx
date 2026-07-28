@@ -84,12 +84,12 @@ export function ImportForm() {
           name="kind"
           required
           disabled={pending}
-          className="h-9 rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring disabled:opacity-50"
+          className="h-10 rounded-[8px] border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring disabled:opacity-50"
         >
-          <option value="apimo_prospects">Apimo — prospects (.xlsx)</option>
-          <option value="apimo_biens">Apimo — biens et mandats (.xlsx)</option>
-          <option value="septeo_contacts">Septéo — propriétaires ou locataires (.csv)</option>
-          <option value="septeo_biens">Septéo — biens et mandats (.csv)</option>
+          <option value="apimo_prospects">Apimo - prospects (.xlsx)</option>
+          <option value="apimo_biens">Apimo - biens et mandats (.xlsx)</option>
+          <option value="septeo_contacts">Septéo - propriétaires ou locataires (.csv)</option>
+          <option value="septeo_biens">Septéo - biens et mandats (.csv)</option>
         </select>
       </div>
 
@@ -125,10 +125,10 @@ export function ImportForm() {
           <p className={`text-xs ${isError ? "text-danger" : "text-muted-foreground"}`}>
             {state.phase === "running"
               ? state.total > 0
-                ? `${pct}% — ${state.processed}/${state.total} ligne(s)`
+                ? `${pct}% - ${state.processed}/${state.total} ligne(s)`
                 : "Lecture du fichier…"
               : state.result.status === "success"
-                ? `100% — ${state.result.recordsUpserted} fiche(s) traitée(s), ${state.result.duplicatesFound} doublon(s) mis à jour.`
+                ? `100% - ${state.result.recordsUpserted} fiche(s) traitée(s), ${state.result.duplicatesFound} doublon(s) mis à jour.`
                 : `Erreur : ${state.result.error ?? "import échoué."}`}
           </p>
         </div>
