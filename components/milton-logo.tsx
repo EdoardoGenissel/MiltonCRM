@@ -1,14 +1,4 @@
-import Image from "next/image"
-
-export function MiltonLogo({ className }: { className?: string }) {
-  return (
-    <Image
-      src="/logo.png"
-      alt="Milton Immobilier"
-      width={200}
-      height={81}
-      priority
-      className={className ?? "h-9 w-auto"}
-    />
-  )
+export function MiltonLogo({ className = "h-[42px] w-auto" }: { className?: string }) {
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src="/logo.png" alt="Milton Immobilier" className={`${className} object-contain`} />
 }
