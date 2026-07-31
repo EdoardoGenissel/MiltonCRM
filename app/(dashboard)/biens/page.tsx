@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Pagination } from "@/components/pagination"
 import { SortableHeader } from "@/components/sortable-header"
 import { ColumnFilter } from "@/components/column-filter"
+import { BienTrigger, ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listBiens } from "@/lib/biens/queries"
 import { parsePage } from "@/lib/pagination"
 import { toArray } from "@/lib/search-params"
@@ -190,9 +191,9 @@ export default async function BiensPage({
                 return (
                   <tr key={bien.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                     <td className="px-5 py-3 font-medium text-foreground">
-                      <Link href={`/biens/${bien.id}`} className="hover:underline">
+                      <BienTrigger id={bien.id} className="hover:underline">
                         {bien.titre || bien.adresse || "-"}
-                      </Link>
+                      </BienTrigger>
                     </td>
                     <td className="px-5 py-3 text-center text-muted-foreground">{bien.commune ?? "-"}</td>
                     <td className="px-5 py-3 text-center text-muted-foreground">{bien.typeBien ?? "-"}</td>
@@ -206,12 +207,9 @@ export default async function BiensPage({
                     <td className="px-5 py-3 text-center text-muted-foreground">{bien.statut ?? "-"}</td>
                     <td className="px-5 py-3">
                       {proprietaire ? (
-                        <Link
-                          href={`/contacts/${proprietaire.id}`}
-                          className="text-foreground hover:underline"
-                        >
+                        <ContactTrigger id={proprietaire.id} className="text-foreground hover:underline">
                           {proprietaire.prenom} {proprietaire.nom}
-                        </Link>
+                        </ContactTrigger>
                       ) : (
                         <span className="text-muted-foreground">{bien.proprietaireLabel ?? "-"}</span>
                       )}

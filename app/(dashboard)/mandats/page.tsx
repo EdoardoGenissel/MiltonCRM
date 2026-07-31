@@ -7,7 +7,7 @@ import { MandatTypeBadge } from "@/components/mandat-type-badge"
 import { Pagination } from "@/components/pagination"
 import { SortableHeader } from "@/components/sortable-header"
 import { ColumnFilter } from "@/components/column-filter"
-import { ClickableRow } from "@/components/clickable-row"
+import { MandatDrawerRow, ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listMandats } from "@/lib/mandats/queries"
 import { parsePage } from "@/lib/pagination"
 import { toArray } from "@/lib/search-params"
@@ -141,9 +141,9 @@ export default async function MandatsPage({
             </thead>
             <tbody>
               {mandats.map((mandat) => (
-                <ClickableRow
+                <MandatDrawerRow
                   key={mandat.id}
-                  href={mandat.bien ? `/biens/${mandat.bien.id}#mandat-${mandat.id}` : "#"}
+                  mandatId={mandat.id}
                   className="border-b border-border last:border-0 hover:bg-muted/50"
                 >
                   <td className="px-5 py-3 text-center">
@@ -153,24 +153,18 @@ export default async function MandatsPage({
                   <td className="px-5 py-3 text-center text-muted-foreground">{mandat.categorie ?? "-"}</td>
                   <td className="px-5 py-3">
                     {mandat.proprietaire ? (
-                      <Link
-                        href={`/contacts/${mandat.proprietaire.id}`}
-                        className="text-foreground hover:underline"
-                      >
+                      <ContactTrigger id={mandat.proprietaire.id} className="text-foreground hover:underline">
                         {mandat.proprietaire.prenom} {mandat.proprietaire.nom}
-                      </Link>
+                      </ContactTrigger>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
                   </td>
                   <td className="px-5 py-3">
                     {mandat.locataire ? (
-                      <Link
-                        href={`/contacts/${mandat.locataire.id}`}
-                        className="text-foreground hover:underline"
-                      >
+                      <ContactTrigger id={mandat.locataire.id} className="text-foreground hover:underline">
                         {mandat.locataire.prenom} {mandat.locataire.nom}
-                      </Link>
+                      </ContactTrigger>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
@@ -178,7 +172,7 @@ export default async function MandatsPage({
                   <td className="px-5 py-3 text-muted-foreground">
                     {mandat.bien?.titre || mandat.bien?.adresse || mandat.bien?.commune || "-"}
                   </td>
-                </ClickableRow>
+                </MandatDrawerRow>
               ))}
               {mandats.length === 0 && (
                 <tr>

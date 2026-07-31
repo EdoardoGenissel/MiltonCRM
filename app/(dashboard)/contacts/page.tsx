@@ -9,6 +9,7 @@ import { Pagination } from "@/components/pagination"
 import { SortableHeader } from "@/components/sortable-header"
 import { ColumnFilter } from "@/components/column-filter"
 import { PersonaTabs } from "@/components/persona-tabs"
+import { ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listContacts } from "@/lib/contacts/queries"
 import { parsePage } from "@/lib/pagination"
 import { toArray } from "@/lib/search-params"
@@ -112,8 +113,8 @@ export default async function ContactsPage({
                     />
                   </div>
                 </th>
-                <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
+                <th className="px-5 py-3">
+                  <div className="flex items-center gap-1.5">
                     <SortableHeader
                       label="Téléphone"
                       sortKey="telephone"
@@ -170,14 +171,14 @@ export default async function ContactsPage({
               {contacts.map((contact) => (
                 <tr key={contact.id} className="border-b border-border last:border-0 hover:bg-muted/50">
                   <td className="px-5 py-3">
-                    <Link href={`/contacts/${contact.id}`} className="group flex items-center gap-3">
+                    <ContactTrigger id={contact.id} className="group flex items-center gap-3">
                       <ContactAvatar prenom={contact.prenom} nom={contact.nom} size="sm" />
                       <span className="font-medium text-foreground group-hover:underline">
                         {contact.prenom} {contact.nom}
                       </span>
-                    </Link>
+                    </ContactTrigger>
                   </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">{contact.telephone ?? "-"}</td>
+                  <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">{contact.telephone ?? "-"}</td>
                   <td className="px-5 py-3 text-center text-muted-foreground">{contact.email ?? "-"}</td>
                   <td className="px-5 py-3">
                     <div className="flex flex-wrap justify-center gap-1.5">

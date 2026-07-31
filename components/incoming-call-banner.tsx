@@ -1,8 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { Phone, X } from "lucide-react"
+import { useEntityDrawers } from "@/components/entity-drawers/entity-drawer-provider"
 
 type ActiveCall = {
   id: string
@@ -21,6 +21,7 @@ const POLL_INTERVAL_MS = 5000
 export function IncomingCallBanner() {
   const [call, setCall] = useState<ActiveCall>(null)
   const [dismissedId, setDismissedId] = useState<string | null>(null)
+  const { openContact } = useEntityDrawers()
 
   useEffect(() => {
     let cancelled = false
@@ -63,12 +64,13 @@ export function IncomingCallBanner() {
 
       <div className="flex items-center gap-4">
         {call.matchedContact && (
-          <Link
-            href={`/contacts/${call.matchedContact.id}`}
+          <button
+            type="button"
+            onClick={() => openContact(call.matchedContact!.id)}
             className="text-sm font-medium text-primary hover:underline"
           >
             Voir sa fiche contact
-          </Link>
+          </button>
         )}
         <button
           type="button"

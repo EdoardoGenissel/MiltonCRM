@@ -71,6 +71,13 @@ export function buildMandatOrderBy(sort: string | undefined, dir: string | undef
   }
 }
 
+export function getMandatById(id: string) {
+  return prisma.mandat.findUnique({
+    where: { id },
+    include: { proprietaire: true, locataire: true, bien: true },
+  })
+}
+
 export async function listMandats(filters: MandatListFilters = {}) {
   const { page = 1, sort, dir } = filters
   const where = buildMandatWhere(filters)

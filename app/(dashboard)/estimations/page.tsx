@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Topbar } from "@/components/topbar"
 import { Pagination } from "@/components/pagination"
+import { ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listEstimations } from "@/lib/estimations/queries"
 import { parsePage } from "@/lib/pagination"
 
@@ -45,12 +46,9 @@ export default async function EstimationsPage({
                   </td>
                   <td className="px-5 py-3">
                     {estimation.contact ? (
-                      <Link
-                        href={`/contacts/${estimation.contact.id}`}
-                        className="text-foreground hover:underline"
-                      >
+                      <ContactTrigger id={estimation.contact.id} className="text-foreground hover:underline">
                         {estimation.contact.prenom} {estimation.contact.nom}
-                      </Link>
+                      </ContactTrigger>
                     ) : (
                       "-"
                     )}
