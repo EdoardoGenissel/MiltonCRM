@@ -48,6 +48,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       id: estimation.id,
       statut: estimation.statut,
       cityscanReportUrl: estimation.cityscanReportUrl,
+      contact: estimation.contact
+        ? { id: estimation.contact.id, prenom: estimation.contact.prenom, nom: estimation.contact.nom }
+        : null,
     })),
   })
 }

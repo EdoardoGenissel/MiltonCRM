@@ -69,7 +69,12 @@ type BienDetail = {
   majLe: string | null
   updatedAt: string
   mandats: MandatDetail[]
-  estimations: { id: string; statut: string; cityscanReportUrl: string | null }[]
+  estimations: {
+    id: string
+    statut: string
+    cityscanReportUrl: string | null
+    contact: { id: string; prenom: string; nom: string } | null
+  }[]
 }
 
 export function BienDrawerContent({
@@ -90,6 +95,12 @@ export function BienDrawerContent({
   const adresseComplete = [bien.adresse, bien.adresseComplement].filter(Boolean).join(", ")
   const localisation = [bien.codePostal, bien.commune].filter(Boolean).join(" ")
   const title = bien.titre || bien.adresse || "Bien sans adresse"
+
+  // Pas encore de mandat pour ce bien (fréquent pour un bien JotForm en amont
+  // d'une signature) : on retombe sur le contact de la demande d'estimation,
+  // qui est typiquement le propriétaire (formulaire JotForm section
+  // "PROPRIETAIRE") — cf. lib/integrations/jotform/sync.ts.
+  const estimationContact = bien.estimations.find((e) => e.contact)?.contact ?? null
 
   return (
     <div className="flex flex-col gap-6">
@@ -139,6 +150,18 @@ export function BienDrawerContent({
             {bien.mandats[0].proprietaire.prenom} {bien.mandats[0].proprietaire.nom}
             <ExternalLink className="h-3 w-3" />
           </button>
+        ) : estimationContact ? (
+          <div>
+            <button
+              type="button"
+              onClick={() => onOpenContact(estimationContact.id)}
+              className="inline-flex items-center gap-1.5 text-left text-sm text-primary hover:underline"
+            >
+              {estimationContact.prenom} {estimationContact.nom}
+              <ExternalLink className="h-3 w-3" />
+            </button>
+            <p className="mt-1 text-xs text-muted-foreground">Via une demande d&apos;estimation, pas encore de mandat.</p>
+          </div>
         ) : bien.proprietaireLabel ? (
           <div className="text-sm text-foreground">
             {bien.proprietaireLabel}
@@ -228,24 +251,36 @@ export function BienDrawerContent({
         ) : (
           <ul className="flex flex-col gap-2">
             {bien.estimations.map((estimation) => (
-              <li key={estimation.id} className="flex items-center justify-between rounded-[8px] border border-border p-3 text-sm">
-                <span
-                  className={`rounded-[8px] px-2 py-0.5 text-xs font-medium ${
-                    ESTIMATION_STATUT_STYLES[estimation.statut] ?? "bg-secondary text-secondary-foreground"
-                  }`}
-                >
-                  {ESTIMATION_STATUT_LABELS[estimation.statut] ?? estimation.statut}
-                </span>
-                {estimation.cityscanReportUrl && (
-                  <a
-                    href={estimation.cityscanReportUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:underline"
+              <li key={estimation.id} className="rounded-[8px] border border-border p-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`rounded-[8px] px-2 py-0.5 text-xs font-medium ${
+                      ESTIMATION_STATUT_STYLES[estimation.statut] ?? "bg-secondary text-secondary-foreground"
+                    }`}
                   >
-                    Rapport CityScan
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                    {ESTIMATION_STATUT_LABELS[estimation.statut] ?? estimation.statut}
+                  </span>
+                  {estimation.cityscanReportUrl && (
+                    <a
+                      href={estimation.cityscanReportUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      Rapport CityScan
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+                {estimation.contact && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenContact(estimation.contact!.id)}
+                    className="mt-1.5 flex items-center gap-1.5 text-left text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    <User className="h-3 w-3 shrink-0" />
+                    {estimation.contact.prenom} {estimation.contact.nom}
+                  </button>
                 )}
               </li>
             ))}

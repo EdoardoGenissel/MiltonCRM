@@ -174,26 +174,6 @@ async function seedFactPipeline() {
   await prisma.factPipeline.createMany({ data: rows })
 }
 
-async function seedFactLotGere() {
-  // Lots gérés en fin de mois, cf. hist "lots" dans lib/data.ts.
-  const lotsParMois = [86, 84, 82, 81, 80, 78]
-
-  await prisma.factLotGere.deleteMany({})
-  await prisma.factLotGere.createMany({
-    data: MONTHS.map((month, i) => {
-      const previous = i === 0 ? lotsParMois[0] : lotsParMois[i - 1]
-      const current = lotsParMois[i]
-      const delta = current - previous
-      return {
-        snapshotDate: month,
-        count: current,
-        gained: delta > 0 ? delta : 0,
-        lost: delta < 0 ? -delta : 0,
-      }
-    }),
-  })
-}
-
 async function seedFactImpaye() {
   // Taux d'impayés mensuel (%), cf. hist "impayes" dans lib/data.ts. Le montant
   // suppose une base de loyers appelés d'environ 380 000 €/mois — hypothèse à
@@ -325,7 +305,6 @@ async function main() {
   await seedFactCa()
   await seedFactContrat()
   await seedFactPipeline()
-  await seedFactLotGere()
   await seedFactImpaye()
   await seedFactIncident()
   await seedFactAppel()

@@ -102,7 +102,18 @@ type ContactDetail = {
     bien: { id: string; titre: string | null; adresse: string | null; commune: string | null } | null
   }[]
   callLogs: { id: string; receivedAt: string; transcriptSummary: string | null }[]
-  estimations: { id: string; statut: string; cityscanReportUrl: string | null }[]
+  estimations: {
+    id: string
+    statut: string
+    cityscanReportUrl: string | null
+    bien: {
+      id: string
+      titre: string | null
+      adresse: string | null
+      commune: string | null
+      codePostal: string | null
+    } | null
+  }[]
 }
 
 function loyerMaxLabel(loyerMax: string | null): string | null {
@@ -179,7 +190,7 @@ export function ContactDrawerContent({
           {contact.email && (
             <Button variant="outline" size="sm" nativeButton={false} render={<a href={`mailto:${contact.email}`} />}>
               <Mail className="h-3.5 w-3.5" />
-              Email
+              {contact.email}
             </Button>
           )}
         </div>
@@ -319,24 +330,41 @@ export function ContactDrawerContent({
         ) : (
           <ul className="flex flex-col gap-2">
             {contact.estimations.map((estimation) => (
-              <li key={estimation.id} className="flex items-center justify-between rounded-[8px] border border-border p-3 text-sm">
-                <span
-                  className={`rounded-[8px] px-2 py-0.5 text-xs font-medium ${
-                    ESTIMATION_STATUT_STYLES[estimation.statut] ?? "bg-secondary text-secondary-foreground"
-                  }`}
-                >
-                  {ESTIMATION_STATUT_LABELS[estimation.statut] ?? estimation.statut}
-                </span>
-                {estimation.cityscanReportUrl && (
-                  <a
-                    href={estimation.cityscanReportUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-primary hover:underline"
+              <li key={estimation.id} className="rounded-[8px] border border-border p-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span
+                    className={`rounded-[8px] px-2 py-0.5 text-xs font-medium ${
+                      ESTIMATION_STATUT_STYLES[estimation.statut] ?? "bg-secondary text-secondary-foreground"
+                    }`}
                   >
-                    Rapport CityScan
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
+                    {ESTIMATION_STATUT_LABELS[estimation.statut] ?? estimation.statut}
+                  </span>
+                  {estimation.cityscanReportUrl && (
+                    <a
+                      href={estimation.cityscanReportUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      Rapport CityScan
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+                {estimation.bien && (
+                  <button
+                    type="button"
+                    onClick={() => onOpenBien(estimation.bien!.id)}
+                    className="mt-1.5 flex items-center gap-1.5 text-left text-muted-foreground hover:text-foreground hover:underline"
+                  >
+                    <MapPin className="h-3 w-3 shrink-0" />
+                    {estimation.bien.titre || estimation.bien.adresse || estimation.bien.commune || "Bien sans adresse"}
+                    {(estimation.bien.codePostal || estimation.bien.commune) && (
+                      <span className="text-xs">
+                        ({[estimation.bien.codePostal, estimation.bien.commune].filter(Boolean).join(" ")})
+                      </span>
+                    )}
+                  </button>
                 )}
               </li>
             ))}

@@ -116,6 +116,9 @@ model FactContrat {
   commercialName String?
   signedAt       DateTime
   source         Source
+  // Ajouté côté Cockpit (migration 20260731180000_fact_contrat_honoraires) - même
+  // convention que ci-dessus, copié ici sans migration CRM.
+  honorairesEur  Decimal? @db.Decimal(12, 2)
 
   @@unique([source, externalId])
   @@index([pole, signedAt])
@@ -135,17 +138,6 @@ model FactPipeline {
   source         Source
 
   @@unique([pole, commercialId, metric, period])
-}
-
-/// Lots gérés (snapshot) — SEPTEO
-model FactLotGere {
-  id           String   @id @default(cuid())
-  snapshotDate DateTime
-  count        Int
-  gained       Int      @default(0)
-  lost         Int      @default(0)
-
-  @@unique([snapshotDate])
 }
 
 /// Incidents — SEPTEO
@@ -379,6 +371,22 @@ model Bien {
   majLe               DateTime?
   meuble              Boolean? // gestion locative Septéo — "MandatLot_Meuble"
 
+  // Colonnes alimentées par le formulaire JotForm "ESTIMATION IMMOBILIERE" (cf.
+  // lib/integrations/jotform/sync.ts). Remplies seulement si vides (Apimo/Septéo
+  // priment en cas de conflit, cf. lib/biens/dedupe.ts `fillBlanks`) — ni Apimo ni
+  // Septéo n'alimentent ces champs aujourd'hui, donc pas de conflit en pratique.
+  surfaceTerrain      Decimal?  @db.Decimal(10, 2)
+  referenceCadastrale String?
+  taxeFonciere        Decimal?  @db.Decimal(12, 2)
+  chargesCopropriete  Decimal?  @db.Decimal(10, 2)
+  copropriete         Boolean?
+  assainissement      String?
+  cuisineEquipements  String[]
+  equipements         String[]
+  pointsPositifs      String?
+  pointsNegatifs      String?
+  disponibilite       String?
+
   @@unique([source, sourceRef])
 }
 
@@ -426,14 +434,22 @@ model RingoverEvent {
 /// Pont JotForm (formulaire RDV) → CityScan (génération du rapport d'estimation),
 /// Lot 5.
 model Estimation {
-  id                  String   @id @default(cuid())
+  id                  String    @id @default(cuid())
   contactId           String?
-  contact             Contact? @relation(fields: [contactId], references: [id])
+  contact             Contact?  @relation(fields: [contactId], references: [id])
   bienId              String?
-  bien                Bien?    @relation(fields: [bienId], references: [id])
-  jotformSubmissionId String   @unique
+  bien                Bien?     @relation(fields: [bienId], references: [id])
+  jotformSubmissionId String    @unique
+  // Date de soumission côté JotForm (distincte de createdAt, date de sync côté
+  // CRM) — alimentée par le sync API (cf. lib/integrations/jotform/sync.ts).
+  submittedAt         DateTime?
+  // Intégralité des réponses du formulaire JotForm (libellé de question -> valeur
+  // lisible), au-delà des champs mappés sur Contact/Bien — pour ne perdre aucune
+  // information saisie par le commercial (nombre de pièces, points positifs/
+  // négatifs, équipements, infos financières, observations...).
+  answers             Json?
   cityscanReportUrl   String?
-  statut              String   @default("en_attente") // "en_attente" | "genere" | "envoye_commercial" | "envoye_client"
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  statut              String    @default("en_attente") // "en_attente" | "genere" | "envoye_commercial" | "envoye_client"
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 }

@@ -4,6 +4,7 @@ import { Pagination } from "@/components/pagination"
 import { ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listEstimations } from "@/lib/estimations/queries"
 import { parsePage } from "@/lib/pagination"
+import { JotformSyncButton } from "./jotform-sync-button"
 
 export const dynamic = "force-dynamic"
 
@@ -27,6 +28,9 @@ export default async function EstimationsPage({
     <>
       <Topbar title="Estimations" />
       <div className="flex-1 overflow-auto p-8">
+        <div className="mb-4 flex justify-end">
+          <JotformSyncButton />
+        </div>
         <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
           <table className="w-full text-sm">
             <thead>
@@ -54,7 +58,19 @@ export default async function EstimationsPage({
                     )}
                   </td>
                   <td className="px-5 py-3 text-muted-foreground">
-                    {estimation.bien?.adresse ?? estimation.bien?.commune ?? "-"}
+                    {estimation.bien ? (
+                      <>
+                        {estimation.bien.adresse ?? "-"}
+                        {(estimation.bien.codePostal || estimation.bien.commune) && (
+                          <span className="text-xs">
+                            {" "}
+                            ({[estimation.bien.codePostal, estimation.bien.commune].filter(Boolean).join(" ")})
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      "-"
+                    )}
                   </td>
                   <td className="px-5 py-3 text-foreground">
                     {STATUT_LABELS[estimation.statut] ?? estimation.statut}

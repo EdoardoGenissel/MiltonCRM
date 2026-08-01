@@ -102,6 +102,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       id: estimation.id,
       statut: estimation.statut,
       cityscanReportUrl: estimation.cityscanReportUrl,
+      bien: estimation.bien
+        ? {
+            id: estimation.bien.id,
+            titre: estimation.bien.titre,
+            adresse: estimation.bien.adresse,
+            commune: estimation.bien.commune,
+            codePostal: estimation.bien.codePostal,
+          }
+        : null,
     })),
   })
 }

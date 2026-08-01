@@ -3,13 +3,17 @@ import { NextResponse, type NextRequest } from "next/server"
 
 const PUBLIC_PATHS = ["/login", "/mot-de-passe-oublie", "/reset-password", "/auth/confirm"]
 
-// Routes appelées par des services tiers (webhooks) — authentifiées par secret
-// applicatif, pas par session Supabase. Cf. scope.md : pas de rôles différenciés
-// dans le CRM, ce proxy ne fait que l'authentification, pas d'autorisation fine.
-const WEBHOOK_PATHS = ["/api/ringover/webhook", "/api/jotform/webhook"]
+// Routes appelées par des services tiers (webhooks) ou par le cron Vercel — sans
+// cookie de session, authentifiées par secret applicatif (vérifié dans la route
+// elle-même). Cf. scope.md : pas de rôles différenciés dans le CRM, ce proxy ne
+// fait que l'authentification, pas d'autorisation fine.
+// `/api/jotform/sync` accepte AUSSI la session Supabase (bouton manuel côté UI) —
+// dans ce cas c'est la route elle-même qui revérifie l'utilisateur via
+// `createClient().auth.getUser()`, cf. app/api/jotform/sync/route.ts.
+const NO_SESSION_PATHS = ["/api/ringover/webhook", "/api/jotform/webhook", "/api/jotform/sync"]
 
 export async function proxy(request: NextRequest) {
-  if (WEBHOOK_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))) {
+  if (NO_SESSION_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))) {
     return NextResponse.next()
   }
 
