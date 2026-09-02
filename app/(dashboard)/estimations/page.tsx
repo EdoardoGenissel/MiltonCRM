@@ -1,44 +1,82 @@
 import Link from "next/link"
+import { Calculator } from "lucide-react"
 import { Topbar } from "@/components/topbar"
 import { Pagination } from "@/components/pagination"
+import { FilterBar } from "@/components/filter-bar"
+import { FilterableHeader } from "@/components/filterable-header"
 import { ContactTrigger } from "@/components/entity-drawers/entity-triggers"
-import { listEstimations } from "@/lib/estimations/queries"
+import { listEstimations, ESTIMATION_STATUT_LABELS } from "@/lib/estimations/queries"
 import { parsePage } from "@/lib/pagination"
-import { JotformSyncButton } from "./jotform-sync-button"
+import { toArray } from "@/lib/search-params"
 
 export const dynamic = "force-dynamic"
 
-const STATUT_LABELS: Record<string, string> = {
-  en_attente: "En attente",
-  genere: "Généré",
-  envoye_commercial: "Envoyé au commercial",
-  envoye_client: "Envoyé au client",
+type EstimationsSearchParams = {
+  search?: string
+  statut?: string | string[]
+  page?: string
+  sort?: string
+  dir?: string
 }
+
+const ENDPOINT = "/api/estimations/column-values"
 
 export default async function EstimationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<EstimationsSearchParams>
 }) {
   const params = await searchParams
   const page = parsePage(params.page)
-  const { items: estimations, total, totalPages } = await listEstimations(page)
+  const filters = {
+    search: params.search,
+    statut: toArray(params.statut),
+    sort: params.sort,
+    dir: params.dir,
+    page,
+  }
+  const { items: estimations, total, totalPages } = await listEstimations(filters)
 
   return (
     <>
       <Topbar title="Estimations" />
       <div className="flex-1 overflow-auto p-8">
-        <div className="mb-4 flex justify-end">
-          <JotformSyncButton />
-        </div>
+        <FilterBar
+          searchParams={params}
+          searchPlaceholder="Contact, adresse, commune…"
+          filterKeys={["statut"]}
+          keyLabels={{ statut: "Statut" }}
+          valueLabels={{ statut: ESTIMATION_STATUT_LABELS }}
+        />
+
         <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
-                <th className="px-5 py-3">Date</th>
+                <th className="px-5 py-3">
+                  <FilterableHeader
+                    label="Date"
+                    sortKey="date"
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                  />
+                </th>
                 <th className="px-5 py-3">Contact</th>
                 <th className="px-5 py-3">Bien</th>
-                <th className="px-5 py-3">Statut</th>
+                <th className="px-5 py-3">
+                  <FilterableHeader
+                    label="Statut"
+                    sortKey="statut"
+                    filterColumn="statut"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.statut}
+                    labelMap={ESTIMATION_STATUT_LABELS}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                  />
+                </th>
                 <th className="px-5 py-3">Rapport</th>
               </tr>
             </thead>
@@ -73,7 +111,7 @@ export default async function EstimationsPage({
                     )}
                   </td>
                   <td className="px-5 py-3 text-foreground">
-                    {STATUT_LABELS[estimation.statut] ?? estimation.statut}
+                    {ESTIMATION_STATUT_LABELS[estimation.statut] ?? estimation.statut}
                   </td>
                   <td className="px-5 py-3">
                     {estimation.cityscanReportUrl ? (
@@ -92,9 +130,11 @@ export default async function EstimationsPage({
               ))}
               {estimations.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-muted-foreground">
-                    Aucune estimation. Elles apparaîtront ici après soumission d&apos;un
-                    formulaire JotForm.
+                  <td colSpan={5} className="px-16 py-14 text-center">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      <Calculator className="h-8 w-8 opacity-40" />
+                      <p>Aucune estimation ne correspond à ces filtres.</p>
+                    </div>
                   </td>
                 </tr>
               )}

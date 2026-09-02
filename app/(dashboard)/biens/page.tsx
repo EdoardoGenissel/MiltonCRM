@@ -1,11 +1,8 @@
-import Link from "next/link"
-import { Building2, RotateCcw } from "lucide-react"
+import { Building2 } from "lucide-react"
 import { Topbar } from "@/components/topbar"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Pagination } from "@/components/pagination"
-import { SortableHeader } from "@/components/sortable-header"
-import { ColumnFilter } from "@/components/column-filter"
+import { FilterBar } from "@/components/filter-bar"
+import { FilterableHeader } from "@/components/filterable-header"
 import { BienTrigger, ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listBiens } from "@/lib/biens/queries"
 import { parsePage } from "@/lib/pagination"
@@ -23,6 +20,15 @@ type BiensSearchParams = {
   page?: string
   sort?: string
   dir?: string
+}
+
+const ENDPOINT = "/api/biens/column-values"
+const FILTER_KEYS = ["commune", "typeBien", "categorie", "statut"]
+const KEY_LABELS = {
+  commune: "Commune",
+  typeBien: "Type",
+  categorie: "Catégorie",
+  statut: "Statut",
 }
 
 export default async function BiensPage({
@@ -45,141 +51,98 @@ export default async function BiensPage({
   }
   const { items: biens, total, totalPages } = await listBiens(filters)
 
-  const hasActiveFilters = Boolean(
-    params.search ||
-      filters.commune.length ||
-      filters.typeBien.length ||
-      filters.statut.length ||
-      filters.source.length ||
-      filters.categorie.length
-  )
-
   return (
     <>
       <Topbar title="Biens" />
       <div className="flex-1 overflow-auto p-8">
-        <form className="mb-4 flex flex-wrap items-end justify-end gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Input
-              id="search"
-              name="search"
-              defaultValue={params.search}
-              placeholder="Adresse, commune, référence…"
-              className="w-72"
-            />
-          </div>
-
-          <Button type="submit">Rechercher</Button>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="lg" nativeButton={false} render={<Link href="/biens" />}>
-              <RotateCcw className="h-3.5 w-3.5" />
-              Réinitialiser
-            </Button>
-          )}
-        </form>
+        <FilterBar
+          searchParams={params}
+          searchPlaceholder="Adresse, commune, référence…"
+          filterKeys={FILTER_KEYS}
+          keyLabels={KEY_LABELS}
+        />
 
         <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
                 <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
-                    <SortableHeader
-                      label="Adresse"
-                      sortKey="adresse"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Adresse"
+                    sortKey="adresse"
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Commune"
-                      sortKey="commune"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="commune"
-                      label="Commune"
-                      selected={filters.commune}
-                      searchParams={params}
-                      endpoint="/api/biens/column-values"
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Commune"
+                    sortKey="commune"
+                    filterColumn="commune"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.commune}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Type"
-                      sortKey="typeBien"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="typeBien"
-                      label="Type"
-                      selected={filters.typeBien}
-                      searchParams={params}
-                      endpoint="/api/biens/column-values"
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Type"
+                    sortKey="typeBien"
+                    filterColumn="typeBien"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.typeBien}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    Catégorie
-                    <ColumnFilter
-                      column="categorie"
-                      label="Catégorie"
-                      selected={filters.categorie}
-                      searchParams={params}
-                      endpoint="/api/biens/column-values"
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Catégorie"
+                    filterColumn="categorie"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.categorie}
+                    searchParams={params}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center">
-                    <SortableHeader
-                      label="Surface"
-                      sortKey="surface"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Surface"
+                    sortKey="surface"
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center">
-                    <SortableHeader
-                      label="Prix"
-                      sortKey="prix"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Prix"
+                    sortKey="prix"
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Statut"
-                      sortKey="statut"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="statut"
-                      label="Statut"
-                      selected={filters.statut}
-                      searchParams={params}
-                      endpoint="/api/biens/column-values"
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Statut"
+                    sortKey="statut"
+                    filterColumn="statut"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.statut}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3">Propriétaire</th>
               </tr>

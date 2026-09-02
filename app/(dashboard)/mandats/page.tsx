@@ -1,12 +1,9 @@
-import Link from "next/link"
-import { FileText, RotateCcw } from "lucide-react"
+import { FileText } from "lucide-react"
 import { Topbar } from "@/components/topbar"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { MandatTypeBadge } from "@/components/mandat-type-badge"
 import { Pagination } from "@/components/pagination"
-import { SortableHeader } from "@/components/sortable-header"
-import { ColumnFilter } from "@/components/column-filter"
+import { FilterBar } from "@/components/filter-bar"
+import { FilterableHeader } from "@/components/filterable-header"
 import { MandatDrawerRow, ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listMandats } from "@/lib/mandats/queries"
 import { parsePage } from "@/lib/pagination"
@@ -24,6 +21,10 @@ type MandatsSearchParams = {
   sort?: string
   dir?: string
 }
+
+const ENDPOINT = "/api/mandats/column-values"
+const FILTER_KEYS = ["type", "statut", "categorie"]
+const KEY_LABELS = { type: "Type", statut: "Statut", categorie: "Catégorie" }
 
 export default async function MandatsPage({
   searchParams,
@@ -44,95 +45,59 @@ export default async function MandatsPage({
   }
   const { items: mandats, total, totalPages } = await listMandats(filters)
 
-  const hasActiveFilters = Boolean(
-    params.search ||
-      filters.type.length ||
-      filters.statut.length ||
-      filters.categorie.length ||
-      filters.source.length
-  )
-
   return (
     <>
       <Topbar title="Mandats" />
       <div className="flex-1 overflow-auto p-8">
-        <form className="mb-4 flex flex-wrap items-end justify-end gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Input
-              id="search"
-              name="search"
-              defaultValue={params.search}
-              placeholder="Propriétaire, adresse, commune…"
-              className="w-72"
-            />
-          </div>
-
-          <Button type="submit">Rechercher</Button>
-          {hasActiveFilters && (
-            <Button variant="ghost" size="lg" nativeButton={false} render={<Link href="/mandats" />}>
-              <RotateCcw className="h-3.5 w-3.5" />
-              Réinitialiser
-            </Button>
-          )}
-        </form>
+        <FilterBar
+          searchParams={params}
+          searchPlaceholder="Propriétaire, adresse, commune…"
+          filterKeys={FILTER_KEYS}
+          keyLabels={KEY_LABELS}
+        />
 
         <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Type"
-                      sortKey="type"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="type"
-                      label="Type"
-                      selected={filters.type}
-                      searchParams={params}
-                      endpoint="/api/mandats/column-values"
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Type"
+                    sortKey="type"
+                    filterColumn="type"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.type}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Statut"
-                      sortKey="statut"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="statut"
-                      label="Statut"
-                      selected={filters.statut}
-                      searchParams={params}
-                      endpoint="/api/mandats/column-values"
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Statut"
+                    sortKey="statut"
+                    filterColumn="statut"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.statut}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Catégorie"
-                      sortKey="categorie"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="categorie"
-                      label="Catégorie"
-                      selected={filters.categorie}
-                      searchParams={params}
-                      endpoint="/api/mandats/column-values"
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Catégorie"
+                    sortKey="categorie"
+                    filterColumn="categorie"
+                    filterEndpoint={ENDPOINT}
+                    selected={filters.categorie}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3">Propriétaire</th>
                 <th className="px-5 py-3">Locataire</th>

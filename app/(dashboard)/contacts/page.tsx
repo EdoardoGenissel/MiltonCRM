@@ -1,13 +1,10 @@
-import Link from "next/link"
-import { RotateCcw, Users } from "lucide-react"
+import { Users } from "lucide-react"
 import { Topbar } from "@/components/topbar"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { PersonaBadge } from "@/components/persona-badge"
 import { ContactAvatar } from "@/components/contact-avatar"
 import { Pagination } from "@/components/pagination"
-import { SortableHeader } from "@/components/sortable-header"
-import { ColumnFilter } from "@/components/column-filter"
+import { FilterBar } from "@/components/filter-bar"
+import { FilterableHeader } from "@/components/filterable-header"
 import { PersonaTabs } from "@/components/persona-tabs"
 import { ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listContacts } from "@/lib/contacts/queries"
@@ -28,6 +25,9 @@ type ContactsSearchParams = {
   sort?: string
   dir?: string
 }
+
+const FILTER_KEYS = ["nom", "telephone", "email", "commune"]
+const KEY_LABELS = { nom: "Nom", telephone: "Téléphone", email: "Email", commune: "Commune" }
 
 export default async function ContactsPage({
   searchParams,
@@ -50,120 +50,68 @@ export default async function ContactsPage({
   }
   const { items: contacts, total, totalPages } = await listContacts(filters)
 
-  // Boolean(...) est nécessaire ici : sans ça, quand tout est vide la chaîne de
-  // `||` retombe sur le dernier `.length` (0, un nombre) plutôt que sur `false` —
-  // et `{0 && <Link/>}` affiche littéralement "0" dans le JSX (React ne masque
-  // que `false`/`null`/`undefined`, pas les autres valeurs falsy).
-  const hasActiveFilters = Boolean(
-    params.search ||
-      filters.persona.length ||
-      filters.source.length ||
-      filters.commune.length ||
-      filters.nom.length ||
-      filters.telephone.length ||
-      filters.email.length
-  )
-
   return (
     <>
       <Topbar title="Contacts" />
       <div className="flex-1 overflow-auto p-8">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <PersonaTabs searchParams={params} />
-
-          <form className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Input
-                id="search"
-                name="search"
-                defaultValue={params.search}
-                placeholder="Nom, prénom, téléphone, email…"
-                className="w-72"
-              />
-            </div>
-
-            <Button type="submit">Rechercher</Button>
-            {hasActiveFilters && (
-              <Button variant="ghost" size="lg" nativeButton={false} render={<Link href="/contacts" />}>
-                <RotateCcw className="h-3.5 w-3.5" />
-                Réinitialiser
-              </Button>
-            )}
-          </form>
-        </div>
+        <FilterBar
+          searchParams={params}
+          searchPlaceholder="Nom, prénom, téléphone, email…"
+          filterKeys={FILTER_KEYS}
+          keyLabels={KEY_LABELS}
+          tabs={<PersonaTabs searchParams={params} />}
+        />
 
         <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
                 <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
-                    <SortableHeader
-                      label="Nom"
-                      sortKey="nom"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="nom"
-                      label="Nom"
-                      selected={filters.nom}
-                      searchParams={params}
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Nom"
+                    sortKey="nom"
+                    filterColumn="nom"
+                    selected={filters.nom}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                  />
                 </th>
                 <th className="px-5 py-3">
-                  <div className="flex items-center gap-1.5">
-                    <SortableHeader
-                      label="Téléphone"
-                      sortKey="telephone"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="telephone"
-                      label="Téléphone"
-                      selected={filters.telephone}
-                      searchParams={params}
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Téléphone"
+                    sortKey="telephone"
+                    filterColumn="telephone"
+                    selected={filters.telephone}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Email"
-                      sortKey="email"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="email"
-                      label="Email"
-                      selected={filters.email}
-                      searchParams={params}
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Email"
+                    sortKey="email"
+                    filterColumn="email"
+                    selected={filters.email}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
                 <th className="px-5 py-3 text-center">Type</th>
                 <th className="px-5 py-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <SortableHeader
-                      label="Commune"
-                      sortKey="commune"
-                      currentSort={params.sort}
-                      currentDir={params.dir}
-                      searchParams={params}
-                    />
-                    <ColumnFilter
-                      column="commune"
-                      label="Commune"
-                      selected={filters.commune}
-                      searchParams={params}
-                    />
-                  </div>
+                  <FilterableHeader
+                    label="Commune"
+                    sortKey="commune"
+                    filterColumn="commune"
+                    selected={filters.commune}
+                    searchParams={params}
+                    currentSort={params.sort}
+                    currentDir={params.dir}
+                    align="center"
+                  />
                 </th>
               </tr>
             </thead>

@@ -6,8 +6,8 @@ import { syncJotformEstimations } from "@/lib/integrations/jotform/sync"
 // (cf. imports Excel, même contrainte) — au-delà du timeout par défaut Vercel.
 export const maxDuration = 300
 
-// Déclenché soit manuellement (bouton page Estimations, session Supabase, POST),
-// soit par le cron Vercel (cf. vercel.json, requêtes GET authentifiées par
+// Déclenché principalement par le cron Vercel tous les soirs (cf. vercel.json,
+// requêtes GET authentifiées par
 // `Authorization: Bearer $CRON_SECRET` ajouté automatiquement par Vercel). La
 // route est dans la liste de bypass de proxy.ts (comme les webhooks) car un
 // appel cron n'a pas de cookie de session : l'authentification est donc vérifiée
