@@ -25,12 +25,73 @@ async function parseXlsxBuffer(buffer: ArrayBuffer): Promise<ParsedSheet> {
   return { headerRow: headerRow ?? [], rows }
 }
 
-// Les exports Septéo sont des CSV point-virgule (pas de quoting significatif
-// observé dans les fichiers réels transmis par Milton — cf. `data/`), donc un
-// split simple suffit plutôt que d'embarquer un parseur CSV complet.
-function parseCsvText(text: string): ParsedSheet {
-  const lines = text.split(/\r\n|\n/).filter((line) => line.length > 0)
-  const allRows = lines.map((line) => line.split(";"))
+// Détecte le séparateur sur la ligne d'en-tête (avant tout champ quoté) — les
+// exports Septéo/Milton sont en point-virgule, mais certains outils exportent en
+// virgule.
+function detectDelimiter(text: string): string {
+  const end = text.indexOf("\n")
+  const firstLine = end === -1 ? text : text.slice(0, end)
+  const semicolons = (firstLine.match(/;/g) ?? []).length
+  const commas = (firstLine.match(/,/g) ?? []).length
+  return commas > semicolons ? "," : ";"
+}
+
+// Tokenizer CSV conforme RFC-4180 : champs quotés, guillemets échappés (`""`),
+// séparateurs et retours-ligne embarqués dans les quotes (cf. `data/Liste
+// incident.csv`, colonne "Objet / Libellé" multi-lignes). Sur un CSV non quoté
+// (exports Septéo propriétaires/locataires/biens), le résultat est identique à un
+// simple `split` ligne par ligne puis par séparateur.
+function parseCsvText(rawText: string): ParsedSheet {
+  const text = rawText.charCodeAt(0) === 0xfeff ? rawText.slice(1) : rawText
+  const delimiter = detectDelimiter(text)
+
+  const allRows: string[][] = []
+  let row: string[] = []
+  let field = ""
+  let inQuotes = false
+  let rowHasContent = false
+
+  const pushField = () => {
+    row.push(field)
+    if (field !== "") rowHasContent = true
+    field = ""
+  }
+  const pushRow = () => {
+    pushField()
+    // Ignore les lignes totalement vides (fin de fichier, séparateur de blocs).
+    if (rowHasContent || row.length > 1) allRows.push(row)
+    row = []
+    rowHasContent = false
+  }
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i]
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          field += '"'
+          i++
+        } else {
+          inQuotes = false
+        }
+      } else if (ch !== "\r") {
+        // Normalise les fins de ligne embarquées (\r\n -> \n).
+        field += ch
+      }
+      continue
+    }
+    if (ch === '"') {
+      inQuotes = true
+    } else if (ch === delimiter) {
+      pushField()
+    } else if (ch === "\n") {
+      pushRow()
+    } else if (ch !== "\r") {
+      field += ch
+    }
+  }
+  if (field !== "" || row.length > 0) pushRow()
+
   const [headerRow, ...rows] = allRows
   return { headerRow: headerRow ?? [], rows }
 }

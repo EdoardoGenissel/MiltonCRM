@@ -46,7 +46,7 @@ export default async function EstimationsPage({
               {estimations.map((estimation) => (
                 <tr key={estimation.id} className="border-b border-border last:border-0">
                   <td className="px-5 py-3 text-muted-foreground">
-                    {new Date(estimation.createdAt).toLocaleDateString("fr-FR")}
+                    {new Date(estimation.submittedAt ?? estimation.createdAt).toLocaleDateString("fr-FR")}
                   </td>
                   <td className="px-5 py-3">
                     {estimation.contact ? (

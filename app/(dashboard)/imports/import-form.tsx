@@ -90,7 +90,14 @@ export function ImportForm() {
           <option value="apimo_biens">Apimo - biens et mandats (.xlsx)</option>
           <option value="septeo_contacts">Septéo - propriétaires ou locataires (.csv)</option>
           <option value="septeo_biens">Septéo - biens et mandats (.csv)</option>
+          <option value="septeo_impayes">Septéo - impayés de loyer (.csv)</option>
+          <option value="septeo_incidents">Septéo - incidents (.csv)</option>
+          <option value="septeo_loyers_appeles">Septéo - loyers appelés (.csv)</option>
         </select>
+        <p className="text-xs text-muted-foreground">
+          Les imports impayés / incidents / loyers appelés se rattachent aux biens et contacts
+          existants : importer d&apos;abord « Septéo - biens et mandats » et les contacts.
+        </p>
       </div>
 
       <div className="flex flex-col gap-1.5">

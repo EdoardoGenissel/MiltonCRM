@@ -27,6 +27,18 @@ export function normalizePhone(phone: string): string {
   return digits
 }
 
+// Normalise un nom/prénom pour comparaison : trim, minuscules, accents retirés,
+// espaces multiples réduits. Utilisé par `sameName` et par le resolver de
+// contact par libellé (imports gestion locative).
+export function normalizeName(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+}
+
 export function sameName(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase()
 }

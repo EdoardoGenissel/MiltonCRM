@@ -218,12 +218,16 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  prospectDetail   ProspectDetail?
-  mandats          Mandat[]        @relation("MandatProprietaire")
-  mandatsLocataire Mandat[]        @relation("MandatLocataire")
-  callLogs         CallLog[]
-  estimations      Estimation[]
-  ringoverEvents   RingoverEvent[]
+  prospectDetail       ProspectDetail?
+  mandats              Mandat[]        @relation("MandatProprietaire")
+  mandatsLocataire     Mandat[]        @relation("MandatLocataire")
+  callLogs             CallLog[]
+  estimations          Estimation[]
+  ringoverEvents       RingoverEvent[]
+  impayesLocataire     Impaye[]        @relation("ImpayeLocataire")
+  impayesProprietaire  Impaye[]        @relation("ImpayeProprietaire")
+  incidents            Incident[]
+  loyersAppeles        LoyerAppele[]
 
   @@unique([source, sourceRef])
   @@index([nom, prenom])
@@ -325,6 +329,10 @@ model Mandat {
   honorairesGestion            Decimal? @db.Decimal(10, 2)
   pourcentageHonorairesGestion Decimal? @db.Decimal(5, 2)
 
+  impayes       Impaye[]
+  incidents     Incident[]
+  loyersAppeles LoyerAppele[]
+
   @@unique([source, sourceRef])
 }
 
@@ -342,8 +350,16 @@ model Bien {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  mandats     Mandat[]
-  estimations Estimation[]
+  mandats       Mandat[]
+  estimations   Estimation[]
+  impayes       Impaye[]
+  incidents     Incident[]
+  loyersAppeles LoyerAppele[]
+
+  // "Lot_Reference" / "MandatLot_Reference" Septéo (ex. "SAGER", "BLA-02-H-M") —
+  // référence lisible du lot, sert de clé de rattachement pour l'import des
+  // impayés de loyer (colonne "Ref. Lot").
+  referenceLot String?
 
   // Reste des colonnes de l'export Apimo "Produits" (biens/mandats) — cf.
   // lib/imports/mapping-biens.ts `mapApimoBienRow`.
@@ -452,4 +468,111 @@ model Estimation {
   statut              String    @default("en_attente") // "en_attente" | "genere" | "envoye_commercial" | "envoye_client"
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Gestion locative — imports manuels Septéo "détail" (impayés, incidents,
+// loyers appelés). Modèles propres au CRM : les tables Fact* (FactImpaye,
+// FactIncident, FactAppel) sont des agrégats KPI appartenant à Cockpit et ne
+// sont pas touchées ici. Rattachement best-effort à Bien/Mandat/Contact via
+// `Bien.referenceLot`, `Mandat.locataireId` et le nom (cf. lib/imports/).
+// ---------------------------------------------------------------------------
+
+/// Loyers impayés — export Septéo "liste impayés loyers" (1 ligne par lot).
+model Impaye {
+  id        String @id @default(cuid())
+  source    Source @default(SEPTEO)
+  sourceRef String // "Ref. Lot" (= Bien.referenceLot)
+
+  refLot                String
+  locataireLabel        String? // "Nom Locataire" brut
+  proprietaireLabel     String? // "Propriétaire" brut
+  dateEntree            DateTime?
+  dateFinPreavis        DateTime?
+  solde                 Decimal   @db.Decimal(12, 2)
+  niveau                Int? // "Niv"
+  dateDerniereRelance   DateTime?
+  niveauDerniereRelance Int?
+  ecartNiveau           Boolean?
+  frais                 Decimal?  @db.Decimal(12, 2)
+  codeGli               String?
+  procedureRelance      String?
+  typeEnvoi             String?
+
+  locataireId    String?
+  locataire      Contact? @relation("ImpayeLocataire", fields: [locataireId], references: [id])
+  proprietaireId String?
+  proprietaire   Contact? @relation("ImpayeProprietaire", fields: [proprietaireId], references: [id])
+  bienId         String?
+  bien           Bien?    @relation(fields: [bienId], references: [id])
+  mandatId       String?
+  mandat         Mandat?  @relation(fields: [mandatId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([source, sourceRef])
+  @@index([bienId])
+}
+
+/// Incidents / événements de gestion — export Septéo "Liste incident".
+model Incident {
+  id        String @id @default(cuid())
+  source    Source @default(SEPTEO)
+  sourceRef String // "Référence" (id événement Septéo)
+
+  tiersLabel    String? // "Tiers" brut
+  objet         String? // "Objet / Libellé" (peut contenir des retours-ligne)
+  creeLe        DateTime?
+  responsable   String? // gestionnaire en charge
+  etat          String? // "État de l'événement" ("Cloture" | "Actif" ...)
+  derniereEtape String?
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+  bienId    String?
+  bien      Bien?    @relation(fields: [bienId], references: [id])
+  mandatId  String?
+  mandat    Mandat?  @relation(fields: [mandatId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([source, sourceRef])
+  @@index([contactId])
+}
+
+/// Loyers appelés — export Septéo "liste loyer appelé", agrégé par quittance
+/// (folio + pièce + date + compte auxiliaire locataire). `montantAppele` =
+/// somme des débits des postes (loyer + charges + TVA...), `montantRegle` =
+/// somme des crédits.
+model LoyerAppele {
+  id        String @id @default(cuid())
+  source    Source @default(SEPTEO)
+  sourceRef String // `${folio}-${piece}-${dateEcriture}-${auxiliaire}`
+
+  numeroFolio    String?
+  numeroPiece    String?
+  dateEcriture   DateTime?
+  auxiliaire     String? // code compte locataire Septéo ("L000307")
+  locataireLabel String? // "Libellé auxiliaire"
+  gestionnaire   String?
+  societe        String?
+  categorieLot   String? // "Catégorie" ("Appartement" | "Maison individuelle" ...)
+  typeLot        String? // "Type" ("3 Pièces" ...)
+  montantAppele  Decimal @db.Decimal(12, 2)
+  montantRegle   Decimal @db.Decimal(12, 2)
+
+  contactId String?
+  contact   Contact? @relation(fields: [contactId], references: [id])
+  bienId    String?
+  bien      Bien?    @relation(fields: [bienId], references: [id])
+  mandatId  String?
+  mandat    Mandat?  @relation(fields: [mandatId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([source, sourceRef])
+  @@index([contactId])
 }

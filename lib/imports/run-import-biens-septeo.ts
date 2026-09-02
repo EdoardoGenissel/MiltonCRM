@@ -56,6 +56,7 @@ function buildBienData(mapped: SepteoBienRow) {
     energieEmission: parseNumber(mapped.energieEmission),
     meuble: parseMeuble(mapped.meuble),
     referenceProduit: mapped.numero,
+    referenceLot: mapped.referenceLot,
     // Pas de "prix" : un lot en gestion locative n'est pas à vendre — le loyer
     // vit sur le mandat (Mandat.montantLoyer), pas sur le bien.
   }

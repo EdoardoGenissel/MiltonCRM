@@ -23,6 +23,7 @@ export type SepteoBienRow = {
   idLot: string
   idMandatLot: string
   numero?: string // "Mandat_Numero", numéro de mandat lisible
+  referenceLot?: string // "MandatLot_Reference" / "Lot_Reference" (ex. "SAGER") — clé de rattachement des impayés
 
   // Bien (Immeuble + Lot/MandatLot)
   residence?: string // "Immeuble_Nom"
@@ -82,6 +83,8 @@ export function mapSepteoBienRow(headerIndex: HeaderIndex, row: unknown[]): Sept
     idLot,
     idMandatLot,
     numero: cell(row, at(headerIndex, "mandatnumero")),
+    referenceLot:
+      cell(row, at(headerIndex, "mandatlotreference")) ?? cell(row, at(headerIndex, "lotreference")),
 
     residence: cell(row, at(headerIndex, "immeublenom")),
     adresse: cell(row, at(headerIndex, "mandatlotadra")),

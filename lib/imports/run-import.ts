@@ -17,6 +17,9 @@ import { parseNumber } from "@/lib/imports/parse-number"
 import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
 import { importApimoBiens } from "@/lib/imports/run-import-biens"
 import { importSepteoBiens } from "@/lib/imports/run-import-biens-septeo"
+import { importSepteoImpayes } from "@/lib/imports/run-import-impayes"
+import { importSepteoIncidents } from "@/lib/imports/run-import-incidents"
+import { importSepteoLoyersAppeles } from "@/lib/imports/run-import-loyers-appeles"
 import { recordImportRun } from "@/lib/imports/record-import-run"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
@@ -408,12 +411,27 @@ export async function runImport(
         return await importSepteoContacts(buffer, fileName, onProgress)
       case "septeo_biens":
         return await importSepteoBiens(buffer, fileName, onProgress)
+      case "septeo_impayes":
+        return await importSepteoImpayes(buffer, fileName, onProgress)
+      case "septeo_incidents":
+        return await importSepteoIncidents(buffer, fileName, onProgress)
+      case "septeo_loyers_appeles":
+        return await importSepteoLoyersAppeles(buffer, fileName, onProgress)
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur inconnue"
+    const errorKind: Record<ImportKind, "contacts" | "biens_mandats" | "impayes" | "incidents" | "loyers_appeles"> = {
+      apimo_prospects: "contacts",
+      septeo_contacts: "contacts",
+      apimo_biens: "biens_mandats",
+      septeo_biens: "biens_mandats",
+      septeo_impayes: "impayes",
+      septeo_incidents: "incidents",
+      septeo_loyers_appeles: "loyers_appeles",
+    }
     await recordImportRun({
-      source: kind === "septeo_contacts" || kind === "septeo_biens" ? Source.SEPTEO : Source.APIMO,
-      kind: kind === "septeo_contacts" || kind === "apimo_prospects" ? "contacts" : "biens_mandats",
+      source: kind === "apimo_prospects" || kind === "apimo_biens" ? Source.APIMO : Source.SEPTEO,
+      kind: errorKind[kind],
       fileName,
       status: "error",
       recordsUpserted: 0,

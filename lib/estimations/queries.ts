@@ -5,7 +5,7 @@ export async function listEstimations(page = 1) {
   const [items, total] = await prisma.$transaction([
     prisma.estimation.findMany({
       include: { contact: true, bien: true },
-      orderBy: { createdAt: "desc" },
+      orderBy: { submittedAt: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
     }),

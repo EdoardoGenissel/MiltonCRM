@@ -24,7 +24,15 @@ export async function POST(request: NextRequest) {
   const file = formData.get("file")
   const kind = formData.get("kind")
 
-  const validKinds: ImportKind[] = ["apimo_prospects", "apimo_biens", "septeo_contacts", "septeo_biens"]
+  const validKinds: ImportKind[] = [
+    "apimo_prospects",
+    "apimo_biens",
+    "septeo_contacts",
+    "septeo_biens",
+    "septeo_impayes",
+    "septeo_incidents",
+    "septeo_loyers_appeles",
+  ]
   if (!(file instanceof File) || !validKinds.includes(kind as ImportKind)) {
     return Response.json({ error: "Fichier ou type d'import manquant." }, { status: 400 })
   }
