@@ -1,11 +1,7 @@
 import Link from "next/link"
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-function paramsToArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  return Array.isArray(value) ? value : [value]
-}
+import { buildQuery } from "@/lib/search-params"
 
 // Tri "à la Excel" en cliquant l'en-tête de colonne — pas d'état client, tout
 // passe par l'URL (?sort=...&dir=...), cohérent avec le pattern déjà utilisé pour
@@ -26,13 +22,7 @@ export function SortableHeader({
   const isActive = currentSort === sortKey
   const nextDir = isActive && currentDir !== "desc" ? "desc" : "asc"
 
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (key === "sort" || key === "dir" || key === "page") continue
-    for (const v of paramsToArray(value)) params.append(key, v)
-  }
-  params.set("sort", sortKey)
-  params.set("dir", nextDir)
+  const params = buildQuery(searchParams, { set: { sort: sortKey, dir: nextDir } })
 
   const Icon = !isActive ? ArrowUpDown : currentDir === "desc" ? ArrowDown : ArrowUp
 

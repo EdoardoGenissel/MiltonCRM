@@ -1,4 +1,5 @@
 import { Topbar } from "@/components/topbar"
+import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
 import { listImportRuns, listLatestImportLogByKind } from "@/lib/imports/queries"
 import { ImportForm } from "./import-form"
 
@@ -47,18 +48,15 @@ export default async function ImportsPage() {
             <ImportForm />
           </div>
 
-          <div className="col-span-2 overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+          <TableCard className="col-span-2">
+              <TableHeadRow>
                   <th className="px-5 py-3">Date</th>
                   <th className="px-5 py-3">Source</th>
                   <th className="px-5 py-3">Fichier</th>
                   <th className="px-5 py-3">Statut</th>
                   <th className="px-5 py-3">Traités</th>
                   <th className="px-5 py-3">Doublons</th>
-                </tr>
-              </thead>
+              </TableHeadRow>
               <tbody>
                 {runs.map((run) => (
                   <tr key={run.id} className="border-b border-border last:border-0">
@@ -81,15 +79,10 @@ export default async function ImportsPage() {
                   </tr>
                 ))}
                 {runs.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="px-5 py-10 text-center text-muted-foreground">
-                      Aucun import effectué.
-                    </td>
-                  </tr>
+                  <TableEmpty label="Aucun import effectué." colSpan={6} />
                 )}
               </tbody>
-            </table>
-          </div>
+          </TableCard>
         </div>
       </div>
     </>

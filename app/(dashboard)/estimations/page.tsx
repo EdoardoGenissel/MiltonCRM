@@ -4,8 +4,11 @@ import { Topbar } from "@/components/topbar"
 import { Pagination } from "@/components/pagination"
 import { FilterBar } from "@/components/filter-bar"
 import { FilterableHeader } from "@/components/filterable-header"
+import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
 import { ContactTrigger } from "@/components/entity-drawers/entity-triggers"
-import { listEstimations, ESTIMATION_STATUT_LABELS } from "@/lib/estimations/queries"
+import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
+import { listEstimations } from "@/lib/estimations/queries"
+import { ESTIMATION_STATUT_LABELS } from "@/lib/estimations/statuts"
 import { parsePage } from "@/lib/pagination"
 import { toArray } from "@/lib/search-params"
 
@@ -49,10 +52,8 @@ export default async function EstimationsPage({
           valueLabels={{ statut: ESTIMATION_STATUT_LABELS }}
         />
 
-        <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+        <TableCard>
+          <TableHeadRow>
                 <th className="px-5 py-3">
                   <FilterableHeader
                     label="Date"
@@ -78,8 +79,7 @@ export default async function EstimationsPage({
                   />
                 </th>
                 <th className="px-5 py-3">Rapport</th>
-              </tr>
-            </thead>
+          </TableHeadRow>
             <tbody>
               {estimations.map((estimation) => (
                 <tr key={estimation.id} className="border-b border-border last:border-0">
@@ -110,8 +110,8 @@ export default async function EstimationsPage({
                       "-"
                     )}
                   </td>
-                  <td className="px-5 py-3 text-foreground">
-                    {ESTIMATION_STATUT_LABELS[estimation.statut] ?? estimation.statut}
+                  <td className="px-5 py-3">
+                    <EstimationStatutBadge statut={estimation.statut} />
                   </td>
                   <td className="px-5 py-3">
                     {estimation.cityscanReportUrl ? (
@@ -129,18 +129,10 @@ export default async function EstimationsPage({
                 </tr>
               ))}
               {estimations.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-16 py-14 text-center">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <Calculator className="h-8 w-8 opacity-40" />
-                      <p>Aucune estimation ne correspond à ces filtres.</p>
-                    </div>
-                  </td>
-                </tr>
+                <TableEmpty icon={Calculator} label="Aucune estimation ne correspond à ces filtres." colSpan={5} />
               )}
             </tbody>
-          </table>
-        </div>
+        </TableCard>
 
         <Pagination page={page} total={total} totalPages={totalPages} searchParams={params} />
       </div>

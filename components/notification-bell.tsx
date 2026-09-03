@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Popover } from "@base-ui/react/popover"
 import { Bell } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { usePolling } from "@/lib/use-polling"
 
 type NotificationItem = { id: string; message: string; createdAt: string }
 
@@ -26,7 +27,8 @@ function relativeTime(iso: string): string {
 // localStorage, comme pour un simple indicateur de nouveauté, pas un centre de
 // notifications complet.
 export function NotificationBell() {
-  const [items, setItems] = useState<NotificationItem[]>([])
+  const { data } = usePolling<{ items: NotificationItem[] }>("/api/notifications", POLL_INTERVAL_MS)
+  const items = data?.items ?? []
   const [lastSeenAt, setLastSeenAt] = useState<string | null>(null)
   // Snapshot de `lastSeenAt` pris à l'ouverture — sert à garder les items
   // surlignés "nouveaux" pendant la consultation, alors que `lastSeenAt` (qui
@@ -36,29 +38,6 @@ export function NotificationBell() {
 
   useEffect(() => {
     setLastSeenAt(localStorage.getItem(LAST_SEEN_KEY))
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function poll() {
-      try {
-        const res = await fetch("/api/notifications")
-        if (!res.ok) return
-        const data: { items: NotificationItem[] } = await res.json()
-        if (!cancelled) setItems(data.items)
-      } catch {
-        // Un échec de polling ne doit pas casser le dashboard - on retentera au
-        // prochain intervalle.
-      }
-    }
-
-    poll()
-    const interval = setInterval(poll, POLL_INTERVAL_MS)
-    return () => {
-      cancelled = true
-      clearInterval(interval)
-    }
   }, [])
 
   const hasUnseen = items.some((item) => !lastSeenAt || item.createdAt > lastSeenAt)

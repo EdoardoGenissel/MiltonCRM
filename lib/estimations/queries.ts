@@ -1,16 +1,7 @@
 import { prisma } from "@/lib/db/prisma"
 import { PAGE_SIZE, toPageResult } from "@/lib/pagination"
 
-export const ESTIMATION_STATUTS = [
-  { value: "en_attente", label: "En attente" },
-  { value: "genere", label: "Généré" },
-  { value: "envoye_commercial", label: "Envoyé au commercial" },
-  { value: "envoye_client", label: "Envoyé au client" },
-] as const
-
-export const ESTIMATION_STATUT_LABELS: Record<string, string> = Object.fromEntries(
-  ESTIMATION_STATUTS.map((s) => [s.value, s.label])
-)
+export { ESTIMATION_STATUTS, ESTIMATION_STATUT_LABELS } from "@/lib/estimations/statuts"
 
 export type EstimationFilterColumn = "statut"
 

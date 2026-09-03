@@ -20,22 +20,9 @@ import { Card, Field, EmptyState, Badge } from "@/components/detail-card"
 import { MandatSummary, type MandatDetail } from "@/components/entity-drawers/mandat-summary"
 import { DrawerTabs } from "@/components/ui/drawer-tabs"
 import { ClickableRow } from "@/components/entity-drawers/clickable-row"
+import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
 import { useFetchJson } from "@/lib/use-fetch-json"
 import { dateLabel, moneyLabel, boolLabelOuiNon } from "@/lib/format"
-
-const ESTIMATION_STATUT_STYLES: Record<string, string> = {
-  en_attente: "bg-secondary text-secondary-foreground",
-  genere: "bg-primary/10 text-primary",
-  envoye_commercial: "bg-success-bg text-success-foreground",
-  envoye_client: "bg-success-bg text-success-foreground",
-}
-
-const ESTIMATION_STATUT_LABELS: Record<string, string> = {
-  en_attente: "En attente",
-  genere: "Généré",
-  envoye_commercial: "Envoyé au commercial",
-  envoye_client: "Envoyé au client",
-}
 
 type BienDetail = {
   id: string
@@ -240,13 +227,7 @@ export function BienDrawerContent({
                 const inner = (
                   <>
                     <div className="flex items-center justify-between">
-                      <span
-                        className={`rounded-[8px] px-2 py-0.5 text-xs font-medium ${
-                          ESTIMATION_STATUT_STYLES[estimation.statut] ?? "bg-secondary text-secondary-foreground"
-                        }`}
-                      >
-                        {ESTIMATION_STATUT_LABELS[estimation.statut] ?? estimation.statut}
-                      </span>
+                      <EstimationStatutBadge statut={estimation.statut} />
                       {estimation.cityscanReportUrl && (
                         <a
                           href={estimation.cityscanReportUrl}

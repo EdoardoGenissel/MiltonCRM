@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Phone, X } from "lucide-react"
 import { useEntityDrawers } from "@/components/entity-drawers/entity-drawer-provider"
+import { usePolling } from "@/lib/use-polling"
 
 type ActiveCall = {
   id: string
@@ -19,32 +20,10 @@ const POLL_INTERVAL_MS = 5000
 // se contente d'interroger /api/calls/active à intervalle régulier (pas de
 // WebSocket/SSE, cohérent avec "pas de worker séparé pour ce volume").
 export function IncomingCallBanner() {
-  const [call, setCall] = useState<ActiveCall>(null)
   const [dismissedId, setDismissedId] = useState<string | null>(null)
   const { openContact } = useEntityDrawers()
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function poll() {
-      try {
-        const res = await fetch("/api/calls/active")
-        if (!res.ok) return
-        const data: { call: ActiveCall } = await res.json()
-        if (!cancelled) setCall(data.call)
-      } catch {
-        // Un échec de polling ne doit pas casser le dashboard — on retentera au
-        // prochain intervalle.
-      }
-    }
-
-    poll()
-    const interval = setInterval(poll, POLL_INTERVAL_MS)
-    return () => {
-      cancelled = true
-      clearInterval(interval)
-    }
-  }, [])
+  const { data } = usePolling<{ call: ActiveCall }>("/api/calls/active", POLL_INTERVAL_MS)
+  const call = data?.call ?? null
 
   if (!call || call.id === dismissedId) return null
 

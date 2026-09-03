@@ -1,5 +1,6 @@
 import { FileText } from "lucide-react"
 import { Topbar } from "@/components/topbar"
+import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
 import { MandatTypeBadge } from "@/components/mandat-type-badge"
 import { Pagination } from "@/components/pagination"
 import { FilterBar } from "@/components/filter-bar"
@@ -56,10 +57,8 @@ export default async function MandatsPage({
           keyLabels={KEY_LABELS}
         />
 
-        <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+        <TableCard>
+          <TableHeadRow>
                 <th className="px-5 py-3 text-center">
                   <FilterableHeader
                     label="Type"
@@ -102,8 +101,7 @@ export default async function MandatsPage({
                 <th className="px-5 py-3">Propriétaire</th>
                 <th className="px-5 py-3">Locataire</th>
                 <th className="px-5 py-3">Bien</th>
-              </tr>
-            </thead>
+          </TableHeadRow>
             <tbody>
               {mandats.map((mandat) => (
                 <MandatDrawerRow
@@ -140,18 +138,10 @@ export default async function MandatsPage({
                 </MandatDrawerRow>
               ))}
               {mandats.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-16 py-14 text-center">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <FileText className="h-8 w-8 opacity-40" />
-                      <p>Aucun mandat ne correspond à ces filtres.</p>
-                    </div>
-                  </td>
-                </tr>
+                <TableEmpty icon={FileText} label="Aucun mandat ne correspond à ces filtres." colSpan={6} />
               )}
             </tbody>
-          </table>
-        </div>
+        </TableCard>
 
         <Pagination page={page} total={total} totalPages={totalPages} searchParams={params} />
       </div>

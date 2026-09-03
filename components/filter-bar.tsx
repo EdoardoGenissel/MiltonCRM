@@ -5,11 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { RotateCcw, Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-
-function paramsToArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  return Array.isArray(value) ? value : [value]
-}
+import { buildQuery, toArray } from "@/lib/search-params"
 
 type Chip = { key: string; value: string; label: string }
 
@@ -39,34 +35,26 @@ export function FilterBar({
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const currentSearch = paramsToArray(searchParams.search)[0] ?? ""
+  const currentSearch = toArray(searchParams.search)[0] ?? ""
   const [search, setSearch] = useState(currentSearch)
 
-  function pushWith(mutate: (params: URLSearchParams) => void) {
-    const params = new URLSearchParams()
-    for (const [key, value] of Object.entries(searchParams)) {
-      if (key === "page") continue
-      for (const v of paramsToArray(value)) params.append(key, v)
-    }
-    mutate(params)
+  function push(params: URLSearchParams) {
     const qs = params.toString()
     router.push(qs ? `${pathname}?${qs}` : pathname)
   }
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault()
-    pushWith((params) => {
-      params.delete("search")
-      if (search.trim()) params.set("search", search.trim())
-    })
+    push(buildQuery(searchParams, { set: { search: search.trim() || undefined } }))
   }
 
   function removeChip(chip: Chip) {
-    pushWith((params) => {
-      const kept = params.getAll(chip.key).filter((v) => v !== chip.value)
-      params.delete(chip.key)
-      for (const v of kept) params.append(chip.key, v)
-    })
+    if (chip.key === "search") {
+      push(buildQuery(searchParams, { set: { search: undefined } }))
+      return
+    }
+    const kept = toArray(searchParams[chip.key]).filter((v) => v !== chip.value)
+    push(buildQuery(searchParams, { append: { [chip.key]: kept } }))
   }
 
   const chips: Chip[] = []
@@ -74,7 +62,7 @@ export function FilterBar({
     chips.push({ key: "search", value: currentSearch, label: `« ${currentSearch} »` })
   }
   for (const key of filterKeys) {
-    for (const value of paramsToArray(searchParams[key])) {
+    for (const value of toArray(searchParams[key])) {
       chips.push({
         key,
         value,

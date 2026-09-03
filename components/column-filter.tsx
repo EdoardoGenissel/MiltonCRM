@@ -7,13 +7,9 @@ import { ListFilter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { buildQuery } from "@/lib/search-params"
 
 type ColumnValuesResponse = { values?: string[]; hasMore?: boolean; error?: string }
-
-function paramsToArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  return Array.isArray(value) ? value : [value]
-}
 
 // Filtre "à la Excel" pour un en-tête de colonne : popover avec recherche +
 // cases à cocher sur les valeurs uniques réellement présentes (cf.
@@ -65,13 +61,10 @@ export function ColumnFilter({
     setLoading(true)
 
     const timeout = setTimeout(async () => {
-      const params = new URLSearchParams()
-      params.set("column", column)
-      if (query) params.set("q", query)
-      for (const [key, value] of Object.entries(searchParams)) {
-        if (key === "page" || key === "sort" || key === "dir") continue
-        for (const v of paramsToArray(value)) params.append(key, v)
-      }
+      const params = buildQuery(searchParams, {
+        drop: ["sort", "dir"],
+        set: { column, q: query || undefined },
+      })
 
       try {
         const res = await fetch(`${endpoint}?${params.toString()}`)
@@ -106,12 +99,7 @@ export function ColumnFilter({
   }
 
   function apply() {
-    const params = new URLSearchParams()
-    for (const [key, value] of Object.entries(searchParams)) {
-      if (key === column || key === "page") continue
-      for (const v of paramsToArray(value)) params.append(key, v)
-    }
-    for (const v of pending) params.append(column, v)
+    const params = buildQuery(searchParams, { append: { [column]: [...pending] } })
     setOpen(false)
     router.push(`?${params.toString()}`)
   }

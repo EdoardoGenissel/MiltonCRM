@@ -1,5 +1,6 @@
 import { Building2 } from "lucide-react"
 import { Topbar } from "@/components/topbar"
+import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
 import { Pagination } from "@/components/pagination"
 import { FilterBar } from "@/components/filter-bar"
 import { FilterableHeader } from "@/components/filterable-header"
@@ -62,10 +63,8 @@ export default async function BiensPage({
           keyLabels={KEY_LABELS}
         />
 
-        <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+        <TableCard>
+          <TableHeadRow>
                 <th className="px-5 py-3">
                   <FilterableHeader
                     label="Adresse"
@@ -145,8 +144,7 @@ export default async function BiensPage({
                   />
                 </th>
                 <th className="px-5 py-3">Propriétaire</th>
-              </tr>
-            </thead>
+          </TableHeadRow>
             <tbody>
               {biens.map((bien) => {
                 const proprietaire = bien.mandats[0]?.proprietaire
@@ -181,18 +179,10 @@ export default async function BiensPage({
                 )
               })}
               {biens.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-16 py-14 text-center">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <Building2 className="h-8 w-8 opacity-40" />
-                      <p>Aucun bien ne correspond à ces filtres.</p>
-                    </div>
-                  </td>
-                </tr>
+                <TableEmpty icon={Building2} label="Aucun bien ne correspond à ces filtres." colSpan={8} />
               )}
             </tbody>
-          </table>
-        </div>
+        </TableCard>
 
         <Pagination page={page} total={total} totalPages={totalPages} searchParams={params} />
       </div>

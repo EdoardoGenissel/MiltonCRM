@@ -1,5 +1,6 @@
 import { Users } from "lucide-react"
 import { Topbar } from "@/components/topbar"
+import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
 import { PersonaBadge } from "@/components/persona-badge"
 import { ContactAvatar } from "@/components/contact-avatar"
 import { Pagination } from "@/components/pagination"
@@ -62,10 +63,8 @@ export default async function ContactsPage({
           tabs={<PersonaTabs searchParams={params} />}
         />
 
-        <div className="overflow-hidden rounded-[8px] border border-border bg-card shadow-[var(--shadow-card)]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs font-medium text-muted-foreground">
+        <TableCard>
+          <TableHeadRow>
                 <th className="px-5 py-3">
                   <FilterableHeader
                     label="Nom"
@@ -113,8 +112,7 @@ export default async function ContactsPage({
                     align="center"
                   />
                 </th>
-              </tr>
-            </thead>
+          </TableHeadRow>
             <tbody>
               {contacts.map((contact) => (
                 <tr key={contact.id} className="border-b border-border last:border-0 hover:bg-muted/50">
@@ -139,18 +137,10 @@ export default async function ContactsPage({
                 </tr>
               ))}
               {contacts.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-16 py-14 text-center">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <Users className="h-8 w-8 opacity-40" />
-                      <p>Aucun contact ne correspond à ces filtres.</p>
-                    </div>
-                  </td>
-                </tr>
+                <TableEmpty icon={Users} label="Aucun contact ne correspond à ces filtres." colSpan={5} />
               )}
             </tbody>
-          </table>
-        </div>
+        </TableCard>
 
         <Pagination page={page} total={total} totalPages={totalPages} searchParams={params} />
       </div>

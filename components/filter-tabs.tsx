@@ -1,10 +1,6 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-
-function paramsToArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  return Array.isArray(value) ? value : [value]
-}
+import { buildQuery, toArray } from "@/lib/search-params"
 
 // Filtre mono-valeur présenté en onglets (un seul actif à la fois), tout passe
 // par l'URL (?<param>=...) — même logique que le tri (cf.
@@ -21,20 +17,14 @@ export function FilterTabs({
   allLabel?: string
   searchParams: Record<string, string | string[] | undefined>
 }) {
-  const active = paramsToArray(searchParams[param])[0] ?? ""
+  const active = toArray(searchParams[param])[0] ?? ""
   const tabs = [{ value: "", label: allLabel }, ...options]
 
   return (
     <div className="flex items-center gap-1 border-b border-border">
       {tabs.map((tab) => {
         const isActive = tab.value === active
-
-        const params = new URLSearchParams()
-        for (const [key, value] of Object.entries(searchParams)) {
-          if (key === param || key === "page") continue
-          for (const v of paramsToArray(value)) params.append(key, v)
-        }
-        if (tab.value) params.set(param, tab.value)
+        const params = buildQuery(searchParams, { set: { [param]: tab.value || undefined } })
 
         return (
           <Link

@@ -1,11 +1,7 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { buildPageList, PAGE_SIZE } from "@/lib/pagination"
-
-function paramsToArray(value: string | string[] | undefined): string[] {
-  if (!value) return []
-  return Array.isArray(value) ? value : [value]
-}
+import { buildQuery } from "@/lib/search-params"
 
 export function Pagination({
   page,
@@ -21,12 +17,9 @@ export function Pagination({
   if (totalPages <= 1 && total <= PAGE_SIZE) return null
 
   function hrefForPage(target: number) {
-    const params = new URLSearchParams()
-    for (const [key, value] of Object.entries(searchParams)) {
-      if (key === "page") continue
-      for (const v of paramsToArray(value)) params.append(key, v)
-    }
-    if (target > 1) params.set("page", String(target))
+    const params = buildQuery(searchParams, {
+      set: { page: target > 1 ? String(target) : undefined },
+    })
     const qs = params.toString()
     return qs ? `?${qs}` : "?"
   }
