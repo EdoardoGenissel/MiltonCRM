@@ -26,7 +26,7 @@ export function Pagination({
 
   const linkClass = (disabled: boolean, active = false) =>
     cn(
-      "flex h-8 min-w-8 items-center justify-center rounded-[8px] border px-2.5 text-sm font-medium",
+      "flex h-8 min-w-8 items-center justify-center rounded-md border px-2.5 text-sm font-medium",
       active
         ? "border-primary bg-primary text-primary-foreground"
         : "border-border text-foreground hover:bg-muted",

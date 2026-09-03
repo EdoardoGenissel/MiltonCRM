@@ -177,7 +177,7 @@ export function BienDrawerContent({
                     key={`${index}-${url}`}
                     src={url}
                     alt=""
-                    className="aspect-[4/3] w-full rounded-[8px] border border-border object-cover"
+                    className="aspect-[4/3] w-full rounded-md border border-border object-cover"
                   />
                 ))}
               </div>
@@ -270,7 +270,7 @@ export function BienDrawerContent({
                         {inner}
                       </ClickableRow>
                     ) : (
-                      <div className="rounded-[8px] border border-border p-3 text-sm">{inner}</div>
+                      <div className="rounded-md border border-border p-3 text-sm">{inner}</div>
                     )}
                   </li>
                 )
@@ -284,7 +284,7 @@ export function BienDrawerContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 rounded-[8px] border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+      <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
             <Building2 className="h-5 w-5" />

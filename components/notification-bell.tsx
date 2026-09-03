@@ -55,7 +55,7 @@ export function NotificationBell() {
   return (
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
-        className="relative flex h-9 w-9 items-center justify-center rounded-[8px] text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="relative flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
         aria-label="Notifications"
       >
         <Bell className="h-[18px] w-[18px]" />
@@ -65,7 +65,7 @@ export function NotificationBell() {
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="w-80 rounded-[8px] border border-border bg-popover p-2 text-popover-foreground shadow-lg">
+          <Popover.Popup className="w-80 rounded-md border border-border bg-popover p-2 text-popover-foreground shadow-lg">
             <p className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Notifications</p>
             {items.length === 0 ? (
               <p className="px-2 py-4 text-center text-sm text-muted-foreground">
@@ -77,7 +77,7 @@ export function NotificationBell() {
                   <li
                     key={item.id}
                     className={cn(
-                      "flex flex-col gap-0.5 rounded-[8px] px-2 py-2 text-sm",
+                      "flex flex-col gap-0.5 rounded-md px-2 py-2 text-sm",
                       !viewingSinceAt || item.createdAt > viewingSinceAt ? "bg-muted/60" : "",
                     )}
                   >

@@ -13,7 +13,7 @@ function LastImportStat({
   log: { created: number; updated: number; total: number; startedAt: Date } | null
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-[8px] border border-border p-4">
+    <div className="flex flex-col gap-2 rounded-md border border-border p-4">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       {log ? (
         <>
@@ -52,7 +52,7 @@ export default async function ImportsPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-1 rounded-[8px] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+          <div className="col-span-1 rounded-md border border-border bg-card p-6 shadow-[var(--shadow-card)]">
             <h2 className="mb-4 text-sm font-semibold text-foreground">Nouvel import</h2>
             <ImportForm />
           </div>

@@ -316,7 +316,7 @@ export function ContactDrawerContent({
                           {inner}
                         </ClickableRow>
                       ) : (
-                        <div className="rounded-[8px] border border-border p-3 text-sm">
+                        <div className="rounded-md border border-border p-3 text-sm">
                           {inner}
                         </div>
                       )}
@@ -363,7 +363,7 @@ export function ContactDrawerContent({
                           {inner}
                         </ClickableRow>
                       ) : (
-                        <div className="rounded-[8px] border border-border p-3 text-sm">
+                        <div className="rounded-md border border-border p-3 text-sm">
                           {inner}
                         </div>
                       )}
@@ -430,7 +430,7 @@ export function ContactDrawerContent({
                         {inner}
                       </ClickableRow>
                     ) : (
-                      <div className="rounded-[8px] border border-border p-3 text-sm">{inner}</div>
+                      <div className="rounded-md border border-border p-3 text-sm">{inner}</div>
                     )}
                   </li>
                 )
@@ -449,7 +449,7 @@ export function ContactDrawerContent({
               <Card title="Historique d'appels" icon={Phone}>
                 <ul className="flex flex-col gap-2">
                   {contact.callLogs.map((call) => (
-                    <li key={call.id} className="rounded-[8px] border border-border p-3 text-sm">
+                    <li key={call.id} className="rounded-md border border-border p-3 text-sm">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {dateTimeLabel(call.receivedAt)}
@@ -469,7 +469,7 @@ export function ContactDrawerContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-[8px] border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+      <div className="flex flex-col gap-4 rounded-md border border-border bg-card p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center gap-4">
           <ContactAvatar prenom={contact.prenom} nom={contact.nom} size="lg" />
           <div>
