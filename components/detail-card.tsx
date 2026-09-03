@@ -3,21 +3,29 @@
 // (contacts/[id], biens/[id]) pour éviter la duplication une fois leur contenu
 // porté dans des drawers.
 
+// Ré-export : `Badge` reste importable depuis ce module pour ne pas casser les
+// appels existants (cf. components/ui/badge.tsx).
+export { Badge } from "@/components/ui/badge"
+
 export function Card({
   title,
   icon: Icon,
   children,
 }: {
-  title: string
+  // Titre optionnel : sans titre, simple panneau (remplace les `<div>` de carte
+  // recopiés en tête des drawers).
+  title?: string
   icon?: React.ComponentType<{ className?: string }>
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-[8px] border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-      <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
-        {title}
-      </h2>
+    <div className="rounded-md border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+      {title && (
+        <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
+          {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+          {title}
+        </h2>
+      )}
       {children}
     </div>
   )
@@ -49,12 +57,4 @@ export function Field({
 
 export function EmptyState({ label }: { label: string }) {
   return <p className="text-sm text-muted-foreground">{label}</p>
-}
-
-export function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-[8px] bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-      {children}
-    </span>
-  )
 }

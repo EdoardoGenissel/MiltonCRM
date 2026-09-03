@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 
 // Palette fixe (indépendante du thème clair/sombre, comme success/danger/warning
 // dans globals.css) — une couleur par type de mandat, assignée par hash pour
@@ -25,14 +25,8 @@ function colorFor(value: string) {
 export function MandatTypeBadge({ type, className }: { type: string; className?: string }) {
   const { bg, fg } = colorFor(type)
   return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-[8px] px-2 py-0.5 text-xs font-medium",
-        className,
-      )}
-      style={{ backgroundColor: bg, color: fg }}
-    >
+    <Badge className={className} style={{ backgroundColor: bg, color: fg }}>
       {type}
-    </span>
+    </Badge>
   )
 }
