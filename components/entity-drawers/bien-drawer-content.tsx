@@ -21,6 +21,7 @@ import { MandatSummary, type MandatDetail } from "@/components/entity-drawers/ma
 import { DrawerTabs } from "@/components/ui/drawer-tabs"
 import { ClickableRow } from "@/components/entity-drawers/clickable-row"
 import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
+import { DrawerState } from "@/components/entity-drawers/drawer-state"
 import { useFetchJson } from "@/lib/use-fetch-json"
 import { dateLabel, moneyLabel, boolLabelOuiNon } from "@/lib/format"
 
@@ -78,7 +79,7 @@ export function BienDrawerContent({
   const { data: bien, error, loading } = useFetchJson<BienDetail>(`/api/biens/${id}`)
 
   if (loading || !bien) {
-    return <p className="text-sm text-muted-foreground">{error ?? "Chargement…"}</p>
+    return <DrawerState error={error} />
   }
 
   const adresseComplete = [bien.adresse, bien.adresseComplement].filter(Boolean).join(", ")

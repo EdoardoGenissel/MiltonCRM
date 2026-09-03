@@ -4,6 +4,7 @@ import { FileText, MapPin } from "lucide-react"
 import { Card } from "@/components/detail-card"
 import { MandatSummary, type MandatDetail } from "@/components/entity-drawers/mandat-summary"
 import { MandatTypeBadge } from "@/components/mandat-type-badge"
+import { DrawerState } from "@/components/entity-drawers/drawer-state"
 import { useFetchJson } from "@/lib/use-fetch-json"
 
 // Fiche mandat autonome ouverte depuis /mandats — le mandat n'a pas de page
@@ -21,7 +22,7 @@ export function MandatDrawerContent({
   const { data: mandat, error, loading } = useFetchJson<MandatDetail>(`/api/mandats/${id}`)
 
   if (loading || !mandat) {
-    return <p className="text-sm text-muted-foreground">{error ?? "Chargement…"}</p>
+    return <DrawerState error={error} />
   }
 
   return (

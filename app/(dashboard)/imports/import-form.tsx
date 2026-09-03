@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Select } from "@/components/ui/select"
+import { FormField, SubmitButton } from "@/components/ui/form"
 import type { ImportResult } from "@/lib/imports/run-import"
 
 type StreamEvent =
@@ -74,17 +75,12 @@ export function ImportForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="kind" className="text-sm font-medium text-foreground">
-          Type d&apos;export
-        </label>
-        <select
-          id="kind"
-          name="kind"
-          required
-          disabled={pending}
-          className="h-10 rounded-[8px] border border-input bg-background px-3 text-sm outline-none focus-visible:border-ring disabled:opacity-50"
-        >
+      <FormField
+        label="Type d'export"
+        htmlFor="kind"
+        hint="Les imports impayés / incidents / loyers appelés se rattachent aux biens et contacts existants : importer d'abord « Septéo - biens et mandats » et les contacts."
+      >
+        <Select id="kind" name="kind" required disabled={pending}>
           <option value="apimo_prospects">Apimo - prospects (.xlsx)</option>
           <option value="apimo_biens">Apimo - biens et mandats (.xlsx)</option>
           <option value="septeo_contacts">Septéo - propriétaires ou locataires (.csv)</option>
@@ -92,17 +88,10 @@ export function ImportForm() {
           <option value="septeo_impayes">Septéo - impayés de loyer (.csv)</option>
           <option value="septeo_incidents">Septéo - incidents (.csv)</option>
           <option value="septeo_loyers_appeles">Septéo - loyers appelés (.csv)</option>
-        </select>
-        <p className="text-xs text-muted-foreground">
-          Les imports impayés / incidents / loyers appelés se rattachent aux biens et contacts
-          existants : importer d&apos;abord « Septéo - biens et mandats » et les contacts.
-        </p>
-      </div>
+        </Select>
+      </FormField>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="file" className="text-sm font-medium text-foreground">
-          Fichier
-        </label>
+      <FormField label="Fichier" htmlFor="file">
         <input
           id="file"
           name="file"
@@ -110,13 +99,13 @@ export function ImportForm() {
           accept=".xlsx,.xls,.csv"
           required
           disabled={pending}
-          className="text-sm text-foreground file:mr-3 file:rounded-[8px] file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground disabled:opacity-50"
+          className="text-sm text-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-secondary-foreground disabled:opacity-50"
         />
-      </div>
+      </FormField>
 
-      <Button type="submit" disabled={pending} className="w-fit">
-        {pending ? "Import en cours…" : "Importer"}
-      </Button>
+      <SubmitButton pending={pending} pendingLabel="Import en cours…" className="w-fit">
+        Importer
+      </SubmitButton>
 
       {state.phase !== "idle" && (
         <div className="flex flex-col gap-1.5">

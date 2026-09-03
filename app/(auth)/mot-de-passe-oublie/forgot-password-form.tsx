@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { FormField, FormError, SubmitButton } from "@/components/ui/form"
 import { requestPasswordReset, type AuthActionState } from "../actions"
 
 const initialState: AuthActionState = { error: null }
@@ -20,18 +20,15 @@ export function ForgotPasswordForm() {
 
   return (
     <form action={formAction} className="mt-6 flex flex-col gap-4">
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium text-foreground">
-          Email
-        </label>
+      <FormField label="Email" htmlFor="email">
         <Input id="email" name="email" type="email" autoComplete="email" required />
-      </div>
+      </FormField>
 
-      {state.error && <p className="text-sm text-danger">{state.error}</p>}
+      <FormError>{state.error}</FormError>
 
-      <Button type="submit" disabled={pending} className="mt-2 w-full">
-        {pending ? "Envoi…" : "Envoyer le lien"}
-      </Button>
+      <SubmitButton pending={pending} pendingLabel="Envoi…" className="mt-2 w-full">
+        Envoyer le lien
+      </SubmitButton>
     </form>
   )
 }

@@ -23,6 +23,7 @@ import { Card, Field, EmptyState } from "@/components/detail-card"
 import { DrawerTabs } from "@/components/ui/drawer-tabs"
 import { ClickableRow } from "@/components/entity-drawers/clickable-row"
 import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
+import { DrawerState } from "@/components/entity-drawers/drawer-state"
 import { useFetchJson } from "@/lib/use-fetch-json"
 import { dateLabel, dateTimeLabel, boolLabel, moneyLabel, surfaceLabel } from "@/lib/format"
 import { loyerMaxWithMargin } from "@/lib/prospects/loyer-max"
@@ -153,7 +154,7 @@ export function ContactDrawerContent({
   const { data: contact, error, loading } = useFetchJson<ContactDetail>(`/api/contacts/${id}`)
 
   if (loading || !contact) {
-    return <p className="text-sm text-muted-foreground">{error ?? "Chargement…"}</p>
+    return <DrawerState error={error} />
   }
 
   const tabs = [
