@@ -43,9 +43,11 @@ export function extractRawCallId(rawBody: string): string | undefined {
 export function parseRingoverEvent(payload: unknown, rawBody?: string): ParsedRingoverEvent {
   if (typeof payload !== "object" || payload === null) return {}
   const root = payload as Record<string, unknown>
-  const data = (typeof root.data === "object" && root.data !== null
-    ? (root.data as Record<string, unknown>)
-    : {}) as Record<string, unknown>
+  const data = (
+    typeof root.data === "object" && root.data !== null
+      ? (root.data as Record<string, unknown>)
+      : {}
+  ) as Record<string, unknown>
 
   // Fallback si rawBody n'est pas fourni (tests, ou appelant qui n'a que l'objet
   // déjà parsé) : call_id peut être un number déjà tronqué par JSON.parse, on le

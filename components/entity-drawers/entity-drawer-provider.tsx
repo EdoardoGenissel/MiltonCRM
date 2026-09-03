@@ -7,9 +7,7 @@ import { BienDrawerContent } from "@/components/entity-drawers/bien-drawer-conte
 import { MandatDrawerContent } from "@/components/entity-drawers/mandat-drawer-content"
 
 type DrawerEntry =
-  | { type: "contact"; id: string }
-  | { type: "bien"; id: string }
-  | { type: "mandat"; id: string }
+  { type: "contact"; id: string } | { type: "bien"; id: string } | { type: "mandat"; id: string }
 
 type EntityDrawerContextValue = {
   openContact: (id: string) => void
@@ -39,7 +37,7 @@ export function EntityDrawerProvider({ children }: { children: React.ReactNode }
       openBien: (id) => push({ type: "bien", id }),
       openMandat: (id) => push({ type: "mandat", id }),
     }),
-    [push]
+    [push],
   )
 
   const top = stack[stack.length - 1]

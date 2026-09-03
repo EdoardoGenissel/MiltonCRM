@@ -11,7 +11,8 @@ type SidebarUser = { fullName: string; email: string }
 
 function initialsFor(name: string): string {
   const parts = name.trim().split(/\s+/)
-  const initials = parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : name.slice(0, 2)
+  const initials =
+    parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : name.slice(0, 2)
   return initials.toUpperCase() || "?"
 }
 
@@ -40,7 +41,7 @@ function NavLink({
         "flex items-center gap-3 rounded-[9px] px-3 py-2.5 text-sm font-medium transition-colors",
         active
           ? "bg-[#f1f3f5] text-foreground"
-          : "text-[#4b5563] hover:bg-[#f5f6f8] hover:text-foreground"
+          : "text-[#4b5563] hover:bg-[#f5f6f8] hover:text-foreground",
       )}
     >
       <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-[#8b93a1]")} />
@@ -57,7 +58,7 @@ export function Sidebar({ user }: { user: SidebarUser | null }) {
     <aside
       className={cn(
         "sticky top-0 h-screen shrink-0 overflow-hidden border-r border-border bg-card transition-[width] duration-200 ease-in-out",
-        open ? "w-[264px]" : "w-0 border-r-0"
+        open ? "w-[264px]" : "w-0 border-r-0",
       )}
       aria-hidden={!open}
     >
@@ -73,7 +74,12 @@ export function Sidebar({ user }: { user: SidebarUser | null }) {
         </nav>
 
         <div className="px-3.5 pb-1.5">
-          <NavLink label="Imports" href="/imports" icon={Upload} active={Boolean(pathname?.startsWith("/imports"))} />
+          <NavLink
+            label="Imports"
+            href="/imports"
+            icon={Upload}
+            active={Boolean(pathname?.startsWith("/imports"))}
+          />
         </div>
 
         {user && (
@@ -82,7 +88,9 @@ export function Sidebar({ user }: { user: SidebarUser | null }) {
               {initialsFor(user.fullName)}
             </div>
             <div className="min-w-0 flex-1 text-left">
-              <div className="truncate text-[13.5px] font-semibold text-foreground">{user.fullName}</div>
+              <div className="truncate text-[13.5px] font-semibold text-foreground">
+                {user.fullName}
+              </div>
               <div className="truncate text-xs text-muted-foreground">{user.email}</div>
             </div>
             <form action={signOut}>

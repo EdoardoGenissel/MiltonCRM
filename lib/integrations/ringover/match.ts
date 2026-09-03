@@ -19,10 +19,12 @@ export type IncomingCall = {
 // partagent un numéro (rare mais possible, ex. couple).
 export function matchContactByCall(
   candidates: CallMatchCandidate[],
-  call: IncomingCall
+  call: IncomingCall,
 ): string | null {
   const incomingPhone = normalizePhone(call.phoneNumber)
-  const byPhone = candidates.filter((c) => c.telephone && normalizePhone(c.telephone) === incomingPhone)
+  const byPhone = candidates.filter(
+    (c) => c.telephone && normalizePhone(c.telephone) === incomingPhone,
+  )
 
   if (byPhone.length === 1) return byPhone[0].id
   if (byPhone.length === 0) return null
@@ -30,7 +32,7 @@ export function matchContactByCall(
   if (call.callerName) {
     const normalizedCallerName = call.callerName.trim().toLowerCase()
     const byName = byPhone.find(
-      (c) => `${c.prenom} ${c.nom}`.trim().toLowerCase() === normalizedCallerName
+      (c) => `${c.prenom} ${c.nom}`.trim().toLowerCase() === normalizedCallerName,
     )
     if (byName) return byName.id
   }

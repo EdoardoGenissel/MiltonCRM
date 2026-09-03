@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest"
 import { matchContactByCall, type CallMatchCandidate } from "./match"
 
-const marie: CallMatchCandidate = { id: "c1", nom: "Dupont", prenom: "Marie", telephone: "0612345678" }
-const jean: CallMatchCandidate = { id: "c2", nom: "Martin", prenom: "Jean", telephone: "0698765432" }
+const marie: CallMatchCandidate = {
+  id: "c1",
+  nom: "Dupont",
+  prenom: "Marie",
+  telephone: "0612345678",
+}
+const jean: CallMatchCandidate = {
+  id: "c2",
+  nom: "Martin",
+  prenom: "Jean",
+  telephone: "0698765432",
+}
 
 describe("matchContactByCall", () => {
   it("matche sur le numéro de téléphone normalisé", () => {

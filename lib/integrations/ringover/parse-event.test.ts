@@ -57,7 +57,12 @@ describe("parseRingoverEvent", () => {
       event: "hangup",
       resource: "call",
       timestamp: 1554823493.76,
-      data: { call_id: "42", direction: "inbound", from_number: "33601020304", record: "https://cdr.ringover.com/record/x.mp3" },
+      data: {
+        call_id: "42",
+        direction: "inbound",
+        from_number: "33601020304",
+        record: "https://cdr.ringover.com/record/x.mp3",
+      },
     }
     expect(parseRingoverEvent(payload, JSON.stringify(payload))).toMatchObject({
       event: "hangup",
@@ -69,7 +74,11 @@ describe("parseRingoverEvent", () => {
     const payload = {
       event: "record_available",
       resource: "aftercall",
-      data: { call_id: "42", record_link: "https://cdr.ringover.com/record/y.mp3", record_duration: "32" },
+      data: {
+        call_id: "42",
+        record_link: "https://cdr.ringover.com/record/y.mp3",
+        record_duration: "32",
+      },
     }
     expect(parseRingoverEvent(payload, JSON.stringify(payload))).toMatchObject({
       recordUrl: "https://cdr.ringover.com/record/y.mp3",
@@ -84,7 +93,7 @@ describe("parseRingoverEvent", () => {
       data: { call_id: "42", transcription_url: "https://cdn.ringover.com/transcriptions/x.json" },
     }
     expect(parseRingoverEvent(payload, JSON.stringify(payload)).transcriptionUrl).toBe(
-      "https://cdn.ringover.com/transcriptions/x.json"
+      "https://cdn.ringover.com/transcriptions/x.json",
     )
   })
 

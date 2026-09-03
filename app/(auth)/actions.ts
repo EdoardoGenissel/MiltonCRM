@@ -13,7 +13,7 @@ const loginSchema = z.object({
 
 export async function signIn(
   _prevState: AuthActionState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AuthActionState> {
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
@@ -45,7 +45,7 @@ const forgotPasswordSchema = z.object({
 
 export async function requestPasswordReset(
   _prevState: AuthActionState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AuthActionState> {
   const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") })
   if (!parsed.success) {
@@ -73,7 +73,7 @@ const resetPasswordSchema = z
 
 export async function updatePassword(
   _prevState: AuthActionState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AuthActionState> {
   const parsed = resetPasswordSchema.safeParse({
     password: formData.get("password"),

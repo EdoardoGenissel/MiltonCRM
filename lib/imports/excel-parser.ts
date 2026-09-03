@@ -96,7 +96,10 @@ function parseCsvText(rawText: string): ParsedSheet {
   return { headerRow: headerRow ?? [], rows }
 }
 
-export async function parseTabularBuffer(buffer: ArrayBuffer, fileName: string): Promise<ParsedSheet> {
+export async function parseTabularBuffer(
+  buffer: ArrayBuffer,
+  fileName: string,
+): Promise<ParsedSheet> {
   if (fileName.toLowerCase().endsWith(".csv")) {
     return parseCsvText(new TextDecoder("utf-8").decode(buffer))
   }

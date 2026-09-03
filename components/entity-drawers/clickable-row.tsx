@@ -28,7 +28,7 @@ export function ClickableRow({
       }}
       className={cn(
         "cursor-pointer rounded-[8px] border border-border p-3 text-sm transition-colors hover:bg-muted/50",
-        className
+        className,
       )}
     >
       {children}

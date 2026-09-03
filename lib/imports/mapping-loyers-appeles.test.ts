@@ -5,7 +5,7 @@ import { mapLoyerAppeleRow } from "./mapping-loyers-appeles"
 // En-tête réel de `data/liste loyer appelé.csv` (avec BOM sur la 1ère colonne).
 const HEADER =
   "﻿Numéro folio;Numéro pièce;Date écriture;Compte;Libellé compte;Auxiliaire;Libellé auxiliaire;Libellé écriture;Débit;Crédit;Société;Agence;Groupe de travail;Gestionnaire;Catégorie;Type;Surface".split(
-    ";"
+    ";",
   )
 const headerIndex = buildHeaderIndex(HEADER)
 
@@ -13,7 +13,7 @@ describe("mapLoyerAppeleRow", () => {
   it("mappe une ligne réelle (BOM neutralisé sur l'en-tête)", () => {
     const row =
       "11;6;28/02/2025;41120200;Locataires;L000307;JAMIN & DAUBY Gabriel & Nadia;Locataires;42,86;0,00;MILTON IMMOBILIER;;;WERCAUTRIN Taraïna;Maison individuelle;3 Pièces;0,00".split(
-        ";"
+        ";",
       )
     expect(mapLoyerAppeleRow(headerIndex, row)).toEqual({
       numeroFolio: "11",

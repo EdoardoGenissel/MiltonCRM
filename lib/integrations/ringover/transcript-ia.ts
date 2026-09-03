@@ -12,6 +12,6 @@ export async function summarizeTranscript(transcript: string): Promise<string> {
   }
 
   throw new Error(
-    "TRANSCRIPT_IA_MODE=live sans provider IA branché — implémenter l'appel au provider choisi ici."
+    "TRANSCRIPT_IA_MODE=live sans provider IA branché — implémenter l'appel au provider choisi ici.",
   )
 }

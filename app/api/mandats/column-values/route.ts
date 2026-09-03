@@ -1,6 +1,10 @@
 import type { NextRequest } from "next/server"
 import { prisma } from "@/lib/db/prisma"
-import { buildMandatWhere, type MandatListFilters, type MandatFilterColumn } from "@/lib/mandats/queries"
+import {
+  buildMandatWhere,
+  type MandatListFilters,
+  type MandatFilterColumn,
+} from "@/lib/mandats/queries"
 
 const COLUMNS: MandatFilterColumn[] = ["type", "statut", "categorie", "source"]
 const MAX_VALUES = 100
@@ -30,7 +34,11 @@ export async function GET(request: NextRequest) {
   const qFilter = q ? { contains: q, mode: "insensitive" as const } : undefined
 
   if (column === "source") {
-    const rows = await prisma.mandat.findMany({ where, distinct: ["source"], select: { source: true } })
+    const rows = await prisma.mandat.findMany({
+      where,
+      distinct: ["source"],
+      select: { source: true },
+    })
     const values = rows
       .map((r) => r.source)
       .filter((v) => v.toLowerCase().includes(q.toLowerCase()))
@@ -61,7 +69,10 @@ export async function GET(request: NextRequest) {
       take: MAX_VALUES + 1,
     })
     const values = rows.map((r) => r.categorie).filter((v): v is string => v !== null)
-    return Response.json({ values: values.slice(0, MAX_VALUES), hasMore: values.length > MAX_VALUES })
+    return Response.json({
+      values: values.slice(0, MAX_VALUES),
+      hasMore: values.length > MAX_VALUES,
+    })
   }
 
   // column === "statut"

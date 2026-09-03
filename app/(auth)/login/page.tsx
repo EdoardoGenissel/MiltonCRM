@@ -34,9 +34,7 @@ export default async function LoginPage({
             <MiltonLogo />
           </div>
 
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">
-            Connexion
-          </h1>
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">Connexion</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Accédez à votre cockpit Milton Immobilier.
           </p>

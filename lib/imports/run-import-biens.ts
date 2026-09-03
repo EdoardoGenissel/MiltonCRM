@@ -101,14 +101,20 @@ function buildMandatData(mapped: ApimoBienRow, bienId: string, proprietaireId: s
 export async function importApimoBiens(
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
 
   const [existingBiens, existingMandats, ownerCandidates] = await Promise.all([
-    prisma.bien.findMany({ where: { source: Source.APIMO }, select: { id: true, sourceRef: true } }),
-    prisma.mandat.findMany({ where: { source: Source.APIMO }, select: { id: true, sourceRef: true } }),
+    prisma.bien.findMany({
+      where: { source: Source.APIMO },
+      select: { id: true, sourceRef: true },
+    }),
+    prisma.mandat.findMany({
+      where: { source: Source.APIMO },
+      select: { id: true, sourceRef: true },
+    }),
     loadOwnerCandidates(),
   ])
   const bienIdByRef = new Map(existingBiens.map((b) => [b.sourceRef, b.id]))

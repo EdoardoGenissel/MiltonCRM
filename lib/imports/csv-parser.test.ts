@@ -8,7 +8,7 @@ function csv(text: string) {
 describe("parseTabularBuffer — CSV", () => {
   it("parse un CSV point-virgule non quoté (forme Septéo)", async () => {
     const { headerRow, rows } = await csv(
-      "Nom;Prénom;Ville;;Email\r\nDUPONT;Jean;Cayenne;;jean@ex.fr\r\nSCI MAHURY;;;;\r\n"
+      "Nom;Prénom;Ville;;Email\r\nDUPONT;Jean;Cayenne;;jean@ex.fr\r\nSCI MAHURY;;;;\r\n",
     )
     expect(headerRow).toEqual(["Nom", "Prénom", "Ville", "", "Email"])
     expect(rows).toEqual([
@@ -21,12 +21,12 @@ describe("parseTabularBuffer — CSV", () => {
     const { headerRow, rows } = await csv(
       '"Tiers";"Objet / Libellé";"Référence"\r\n' +
         '"MILTON Johan";"Honoraires; et divers";"340"\r\n' +
-        '"";"Bonjour\r\nC\'est l\'agence ""Milton""";"1291"\r\n'
+        '"";"Bonjour\r\nC\'est l\'agence ""Milton""";"1291"\r\n',
     )
     expect(headerRow).toEqual(["Tiers", "Objet / Libellé", "Référence"])
     expect(rows).toEqual([
       ["MILTON Johan", "Honoraires; et divers", "340"],
-      ["", 'Bonjour\nC\'est l\'agence "Milton"', "1291"],
+      ["", "Bonjour\nC'est l'agence \"Milton\"", "1291"],
     ])
   })
 

@@ -5,7 +5,7 @@
 export async function mapWithConcurrency<T>(
   items: T[],
   limit: number,
-  fn: (item: T, index: number) => Promise<void>
+  fn: (item: T, index: number) => Promise<void>,
 ): Promise<void> {
   let cursor = 0
   async function worker() {

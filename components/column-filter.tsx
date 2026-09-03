@@ -111,7 +111,7 @@ export function ColumnFilter({
       <Popover.Trigger
         className={cn(
           "rounded p-0.5 text-muted-foreground hover:text-foreground",
-          isActive && "text-primary"
+          isActive && "text-primary",
         )}
         aria-label={`Filtrer ${label}`}
       >

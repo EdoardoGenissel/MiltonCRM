@@ -59,88 +59,102 @@ export default async function MandatsPage({
 
         <TableCard>
           <TableHeadRow>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Type"
-                    sortKey="type"
-                    filterColumn="type"
-                    filterEndpoint={ENDPOINT}
-                    selected={filters.type}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Statut"
-                    sortKey="statut"
-                    filterColumn="statut"
-                    filterEndpoint={ENDPOINT}
-                    selected={filters.statut}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Catégorie"
-                    sortKey="categorie"
-                    filterColumn="categorie"
-                    filterEndpoint={ENDPOINT}
-                    selected={filters.categorie}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3">Propriétaire</th>
-                <th className="px-5 py-3">Locataire</th>
-                <th className="px-5 py-3">Bien</th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Type"
+                sortKey="type"
+                filterColumn="type"
+                filterEndpoint={ENDPOINT}
+                selected={filters.type}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Statut"
+                sortKey="statut"
+                filterColumn="statut"
+                filterEndpoint={ENDPOINT}
+                selected={filters.statut}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Catégorie"
+                sortKey="categorie"
+                filterColumn="categorie"
+                filterEndpoint={ENDPOINT}
+                selected={filters.categorie}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3">Propriétaire</th>
+            <th className="px-5 py-3">Locataire</th>
+            <th className="px-5 py-3">Bien</th>
           </TableHeadRow>
-            <tbody>
-              {mandats.map((mandat) => (
-                <MandatDrawerRow
-                  key={mandat.id}
-                  mandatId={mandat.id}
-                  className="border-b border-border last:border-0 hover:bg-muted/50"
-                >
-                  <td className="px-5 py-3 text-center">
-                    <MandatTypeBadge type={mandat.type} />
-                  </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">{mandat.statut ?? "-"}</td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">{mandat.categorie ?? "-"}</td>
-                  <td className="px-5 py-3">
-                    {mandat.proprietaire ? (
-                      <ContactTrigger id={mandat.proprietaire.id} className="text-foreground hover:underline">
-                        {mandat.proprietaire.prenom} {mandat.proprietaire.nom}
-                      </ContactTrigger>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3">
-                    {mandat.locataire ? (
-                      <ContactTrigger id={mandat.locataire.id} className="text-foreground hover:underline">
-                        {mandat.locataire.prenom} {mandat.locataire.nom}
-                      </ContactTrigger>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-muted-foreground">
-                    {mandat.bien?.titre || mandat.bien?.adresse || mandat.bien?.commune || "-"}
-                  </td>
-                </MandatDrawerRow>
-              ))}
-              {mandats.length === 0 && (
-                <TableEmpty icon={FileText} label="Aucun mandat ne correspond à ces filtres." colSpan={6} />
-              )}
-            </tbody>
+          <tbody>
+            {mandats.map((mandat) => (
+              <MandatDrawerRow
+                key={mandat.id}
+                mandatId={mandat.id}
+                className="border-b border-border last:border-0 hover:bg-muted/50"
+              >
+                <td className="px-5 py-3 text-center">
+                  <MandatTypeBadge type={mandat.type} />
+                </td>
+                <td className="px-5 py-3 text-center text-muted-foreground">
+                  {mandat.statut ?? "-"}
+                </td>
+                <td className="px-5 py-3 text-center text-muted-foreground">
+                  {mandat.categorie ?? "-"}
+                </td>
+                <td className="px-5 py-3">
+                  {mandat.proprietaire ? (
+                    <ContactTrigger
+                      id={mandat.proprietaire.id}
+                      className="text-foreground hover:underline"
+                    >
+                      {mandat.proprietaire.prenom} {mandat.proprietaire.nom}
+                    </ContactTrigger>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </td>
+                <td className="px-5 py-3">
+                  {mandat.locataire ? (
+                    <ContactTrigger
+                      id={mandat.locataire.id}
+                      className="text-foreground hover:underline"
+                    >
+                      {mandat.locataire.prenom} {mandat.locataire.nom}
+                    </ContactTrigger>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </td>
+                <td className="px-5 py-3 text-muted-foreground">
+                  {mandat.bien?.titre || mandat.bien?.adresse || mandat.bien?.commune || "-"}
+                </td>
+              </MandatDrawerRow>
+            ))}
+            {mandats.length === 0 && (
+              <TableEmpty
+                icon={FileText}
+                label="Aucun mandat ne correspond à ces filtres."
+                colSpan={6}
+              />
+            )}
+          </tbody>
         </TableCard>
 
         <Pagination page={page} total={total} totalPages={totalPages} searchParams={params} />

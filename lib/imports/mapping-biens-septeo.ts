@@ -84,7 +84,8 @@ export function mapSepteoBienRow(headerIndex: HeaderIndex, row: unknown[]): Sept
     idMandatLot,
     numero: cell(row, at(headerIndex, "mandatnumero")),
     referenceLot:
-      cell(row, at(headerIndex, "mandatlotreference")) ?? cell(row, at(headerIndex, "lotreference")),
+      cell(row, at(headerIndex, "mandatlotreference")) ??
+      cell(row, at(headerIndex, "lotreference")),
 
     residence: cell(row, at(headerIndex, "immeublenom")),
     adresse: cell(row, at(headerIndex, "mandatlotadra")),

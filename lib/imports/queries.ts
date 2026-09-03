@@ -14,7 +14,10 @@ export function listImportRuns() {
 export async function listLatestImportLogByKind() {
   const [contacts, biensMandats] = await Promise.all([
     prisma.importLog.findFirst({ where: { kind: "contacts" }, orderBy: { startedAt: "desc" } }),
-    prisma.importLog.findFirst({ where: { kind: "biens_mandats" }, orderBy: { startedAt: "desc" } }),
+    prisma.importLog.findFirst({
+      where: { kind: "biens_mandats" },
+      orderBy: { startedAt: "desc" },
+    }),
   ])
   return { contacts, biensMandats }
 }

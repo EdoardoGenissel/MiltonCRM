@@ -25,12 +25,14 @@ export function boolLabelOuiNon(value: boolean | null | undefined): string | und
 
 export function moneyLabel(
   value: string | number | null | undefined,
-  devise?: string | null
+  devise?: string | null,
 ): string | undefined {
   if (value === null || value === undefined || value === "") return undefined
   const amount = Number(value)
   try {
-    return new Intl.NumberFormat("fr-FR", { style: "currency", currency: devise ?? "EUR" }).format(amount)
+    return new Intl.NumberFormat("fr-FR", { style: "currency", currency: devise ?? "EUR" }).format(
+      amount,
+    )
   } catch {
     return `${amount} ${devise ?? ""}`.trim()
   }

@@ -22,7 +22,7 @@ export function EstimationStatutBadge({
       className={cn(
         "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium",
         STYLES[statut] ?? "bg-secondary text-secondary-foreground",
-        className
+        className,
       )}
     >
       {ESTIMATION_STATUT_LABELS[statut] ?? statut}

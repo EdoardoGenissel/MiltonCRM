@@ -26,7 +26,10 @@ export function MandatTypeBadge({ type, className }: { type: string; className?:
   const { bg, fg } = colorFor(type)
   return (
     <span
-      className={cn("inline-flex items-center rounded-[8px] px-2 py-0.5 text-xs font-medium", className)}
+      className={cn(
+        "inline-flex items-center rounded-[8px] px-2 py-0.5 text-xs font-medium",
+        className,
+      )}
       style={{ backgroundColor: bg, color: fg }}
     >
       {type}

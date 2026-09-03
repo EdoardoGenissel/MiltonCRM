@@ -6,7 +6,7 @@ export function SourceBadge({ source, className }: { source: string; className?:
     <span
       className={cn(
         "inline-flex items-center rounded-[8px] border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground",
-        className
+        className,
       )}
     >
       {SOURCE_LABELS[source] ?? source}

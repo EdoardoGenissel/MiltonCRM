@@ -36,7 +36,11 @@ export function serializeMandat(mandat: MandatWithRelations) {
     honorairesGestion: mandat.honorairesGestion?.toString() ?? null,
     pourcentageHonorairesGestion: mandat.pourcentageHonorairesGestion?.toString() ?? null,
     proprietaire: mandat.proprietaire
-      ? { id: mandat.proprietaire.id, prenom: mandat.proprietaire.prenom, nom: mandat.proprietaire.nom }
+      ? {
+          id: mandat.proprietaire.id,
+          prenom: mandat.proprietaire.prenom,
+          nom: mandat.proprietaire.nom,
+        }
       : null,
     locataire: mandat.locataire
       ? { id: mandat.locataire.id, prenom: mandat.locataire.prenom, nom: mandat.locataire.nom }

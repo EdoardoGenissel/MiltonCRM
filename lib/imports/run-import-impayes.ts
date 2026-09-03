@@ -38,17 +38,23 @@ function parseBool(value: string | undefined): boolean | undefined {
 export async function importSepteoImpayes(
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
 
   const [biens, mandats, existing] = await Promise.all([
-    prisma.bien.findMany({ where: { referenceLot: { not: null } }, select: { id: true, referenceLot: true } }),
+    prisma.bien.findMany({
+      where: { referenceLot: { not: null } },
+      select: { id: true, referenceLot: true },
+    }),
     prisma.mandat.findMany({
       select: { id: true, bienId: true, locataireId: true, proprietaireId: true, type: true },
     }),
-    prisma.impaye.findMany({ where: { source: Source.SEPTEO }, select: { id: true, sourceRef: true } }),
+    prisma.impaye.findMany({
+      where: { source: Source.SEPTEO },
+      select: { id: true, sourceRef: true },
+    }),
   ])
 
   const bienIdByRef = new Map<string, string>()

@@ -31,7 +31,7 @@ export function SortableHeader({
       href={`?${params.toString()}`}
       className={cn(
         "inline-flex items-center gap-1 hover:text-foreground",
-        isActive && "text-foreground"
+        isActive && "text-foreground",
       )}
     >
       {label}

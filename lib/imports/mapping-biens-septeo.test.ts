@@ -121,7 +121,7 @@ describe("mapSepteoBienRow", () => {
     const headerIndex = buildHeaderIndex(HEADER)
     const mapped = mapSepteoBienRow(
       headerIndex,
-      row({ Proprietaire_Portable: undefined, Proprietaire_TelephoneA: "0594000000" })
+      row({ Proprietaire_Portable: undefined, Proprietaire_TelephoneA: "0594000000" }),
     )
     expect(mapped?.proprietaireTelephone).toBe("0594000000")
   })
@@ -130,7 +130,10 @@ describe("mapSepteoBienRow", () => {
     const headerIndex = buildHeaderIndex(HEADER)
     const mapped = mapSepteoBienRow(
       headerIndex,
-      row({ MandatLot_ConsommationEnergetiqueFinale: undefined, MandatLot_ConsommationEnergetique: "180" })
+      row({
+        MandatLot_ConsommationEnergetiqueFinale: undefined,
+        MandatLot_ConsommationEnergetique: "180",
+      }),
     )
     expect(mapped?.energieConsommation).toBe("180")
   })

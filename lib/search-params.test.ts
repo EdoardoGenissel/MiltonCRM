@@ -18,9 +18,9 @@ describe("buildQuery", () => {
   })
 
   it("set écrase, undefined / chaîne vide retirent la clé", () => {
-    expect(buildQuery({ sort: "nom", dir: "asc" }, { set: { sort: "prix", dir: "desc" } }).toString()).toBe(
-      "sort=prix&dir=desc"
-    )
+    expect(
+      buildQuery({ sort: "nom", dir: "asc" }, { set: { sort: "prix", dir: "desc" } }).toString(),
+    ).toBe("sort=prix&dir=desc")
     expect(buildQuery({ search: "x" }, { set: { search: undefined } }).has("search")).toBe(false)
     expect(buildQuery({ search: "x" }, { set: { search: "" } }).has("search")).toBe(false)
   })
@@ -32,8 +32,8 @@ describe("buildQuery", () => {
   })
 
   it("drop retire une clé sans la réécrire", () => {
-    expect(buildQuery({ sort: "nom", dir: "asc", search: "x" }, { drop: ["sort", "dir"] }).toString()).toBe(
-      "search=x"
-    )
+    expect(
+      buildQuery({ sort: "nom", dir: "asc", search: "x" }, { drop: ["sort", "dir"] }).toString(),
+    ).toBe("search=x")
   })
 })

@@ -40,7 +40,9 @@ export function Field({
         {Icon && <Icon className="h-3 w-3" />}
         {label}
       </dt>
-      <dd className={`mt-0.5 text-foreground ${wrap ? "whitespace-pre-wrap" : ""}`}>{value || "-"}</dd>
+      <dd className={`mt-0.5 text-foreground ${wrap ? "whitespace-pre-wrap" : ""}`}>
+        {value || "-"}
+      </dd>
     </div>
   )
 }

@@ -49,7 +49,7 @@ export function SidePanel({
       aria-hidden={!open}
       className={cn(
         "fixed inset-0 z-50 transition-opacity",
-        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
       )}
     >
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
@@ -58,7 +58,7 @@ export function SidePanel({
         aria-modal="true"
         className={cn(
           "absolute top-0 right-0 flex h-full w-full max-w-xl flex-col border-l border-border bg-background shadow-2xl transition-transform duration-300 ease-out",
-          open ? "translate-x-0" : "translate-x-full"
+          open ? "translate-x-0" : "translate-x-full",
         )}
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-6 py-4">
@@ -74,7 +74,9 @@ export function SidePanel({
               </button>
             )}
             <div className="min-w-0">
-              <h2 className="truncate text-base font-semibold tracking-tight text-foreground">{title}</h2>
+              <h2 className="truncate text-base font-semibold tracking-tight text-foreground">
+                {title}
+              </h2>
               {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
             </div>
           </div>
@@ -90,6 +92,6 @@ export function SidePanel({
         <div className="flex-1 overflow-auto p-6">{children}</div>
       </aside>
     </div>,
-    document.body
+    document.body,
   )
 }

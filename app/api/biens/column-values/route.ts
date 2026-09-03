@@ -31,7 +31,11 @@ export async function GET(request: NextRequest) {
   const qFilter = q ? { contains: q, mode: "insensitive" as const } : undefined
 
   if (column === "source") {
-    const rows = await prisma.bien.findMany({ where, distinct: ["source"], select: { source: true } })
+    const rows = await prisma.bien.findMany({
+      where,
+      distinct: ["source"],
+      select: { source: true },
+    })
     const values = rows
       .map((r) => r.source)
       .filter((v) => v.toLowerCase().includes(q.toLowerCase()))
@@ -50,7 +54,10 @@ export async function GET(request: NextRequest) {
       take: MAX_VALUES + 1,
     })
     const values = rows.map((r) => r.categorie).filter((v): v is string => v !== null)
-    return Response.json({ values: values.slice(0, MAX_VALUES), hasMore: values.length > MAX_VALUES })
+    return Response.json({
+      values: values.slice(0, MAX_VALUES),
+      hasMore: values.length > MAX_VALUES,
+    })
   }
 
   if (column === "commune") {
@@ -62,7 +69,10 @@ export async function GET(request: NextRequest) {
       take: MAX_VALUES + 1,
     })
     const values = rows.map((r) => r.commune).filter((v): v is string => v !== null)
-    return Response.json({ values: values.slice(0, MAX_VALUES), hasMore: values.length > MAX_VALUES })
+    return Response.json({
+      values: values.slice(0, MAX_VALUES),
+      hasMore: values.length > MAX_VALUES,
+    })
   }
 
   if (column === "typeBien") {
@@ -74,7 +84,10 @@ export async function GET(request: NextRequest) {
       take: MAX_VALUES + 1,
     })
     const values = rows.map((r) => r.typeBien).filter((v): v is string => v !== null)
-    return Response.json({ values: values.slice(0, MAX_VALUES), hasMore: values.length > MAX_VALUES })
+    return Response.json({
+      values: values.slice(0, MAX_VALUES),
+      hasMore: values.length > MAX_VALUES,
+    })
   }
 
   // column === "statut"

@@ -30,7 +30,7 @@ export function Pagination({
       active
         ? "border-primary bg-primary text-primary-foreground"
         : "border-border text-foreground hover:bg-muted",
-      disabled && "pointer-events-none opacity-40"
+      disabled && "pointer-events-none opacity-40",
     )
 
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
@@ -44,7 +44,11 @@ export function Pagination({
       </span>
 
       <div className="flex items-center gap-1.5">
-        <Link href={hrefForPage(page - 1)} aria-disabled={page <= 1} className={linkClass(page <= 1)}>
+        <Link
+          href={hrefForPage(page - 1)}
+          aria-disabled={page <= 1}
+          className={linkClass(page <= 1)}
+        >
           Précédent
         </Link>
 
@@ -57,7 +61,7 @@ export function Pagination({
             <Link key={item} href={hrefForPage(item)} className={linkClass(false, item === page)}>
               {item}
             </Link>
-          )
+          ),
         )}
 
         <Link

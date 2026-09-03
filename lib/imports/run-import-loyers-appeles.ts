@@ -39,7 +39,7 @@ type Aggregate = {
 export async function importSepteoLoyersAppeles(
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)

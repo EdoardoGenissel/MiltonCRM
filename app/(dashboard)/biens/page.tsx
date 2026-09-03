@@ -65,123 +65,141 @@ export default async function BiensPage({
 
         <TableCard>
           <TableHeadRow>
-                <th className="px-5 py-3">
-                  <FilterableHeader
-                    label="Adresse"
-                    sortKey="adresse"
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Commune"
-                    sortKey="commune"
-                    filterColumn="commune"
-                    filterEndpoint={ENDPOINT}
-                    selected={filters.commune}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Type"
-                    sortKey="typeBien"
-                    filterColumn="typeBien"
-                    filterEndpoint={ENDPOINT}
-                    selected={filters.typeBien}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Catégorie"
-                    filterColumn="categorie"
-                    filterEndpoint={ENDPOINT}
-                    selected={filters.categorie}
-                    searchParams={params}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Surface"
-                    sortKey="surface"
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Prix"
-                    sortKey="prix"
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Statut"
-                    sortKey="statut"
-                    filterColumn="statut"
-                    filterEndpoint={ENDPOINT}
-                    selected={filters.statut}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3">Propriétaire</th>
+            <th className="px-5 py-3">
+              <FilterableHeader
+                label="Adresse"
+                sortKey="adresse"
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Commune"
+                sortKey="commune"
+                filterColumn="commune"
+                filterEndpoint={ENDPOINT}
+                selected={filters.commune}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Type"
+                sortKey="typeBien"
+                filterColumn="typeBien"
+                filterEndpoint={ENDPOINT}
+                selected={filters.typeBien}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Catégorie"
+                filterColumn="categorie"
+                filterEndpoint={ENDPOINT}
+                selected={filters.categorie}
+                searchParams={params}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Surface"
+                sortKey="surface"
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Prix"
+                sortKey="prix"
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Statut"
+                sortKey="statut"
+                filterColumn="statut"
+                filterEndpoint={ENDPOINT}
+                selected={filters.statut}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3">Propriétaire</th>
           </TableHeadRow>
-            <tbody>
-              {biens.map((bien) => {
-                const proprietaire = bien.mandats[0]?.proprietaire
-                const categorie = bien.mandats[0]?.categorie
-                return (
-                  <tr key={bien.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                    <td className="px-5 py-3 font-medium text-foreground">
-                      <BienTrigger id={bien.id} className="hover:underline">
-                        {bien.titre || bien.adresse || "-"}
-                      </BienTrigger>
-                    </td>
-                    <td className="px-5 py-3 text-center text-muted-foreground">{bien.commune ?? "-"}</td>
-                    <td className="px-5 py-3 text-center text-muted-foreground">{bien.typeBien ?? "-"}</td>
-                    <td className="px-5 py-3 text-center text-muted-foreground">{categorie ?? "-"}</td>
-                    <td className="px-5 py-3 text-center text-muted-foreground">
-                      {bien.surface ? `${bien.surface} m²` : "-"}
-                    </td>
-                    <td className="px-5 py-3 text-center text-muted-foreground">
-                      {bien.prix ? `${bien.prix} €` : "-"}
-                    </td>
-                    <td className="px-5 py-3 text-center text-muted-foreground">{bien.statut ?? "-"}</td>
-                    <td className="px-5 py-3">
-                      {proprietaire ? (
-                        <ContactTrigger id={proprietaire.id} className="text-foreground hover:underline">
-                          {proprietaire.prenom} {proprietaire.nom}
-                        </ContactTrigger>
-                      ) : (
-                        <span className="text-muted-foreground">{bien.proprietaireLabel ?? "-"}</span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-              {biens.length === 0 && (
-                <TableEmpty icon={Building2} label="Aucun bien ne correspond à ces filtres." colSpan={8} />
-              )}
-            </tbody>
+          <tbody>
+            {biens.map((bien) => {
+              const proprietaire = bien.mandats[0]?.proprietaire
+              const categorie = bien.mandats[0]?.categorie
+              return (
+                <tr
+                  key={bien.id}
+                  className="border-b border-border last:border-0 hover:bg-muted/50"
+                >
+                  <td className="px-5 py-3 font-medium text-foreground">
+                    <BienTrigger id={bien.id} className="hover:underline">
+                      {bien.titre || bien.adresse || "-"}
+                    </BienTrigger>
+                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">
+                    {bien.commune ?? "-"}
+                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">
+                    {bien.typeBien ?? "-"}
+                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">
+                    {categorie ?? "-"}
+                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">
+                    {bien.surface ? `${bien.surface} m²` : "-"}
+                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">
+                    {bien.prix ? `${bien.prix} €` : "-"}
+                  </td>
+                  <td className="px-5 py-3 text-center text-muted-foreground">
+                    {bien.statut ?? "-"}
+                  </td>
+                  <td className="px-5 py-3">
+                    {proprietaire ? (
+                      <ContactTrigger
+                        id={proprietaire.id}
+                        className="text-foreground hover:underline"
+                      >
+                        {proprietaire.prenom} {proprietaire.nom}
+                      </ContactTrigger>
+                    ) : (
+                      <span className="text-muted-foreground">{bien.proprietaireLabel ?? "-"}</span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+            {biens.length === 0 && (
+              <TableEmpty
+                icon={Building2}
+                label="Aucun bien ne correspond à ces filtres."
+                colSpan={8}
+              />
+            )}
+          </tbody>
         </TableCard>
 
         <Pagination page={page} total={total} totalPages={totalPages} searchParams={params} />

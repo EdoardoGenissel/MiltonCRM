@@ -32,7 +32,7 @@ export function normalizeAddress(value: string): string {
 // matching, un faux positif fusionnerait les données de deux biens différents.
 export function resolveBienMatch(
   candidates: BienMatchCandidate[],
-  incoming: IncomingBienAddress
+  incoming: IncomingBienAddress,
 ): string | null {
   if (!incoming.adresse) return null
   const incomingAddress = normalizeAddress(incoming.adresse)
@@ -57,10 +57,10 @@ export function resolveBienMatch(
 // `E` (le type "lu" en base, ex. Decimal pour un champ numérique Prisma) et `I`
 // (le type "écrit", ex. number — Prisma accepte les deux en entrée) diffèrent
 // volontairement : on ne compare que la présence de valeur, jamais le type.
-export function fillBlanks<E extends Record<string, unknown>, I extends Partial<Record<keyof E, unknown>>>(
-  existing: E,
-  incoming: I
-): Partial<I> {
+export function fillBlanks<
+  E extends Record<string, unknown>,
+  I extends Partial<Record<keyof E, unknown>>,
+>(existing: E, incoming: I): Partial<I> {
   const update: Partial<I> = {}
   for (const key of Object.keys(incoming) as (keyof I)[]) {
     const value = incoming[key]

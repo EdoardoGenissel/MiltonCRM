@@ -4,7 +4,7 @@ import { parseApimoDateTime, parseFrDateTime } from "./parse-datetime"
 describe("parseApimoDateTime", () => {
   it("parses a date with time", () => {
     expect(parseApimoDateTime("2023-08-03 22:46:34")?.toISOString()).toBe(
-      "2023-08-03T22:46:34.000Z"
+      "2023-08-03T22:46:34.000Z",
     )
   })
 

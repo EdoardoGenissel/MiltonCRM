@@ -49,7 +49,7 @@ export function ContactAvatar({
       className={cn(
         "flex shrink-0 items-center justify-center rounded-full font-semibold",
         SIZE_CLASSES[size],
-        className
+        className,
       )}
       style={{ backgroundColor: color.bg, color: color.fg }}
     >

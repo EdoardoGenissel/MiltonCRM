@@ -17,9 +17,9 @@ export type CityScanEstimationResult = {
 }
 
 export async function generateEstimationReport(
-  _input: CityScanEstimationInput
+  _input: CityScanEstimationInput,
 ): Promise<CityScanEstimationResult> {
   throw new Error(
-    "Accès API CityScan pas encore branché — brancher ici une fois l'accès obtenu (cf. scope.md)."
+    "Accès API CityScan pas encore branché — brancher ici une fois l'accès obtenu (cf. scope.md).",
   )
 }

@@ -31,7 +31,11 @@ describe("parseApimoProprietaire", () => {
   })
 
   it("traite une raison sociale nue comme un nom seul", () => {
-    expect(parseApimoProprietaire("COETA")).toEqual({ civilite: undefined, prenom: "", nom: "COETA" })
+    expect(parseApimoProprietaire("COETA")).toEqual({
+      civilite: undefined,
+      prenom: "",
+      nom: "COETA",
+    })
   })
 
   it("renvoie null pour une valeur vide", () => {

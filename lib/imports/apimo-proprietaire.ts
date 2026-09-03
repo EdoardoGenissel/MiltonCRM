@@ -8,9 +8,9 @@
 // (cf. décision produit : le texte brut reste affiché sur la fiche bien via
 // `Bien.proprietaireLabel`, que la résolution réussisse ou non).
 const CIVILITES: Record<string, string> = {
-  "Mme": "Madame",
+  Mme: "Madame",
   "M.": "Monsieur",
-  "Mlle": "Mademoiselle",
+  Mlle: "Mademoiselle",
 }
 
 export type ParsedApimoProprietaire = {

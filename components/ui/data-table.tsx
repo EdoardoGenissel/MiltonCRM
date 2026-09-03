@@ -13,7 +13,7 @@ export function TableCard({
     <div
       className={cn(
         "overflow-hidden rounded-md border border-border bg-card shadow-[var(--shadow-card)]",
-        className
+        className,
       )}
     >
       <table className="w-full text-sm">{children}</table>

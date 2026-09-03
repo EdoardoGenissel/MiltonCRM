@@ -2,11 +2,7 @@ import { prisma } from "@/lib/db/prisma"
 import type { Source } from "@/lib/generated/prisma/enums"
 
 export type ImportKindGroup =
-  | "contacts"
-  | "biens_mandats"
-  | "impayes"
-  | "incidents"
-  | "loyers_appeles"
+  "contacts" | "biens_mandats" | "impayes" | "incidents" | "loyers_appeles"
 
 // Écrit le SyncRun (partagé avec Cockpit, cf. schema.prisma) et, si l'import a
 // réussi, l'ImportLog associé (créé/mis à jour, propre au CRM) — centralisé ici

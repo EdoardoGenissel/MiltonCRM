@@ -65,81 +65,94 @@ export default async function ContactsPage({
 
         <TableCard>
           <TableHeadRow>
-                <th className="px-5 py-3">
-                  <FilterableHeader
-                    label="Nom"
-                    sortKey="nom"
-                    filterColumn="nom"
-                    selected={filters.nom}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                  />
-                </th>
-                <th className="px-5 py-3">
-                  <FilterableHeader
-                    label="Téléphone"
-                    sortKey="telephone"
-                    filterColumn="telephone"
-                    selected={filters.telephone}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Email"
-                    sortKey="email"
-                    filterColumn="email"
-                    selected={filters.email}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
-                <th className="px-5 py-3 text-center">Type</th>
-                <th className="px-5 py-3 text-center">
-                  <FilterableHeader
-                    label="Commune"
-                    sortKey="commune"
-                    filterColumn="commune"
-                    selected={filters.commune}
-                    searchParams={params}
-                    currentSort={params.sort}
-                    currentDir={params.dir}
-                    align="center"
-                  />
-                </th>
+            <th className="px-5 py-3">
+              <FilterableHeader
+                label="Nom"
+                sortKey="nom"
+                filterColumn="nom"
+                selected={filters.nom}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+              />
+            </th>
+            <th className="px-5 py-3">
+              <FilterableHeader
+                label="Téléphone"
+                sortKey="telephone"
+                filterColumn="telephone"
+                selected={filters.telephone}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+              />
+            </th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Email"
+                sortKey="email"
+                filterColumn="email"
+                selected={filters.email}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
+            <th className="px-5 py-3 text-center">Type</th>
+            <th className="px-5 py-3 text-center">
+              <FilterableHeader
+                label="Commune"
+                sortKey="commune"
+                filterColumn="commune"
+                selected={filters.commune}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+                align="center"
+              />
+            </th>
           </TableHeadRow>
-            <tbody>
-              {contacts.map((contact) => (
-                <tr key={contact.id} className="border-b border-border last:border-0 hover:bg-muted/50">
-                  <td className="px-5 py-3">
-                    <ContactTrigger id={contact.id} className="group flex items-center gap-3">
-                      <ContactAvatar prenom={contact.prenom} nom={contact.nom} size="sm" />
-                      <span className="font-medium text-foreground group-hover:underline">
-                        {contact.prenom} {contact.nom}
-                      </span>
-                    </ContactTrigger>
-                  </td>
-                  <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">{contact.telephone ?? "-"}</td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">{contact.email ?? "-"}</td>
-                  <td className="px-5 py-3">
-                    <div className="flex flex-wrap justify-center gap-1.5">
-                      {contact.personas.map((persona) => (
-                        <PersonaBadge key={persona} persona={persona} />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">{contact.commune ?? "-"}</td>
-                </tr>
-              ))}
-              {contacts.length === 0 && (
-                <TableEmpty icon={Users} label="Aucun contact ne correspond à ces filtres." colSpan={5} />
-              )}
-            </tbody>
+          <tbody>
+            {contacts.map((contact) => (
+              <tr
+                key={contact.id}
+                className="border-b border-border last:border-0 hover:bg-muted/50"
+              >
+                <td className="px-5 py-3">
+                  <ContactTrigger id={contact.id} className="group flex items-center gap-3">
+                    <ContactAvatar prenom={contact.prenom} nom={contact.nom} size="sm" />
+                    <span className="font-medium text-foreground group-hover:underline">
+                      {contact.prenom} {contact.nom}
+                    </span>
+                  </ContactTrigger>
+                </td>
+                <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">
+                  {contact.telephone ?? "-"}
+                </td>
+                <td className="px-5 py-3 text-center text-muted-foreground">
+                  {contact.email ?? "-"}
+                </td>
+                <td className="px-5 py-3">
+                  <div className="flex flex-wrap justify-center gap-1.5">
+                    {contact.personas.map((persona) => (
+                      <PersonaBadge key={persona} persona={persona} />
+                    ))}
+                  </div>
+                </td>
+                <td className="px-5 py-3 text-center text-muted-foreground">
+                  {contact.commune ?? "-"}
+                </td>
+              </tr>
+            ))}
+            {contacts.length === 0 && (
+              <TableEmpty
+                icon={Users}
+                label="Aucun contact ne correspond à ces filtres."
+                colSpan={5}
+              />
+            )}
+          </tbody>
         </TableCard>
 
         <Pagination page={page} total={total} totalPages={totalPages} searchParams={params} />

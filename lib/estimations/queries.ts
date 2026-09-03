@@ -19,7 +19,7 @@ export type EstimationListFilters = {
 // et l'adresse du bien (l'estimation elle-même n'a pas de libellé).
 export function buildEstimationWhere(
   filters: EstimationListFilters,
-  excludeColumn?: EstimationFilterColumn
+  excludeColumn?: EstimationFilterColumn,
 ) {
   const { search, statut } = filters
 

@@ -24,7 +24,7 @@ type BuildQueryOptions = {
 // sortable-header / pagination / filter-tabs / filter-bar / column-filter.
 export function buildQuery(
   searchParams: SearchParamsRecord,
-  { drop = [], set = {}, append = {} }: BuildQueryOptions = {}
+  { drop = [], set = {}, append = {} }: BuildQueryOptions = {},
 ): URLSearchParams {
   const managed = new Set([...drop, ...Object.keys(set), ...Object.keys(append)])
   const params = new URLSearchParams()

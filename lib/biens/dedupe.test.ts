@@ -47,7 +47,11 @@ describe("resolveBienMatch", () => {
 
 describe("fillBlanks", () => {
   it("ne retient que les champs vides côté existant", () => {
-    const existing = { adresse: "17 rue des Pluviers", taxeFonciere: null, equipements: [] as string[] }
+    const existing = {
+      adresse: "17 rue des Pluviers",
+      taxeFonciere: null,
+      equipements: [] as string[],
+    }
     const incoming = { adresse: "AUTRE", taxeFonciere: 1575, equipements: ["Piscine"] }
 
     expect(fillBlanks(existing, incoming)).toEqual({ taxeFonciere: 1575, equipements: ["Piscine"] })

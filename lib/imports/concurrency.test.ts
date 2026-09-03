@@ -14,12 +14,16 @@ describe("mapWithConcurrency", () => {
     let inFlight = 0
     let maxInFlight = 0
 
-    await mapWithConcurrency(Array.from({ length: 20 }, (_, i) => i), 3, async () => {
-      inFlight++
-      maxInFlight = Math.max(maxInFlight, inFlight)
-      await new Promise((resolve) => setTimeout(resolve, 5))
-      inFlight--
-    })
+    await mapWithConcurrency(
+      Array.from({ length: 20 }, (_, i) => i),
+      3,
+      async () => {
+        inFlight++
+        maxInFlight = Math.max(maxInFlight, inFlight)
+        await new Promise((resolve) => setTimeout(resolve, 5))
+        inFlight--
+      },
+    )
 
     expect(maxInFlight).toBeLessThanOrEqual(3)
   })

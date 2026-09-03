@@ -34,7 +34,7 @@ export function FilterTabs({
               "relative px-3 py-2 text-sm font-medium transition-colors after:absolute after:inset-x-0 after:-bottom-px after:h-0.5 after:rounded-full after:opacity-0 after:transition-opacity",
               isActive
                 ? "text-foreground after:bg-foreground after:opacity-100"
-                : "text-foreground/60 hover:text-foreground"
+                : "text-foreground/60 hover:text-foreground",
             )}
           >
             {tab.label}

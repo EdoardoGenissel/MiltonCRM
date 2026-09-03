@@ -10,8 +10,7 @@ import type { ImportKind } from "@/lib/imports/mapping"
 export const maxDuration = 300
 
 type StreamEvent =
-  | { type: "progress"; processed: number; total: number }
-  | { type: "done"; result: ImportResult }
+  { type: "progress"; processed: number; total: number } | { type: "done"; result: ImportResult }
 
 // Ne pousse un événement de progression que toutes les 250ms (ou au dernier
 // événement) : à raison d'un onProgress par ligne sur ~3700 lignes, streamer
@@ -43,17 +42,23 @@ export async function POST(request: NextRequest) {
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const send = (event: StreamEvent) => controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"))
+      const send = (event: StreamEvent) =>
+        controller.enqueue(encoder.encode(JSON.stringify(event) + "\n"))
       let lastSent = 0
 
-      const result = await runImport(kind as ImportKind, buffer, fileName, (progress: ImportProgress) => {
-        const now = Date.now()
-        const isLast = progress.processed >= progress.total
-        if (isLast || now - lastSent >= PROGRESS_THROTTLE_MS) {
-          lastSent = now
-          send({ type: "progress", processed: progress.processed, total: progress.total })
-        }
-      })
+      const result = await runImport(
+        kind as ImportKind,
+        buffer,
+        fileName,
+        (progress: ImportProgress) => {
+          const now = Date.now()
+          const isLast = progress.processed >= progress.total
+          if (isLast || now - lastSent >= PROGRESS_THROTTLE_MS) {
+            lastSent = now
+            send({ type: "progress", processed: progress.processed, total: progress.total })
+          }
+        },
+      )
 
       send({ type: "done", result })
       controller.close()

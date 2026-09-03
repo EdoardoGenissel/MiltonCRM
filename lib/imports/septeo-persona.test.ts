@@ -12,7 +12,7 @@ describe("parseSepteoPersonas", () => {
 
   it("cumul propriétaire + locataire sur la même fiche", () => {
     expect(parseSepteoPersonas("Locataire Gérance,Propriétaire Gérance")).toEqual(
-      expect.arrayContaining(["locataire", "proprietaire_bailleur"])
+      expect.arrayContaining(["locataire", "proprietaire_bailleur"]),
     )
   })
 

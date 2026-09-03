@@ -6,8 +6,7 @@ import { Button } from "@/components/ui/button"
 import type { ImportResult } from "@/lib/imports/run-import"
 
 type StreamEvent =
-  | { type: "progress"; processed: number; total: number }
-  | { type: "done"; result: ImportResult }
+  { type: "progress"; processed: number; total: number } | { type: "done"; result: ImportResult }
 
 type ImportState =
   | { phase: "idle" }

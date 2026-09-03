@@ -2,7 +2,11 @@ import { NextResponse, type NextRequest } from "next/server"
 import { prisma } from "@/lib/db/prisma"
 import type { Prisma } from "@/lib/generated/prisma/client"
 import { matchContactByCall } from "@/lib/integrations/ringover/match"
-import { isIncomingCall, parseRingoverEvent, safeDate } from "@/lib/integrations/ringover/parse-event"
+import {
+  isIncomingCall,
+  parseRingoverEvent,
+  safeDate,
+} from "@/lib/integrations/ringover/parse-event"
 import { verifyRingoverSignature } from "@/lib/integrations/ringover/webhook-signature"
 
 // Webhook Ringover — un seul point d'entrée pour tous les types d'événements
@@ -25,14 +29,16 @@ export async function POST(request: NextRequest) {
     // Mécanisme réel Ringover (V1) : JWT HS512 signé avec la clé webhook du
     // dashboard Ringover (Paramètres > Webhooks) — cf. lib/integrations/ringover/
     // webhook-signature.ts.
-    authorized = verifyRingoverSignature(signatureHeader, process.env.RINGOVER_WEBHOOK_SECRET) !== null
+    authorized =
+      verifyRingoverSignature(signatureHeader, process.env.RINGOVER_WEBHOOK_SECRET) !== null
   }
   if (!authorized) {
     // Repli : secret en query string — utile pour nos propres tests manuels tant
     // qu'on n'a pas récupéré la vraie clé webhook dans le dashboard Ringover.
     const querySecret = request.nextUrl.searchParams.get("secret")
     authorized =
-      Boolean(process.env.RINGOVER_WEBHOOK_SECRET) && querySecret === process.env.RINGOVER_WEBHOOK_SECRET
+      Boolean(process.env.RINGOVER_WEBHOOK_SECRET) &&
+      querySecret === process.env.RINGOVER_WEBHOOK_SECRET
   }
   if (!authorized) {
     return NextResponse.json({ error: "Non autorisé." }, { status: 401 })

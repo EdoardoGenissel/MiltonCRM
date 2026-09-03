@@ -13,7 +13,9 @@
 // optionnelles (`undefined extends T[K]`) — les champs NOT NULL du schéma
 // (ex. `Mandat.type`, `Bien.photos`) ne sont jamais `undefined` dans ces objets
 // mappés, leur type reste inchangé et Prisma continue de les accepter tels quels.
-type NullifyUndefined<T> = { [K in keyof T]: undefined extends T[K] ? Exclude<T[K], undefined> | null : T[K] }
+type NullifyUndefined<T> = {
+  [K in keyof T]: undefined extends T[K] ? Exclude<T[K], undefined> | null : T[K]
+}
 
 export function nullifyUndefined<T extends object>(obj: T): NullifyUndefined<T> {
   const result = { ...obj } as Record<string, unknown>

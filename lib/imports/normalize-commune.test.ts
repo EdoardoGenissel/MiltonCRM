@@ -14,7 +14,7 @@ describe("normalizeCommune", () => {
 
   it("conserve une liste de communes séparées par des virgules (zone Apimo)", () => {
     expect(normalizeCommune("Remire-Montjoly, Matoury, Cayenne")).toBe(
-      "REMIRE-MONTJOLY, MATOURY, CAYENNE"
+      "REMIRE-MONTJOLY, MATOURY, CAYENNE",
     )
   })
 })

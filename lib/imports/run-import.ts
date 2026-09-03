@@ -128,7 +128,7 @@ function buildProspectDetailExtras(mapped: ApimoProspectRow) {
 async function importApimoProspects(
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
@@ -155,7 +155,9 @@ async function importApimoProspects(
       telephone: mapped.telephone,
     })
 
-    const emailMatchId = matchId ? null : (mapped.email && emailIndex.get(mapped.email.trim().toLowerCase())) || null
+    const emailMatchId = matchId
+      ? null
+      : (mapped.email && emailIndex.get(mapped.email.trim().toLowerCase())) || null
 
     if (matchId) {
       toUpdate.push({ matchId, mapped })
@@ -210,7 +212,9 @@ async function importApimoProspects(
         categorie: mapped.categorie,
         typeBien: mapped.typeBien,
         loyerMax:
-          mapped.categorie?.toLowerCase() === "location" ? parseLoyerMax(mapped.loyerMax) : undefined,
+          mapped.categorie?.toLowerCase() === "location"
+            ? parseLoyerMax(mapped.loyerMax)
+            : undefined,
         ...buildProspectDetailExtras(mapped),
       })),
     })
@@ -290,7 +294,7 @@ async function importApimoProspects(
 async function importSepteoContacts(
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
@@ -318,7 +322,9 @@ async function importSepteoContacts(
       telephone: mapped.telephone,
     })
 
-    const emailMatchId = matchId ? null : (mapped.email && emailIndex.get(mapped.email.trim().toLowerCase())) || null
+    const emailMatchId = matchId
+      ? null
+      : (mapped.email && emailIndex.get(mapped.email.trim().toLowerCase())) || null
 
     if (matchId) {
       const existingPersonas = candidates.find((c) => c.id === matchId)?.personas ?? []
@@ -364,19 +370,23 @@ async function importSepteoContacts(
     onProgress?.({ processed, total })
   }
 
-  await mapWithConcurrency(toUpdate, UPDATE_CONCURRENCY, async ({ matchId, mapped, mergedPersonas }) => {
-    await prisma.contact.update({
-      where: { id: matchId },
-      data: {
-        email: mapped.email,
-        telephone: mapped.telephone,
-        commune: mapped.commune,
-        personas: { set: mergedPersonas },
-      },
-    })
-    processed += 1
-    onProgress?.({ processed, total })
-  })
+  await mapWithConcurrency(
+    toUpdate,
+    UPDATE_CONCURRENCY,
+    async ({ matchId, mapped, mergedPersonas }) => {
+      await prisma.contact.update({
+        where: { id: matchId },
+        data: {
+          email: mapped.email,
+          telephone: mapped.telephone,
+          commune: mapped.commune,
+          personas: { set: mergedPersonas },
+        },
+      })
+      processed += 1
+      onProgress?.({ processed, total })
+    },
+  )
 
   await tagCrossSourcePersonas(crossSourceTags)
   processed += crossSourceTags.size
@@ -399,7 +409,7 @@ export async function runImport(
   kind: ImportKind,
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   try {
     switch (kind) {
@@ -420,7 +430,10 @@ export async function runImport(
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erreur inconnue"
-    const errorKind: Record<ImportKind, "contacts" | "biens_mandats" | "impayes" | "incidents" | "loyers_appeles"> = {
+    const errorKind: Record<
+      ImportKind,
+      "contacts" | "biens_mandats" | "impayes" | "incidents" | "loyers_appeles"
+    > = {
       apimo_prospects: "contacts",
       septeo_contacts: "contacts",
       apimo_biens: "biens_mandats",

@@ -23,15 +23,20 @@ const WRITE_CONCURRENCY = 10
 export async function importSepteoIncidents(
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
 
   const [contacts, mandats, existing] = await Promise.all([
     prisma.contact.findMany({ select: { id: true, nom: true, prenom: true } }),
-    prisma.mandat.findMany({ select: { id: true, bienId: true, locataireId: true, proprietaireId: true } }),
-    prisma.incident.findMany({ where: { source: Source.SEPTEO }, select: { id: true, sourceRef: true } }),
+    prisma.mandat.findMany({
+      select: { id: true, bienId: true, locataireId: true, proprietaireId: true },
+    }),
+    prisma.incident.findMany({
+      where: { source: Source.SEPTEO },
+      select: { id: true, sourceRef: true },
+    }),
   ])
 
   const labelIndex = buildContactLabelIndex(contacts)

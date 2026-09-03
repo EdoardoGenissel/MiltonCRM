@@ -11,14 +11,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
     data: { user },
   } = await supabase.auth.getUser()
   const profile = user
-    ? await prisma.profile.findUnique({ where: { id: user.id }, select: { fullName: true, email: true } })
+    ? await prisma.profile.findUnique({
+        where: { id: user.id },
+        select: { fullName: true, email: true },
+      })
     : null
 
   return (
     <SidebarProvider>
       <EntityDrawerProvider>
         <div className="flex min-h-screen">
-          <Sidebar user={profile ?? (user ? { fullName: user.email ?? "", email: user.email ?? "" } : null)} />
+          <Sidebar
+            user={
+              profile ?? (user ? { fullName: user.email ?? "", email: user.email ?? "" } : null)
+            }
+          />
           <div className="flex min-w-0 flex-1 flex-col">
             <IncomingCallBanner />
             {children}

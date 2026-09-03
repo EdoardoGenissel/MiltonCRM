@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write \"{app,components,lib}/**/*.{ts,tsx}\"",
     "test": "vitest run"
   },
   "dependencies": {
@@ -38,6 +39,7 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5",

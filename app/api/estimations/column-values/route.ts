@@ -30,10 +30,14 @@ export async function GET(request: NextRequest) {
 
   // column === "statut" : liste fermée (4 valeurs connues) — on ne propose que
   // celles réellement présentes compte tenu des autres filtres actifs.
-  const rows = await prisma.estimation.findMany({ where, distinct: ["statut"], select: { statut: true } })
+  const rows = await prisma.estimation.findMany({
+    where,
+    distinct: ["statut"],
+    select: { statut: true },
+  })
   const present = new Set(rows.map((r) => r.statut))
   const values = ESTIMATION_STATUTS.map((s) => s.value).filter(
-    (v) => present.has(v) && v.toLowerCase().includes(q)
+    (v) => present.has(v) && v.toLowerCase().includes(q),
   )
   return Response.json({ values, hasMore: false })
 }

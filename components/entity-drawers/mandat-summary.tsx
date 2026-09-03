@@ -29,7 +29,13 @@ export type MandatDetail = {
   pourcentageHonorairesGestion: string | null
   proprietaire: { id: string; prenom: string; nom: string } | null
   locataire: { id: string; prenom: string; nom: string } | null
-  bien: { id: string; titre: string | null; adresse: string | null; commune: string | null; devise: string | null } | null
+  bien: {
+    id: string
+    titre: string | null
+    adresse: string | null
+    commune: string | null
+    devise: string | null
+  } | null
 }
 
 // Contenu détaillé d'un mandat — partagé par la fiche bien (liste de ses
@@ -95,22 +101,47 @@ export function MandatSummary({
         <Field label="Numéro de mandat" value={mandat.numero} />
         <Field label="Démarrage mandat" value={dateLabel(mandat.dateSignature)} icon={Calendar} />
         <Field label="Fin mandat" value={dateLabel(mandat.finMandat)} icon={Calendar} />
-        <Field label="Origine" value={[mandat.origine, mandat.originePrecise].filter(Boolean).join(" - ") || undefined} />
+        <Field
+          label="Origine"
+          value={[mandat.origine, mandat.originePrecise].filter(Boolean).join(" - ") || undefined}
+        />
       </dl>
 
-      {(mandat.montantProprietaire || mandat.montantCompromis || mandat.honorairesProprietaire || mandat.honorairesAcheteur || mandat.venduLe) && (
+      {(mandat.montantProprietaire ||
+        mandat.montantCompromis ||
+        mandat.honorairesProprietaire ||
+        mandat.honorairesAcheteur ||
+        mandat.venduLe) && (
         <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3">
-          <Field label="Montant propriétaire" value={moneyLabel(mandat.montantProprietaire, effectiveDevise)} icon={Wallet} />
-          <Field label="Montant compromis" value={moneyLabel(mandat.montantCompromis, effectiveDevise)} icon={Wallet} />
-          <Field label="Honoraires propriétaire" value={moneyLabel(mandat.honorairesProprietaire, effectiveDevise)} />
-          <Field label="Honoraires acheteur" value={moneyLabel(mandat.honorairesAcheteur, effectiveDevise)} />
+          <Field
+            label="Montant propriétaire"
+            value={moneyLabel(mandat.montantProprietaire, effectiveDevise)}
+            icon={Wallet}
+          />
+          <Field
+            label="Montant compromis"
+            value={moneyLabel(mandat.montantCompromis, effectiveDevise)}
+            icon={Wallet}
+          />
+          <Field
+            label="Honoraires propriétaire"
+            value={moneyLabel(mandat.honorairesProprietaire, effectiveDevise)}
+          />
+          <Field
+            label="Honoraires acheteur"
+            value={moneyLabel(mandat.honorairesAcheteur, effectiveDevise)}
+          />
           <Field label="Vendu le" value={dateLabel(mandat.venduLe)} />
         </dl>
       )}
 
       {(mandat.montantLoyer || mandat.locataire) && (
         <dl className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3">
-          <Field label="Loyer mensuel" value={moneyLabel(mandat.montantLoyer, "EUR")} icon={Wallet} />
+          <Field
+            label="Loyer mensuel"
+            value={moneyLabel(mandat.montantLoyer, "EUR")}
+            icon={Wallet}
+          />
           <Field label="Charges (provisions)" value={moneyLabel(mandat.montantCharges, "EUR")} />
           <Field label="Dépôt de garantie" value={moneyLabel(mandat.montantDepotGarantie, "EUR")} />
           <Field label="Frais d'agence" value={moneyLabel(mandat.fraisAgence, "EUR")} />

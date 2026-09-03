@@ -1,6 +1,10 @@
 import type { NextRequest } from "next/server"
 import { prisma } from "@/lib/db/prisma"
-import { buildContactWhere, type ContactListFilters, type FilterColumn } from "@/lib/contacts/queries"
+import {
+  buildContactWhere,
+  type ContactListFilters,
+  type FilterColumn,
+} from "@/lib/contacts/queries"
 import { PERSONAS } from "@/lib/contacts/personas"
 
 const COLUMNS: FilterColumn[] = ["nom", "telephone", "email", "commune", "source", "persona"]
@@ -43,8 +47,8 @@ export async function GET(request: NextRequest) {
     // présents parmi les contacts de Cayenne).
     const counts = await Promise.all(
       PERSONAS.map((p) =>
-        prisma.contact.count({ where: { ...where, personas: { has: p.value } } })
-      )
+        prisma.contact.count({ where: { ...where, personas: { has: p.value } } }),
+      ),
     )
     const values = PERSONAS.filter((_, i) => counts[i] > 0)
       .map((p) => p.value)
@@ -53,7 +57,11 @@ export async function GET(request: NextRequest) {
   }
 
   if (column === "source") {
-    const rows = await prisma.contact.findMany({ where, distinct: ["source"], select: { source: true } })
+    const rows = await prisma.contact.findMany({
+      where,
+      distinct: ["source"],
+      select: { source: true },
+    })
     const values = rows
       .map((r) => r.source)
       .filter((v) => v.toLowerCase().includes(q.toLowerCase()))
@@ -87,7 +95,10 @@ export async function GET(request: NextRequest) {
       take: MAX_VALUES + 1,
     })
     const values = rows.map((r) => r.telephone).filter((v): v is string => v !== null)
-    return Response.json({ values: values.slice(0, MAX_VALUES), hasMore: values.length > MAX_VALUES })
+    return Response.json({
+      values: values.slice(0, MAX_VALUES),
+      hasMore: values.length > MAX_VALUES,
+    })
   }
 
   if (column === "email") {
@@ -102,7 +113,10 @@ export async function GET(request: NextRequest) {
       take: MAX_VALUES + 1,
     })
     const values = rows.map((r) => r.email).filter((v): v is string => v !== null)
-    return Response.json({ values: values.slice(0, MAX_VALUES), hasMore: values.length > MAX_VALUES })
+    return Response.json({
+      values: values.slice(0, MAX_VALUES),
+      hasMore: values.length > MAX_VALUES,
+    })
   }
 
   // column === "commune"

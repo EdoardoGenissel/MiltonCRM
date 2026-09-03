@@ -111,13 +111,16 @@ export function BienDrawerContent({
                   {estimationContact.prenom} {estimationContact.nom}
                   <ExternalLink className="h-3 w-3" />
                 </span>
-                <p className="mt-1 text-xs text-muted-foreground">Via une demande d&apos;estimation, pas encore de mandat.</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Via une demande d&apos;estimation, pas encore de mandat.
+                </p>
               </ClickableRow>
             ) : bien.proprietaireLabel ? (
               <div className="text-sm text-foreground">
                 {bien.proprietaireLabel}
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Fiche non rattachée automatiquement (plusieurs co-propriétaires ou identité ambiguë).
+                  Fiche non rattachée automatiquement (plusieurs co-propriétaires ou identité
+                  ambiguë).
                 </p>
               </div>
             ) : (
@@ -140,7 +143,9 @@ export function BienDrawerContent({
               <Field label="Meublé" value={boolLabelOuiNon(bien.meuble)} />
               <Field
                 label="DPE - consommation"
-                value={bien.energieConsommation ? `${bien.energieConsommation} kWh/m²/an` : undefined}
+                value={
+                  bien.energieConsommation ? `${bien.energieConsommation} kWh/m²/an` : undefined
+                }
                 icon={Zap}
               />
               <Field
@@ -154,7 +159,11 @@ export function BienDrawerContent({
           {(bien.titre || bien.description) && (
             <Card title="Description" icon={FileText}>
               {bien.titre && <p className="mb-2 font-medium text-foreground">{bien.titre}</p>}
-              {bien.description && <p className="whitespace-pre-wrap text-sm text-muted-foreground">{bien.description}</p>}
+              {bien.description && (
+                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  {bien.description}
+                </p>
+              )}
             </Card>
           )}
 
@@ -205,7 +214,11 @@ export function BienDrawerContent({
               {bien.mandats.map((mandat) => (
                 <li key={mandat.id}>
                   <ClickableRow onClick={() => onOpenMandat(mandat.id)} className="p-4">
-                    <MandatSummary mandat={mandat} devise={bien.devise} onOpenContact={onOpenContact} />
+                    <MandatSummary
+                      mandat={mandat}
+                      devise={bien.devise}
+                      onOpenContact={onOpenContact}
+                    />
                   </ClickableRow>
                 </li>
               ))}
@@ -252,7 +265,9 @@ export function BienDrawerContent({
                 return (
                   <li key={estimation.id}>
                     {estimation.contact ? (
-                      <ClickableRow onClick={() => onOpenContact(estimation.contact!.id)}>{inner}</ClickableRow>
+                      <ClickableRow onClick={() => onOpenContact(estimation.contact!.id)}>
+                        {inner}
+                      </ClickableRow>
                     ) : (
                       <div className="rounded-[8px] border border-border p-3 text-sm">{inner}</div>
                     )}
@@ -292,7 +307,9 @@ export function BienDrawerContent({
           {bien.prix && (
             <div>
               <div className="text-xs text-muted-foreground">Prix</div>
-              <div className="text-lg font-semibold text-foreground">{moneyLabel(bien.prix, bien.devise)}</div>
+              <div className="text-lg font-semibold text-foreground">
+                {moneyLabel(bien.prix, bien.devise)}
+              </div>
             </div>
           )}
           {bien.surface && (

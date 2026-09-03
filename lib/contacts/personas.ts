@@ -9,5 +9,5 @@ export const PERSONAS = [
 ] as const
 
 export const PERSONA_LABELS: Record<string, string> = Object.fromEntries(
-  PERSONAS.map((p) => [p.value, p.label])
+  PERSONAS.map((p) => [p.value, p.label]),
 )

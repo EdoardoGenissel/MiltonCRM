@@ -28,12 +28,7 @@ export function FilterableHeader({
   align?: "start" | "center"
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-1.5",
-        align === "center" && "justify-center"
-      )}
-    >
+    <div className={cn("flex items-center gap-1.5", align === "center" && "justify-center")}>
       {sortKey ? (
         <SortableHeader
           label={label}

@@ -13,8 +13,7 @@ export function ForgotPasswordForm() {
   if (state.error === null && state !== initialState) {
     return (
       <p className="mt-6 text-sm text-foreground">
-        Si un compte existe avec cet email, un lien de réinitialisation vient de lui
-        être envoyé.
+        Si un compte existe avec cet email, un lien de réinitialisation vient de lui être envoyé.
       </p>
     )
   }

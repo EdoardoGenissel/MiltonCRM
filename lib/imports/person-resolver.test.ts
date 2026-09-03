@@ -13,7 +13,11 @@ describe("PersonResolver", () => {
     }
     const resolver = new PersonResolver([existing])
 
-    const id = resolver.resolve({ nom: "Dupont", email: "marie@example.com", persona: "proprietaire_bailleur" })
+    const id = resolver.resolve({
+      nom: "Dupont",
+      email: "marie@example.com",
+      persona: "proprietaire_bailleur",
+    })
 
     expect(id).toBe("c1")
     expect(resolver.toCreate).toHaveLength(0)
@@ -22,7 +26,12 @@ describe("PersonResolver", () => {
 
   it("planifie une création pour une personne inconnue", () => {
     const resolver = new PersonResolver([])
-    const id = resolver.resolve({ nom: "Martin", prenom: "Julie", email: "julie@example.com", persona: "locataire" })
+    const id = resolver.resolve({
+      nom: "Martin",
+      prenom: "Julie",
+      email: "julie@example.com",
+      persona: "locataire",
+    })
 
     expect(resolver.toCreate).toEqual([
       {
@@ -40,8 +49,16 @@ describe("PersonResolver", () => {
 
   it("fusionne deux personas pour la même personne planifiée dans le même import (ex. propriétaire de 2 lots)", () => {
     const resolver = new PersonResolver([])
-    const id1 = resolver.resolve({ nom: "Kong", email: "kong@example.com", persona: "proprietaire_bailleur" })
-    const id2 = resolver.resolve({ nom: "Kong", email: "kong@example.com", persona: "proprietaire_bailleur" })
+    const id1 = resolver.resolve({
+      nom: "Kong",
+      email: "kong@example.com",
+      persona: "proprietaire_bailleur",
+    })
+    const id2 = resolver.resolve({
+      nom: "Kong",
+      email: "kong@example.com",
+      persona: "proprietaire_bailleur",
+    })
 
     expect(id2).toBe(id1)
     expect(resolver.toCreate).toHaveLength(1)
@@ -50,7 +67,11 @@ describe("PersonResolver", () => {
 
   it("ajoute un second persona à une création planifiée (même personne, rôles différents)", () => {
     const resolver = new PersonResolver([])
-    const id1 = resolver.resolve({ nom: "Kong", email: "kong@example.com", persona: "proprietaire_bailleur" })
+    const id1 = resolver.resolve({
+      nom: "Kong",
+      email: "kong@example.com",
+      persona: "proprietaire_bailleur",
+    })
     const id2 = resolver.resolve({ nom: "Kong", email: "kong@example.com", persona: "locataire" })
 
     expect(id2).toBe(id1)

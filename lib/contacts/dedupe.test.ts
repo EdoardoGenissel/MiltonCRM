@@ -111,7 +111,9 @@ describe("resolveContactMatch", () => {
   })
 })
 
-function identityCandidate(overrides: Partial<IdentityMatchCandidate> = {}): IdentityMatchCandidate {
+function identityCandidate(
+  overrides: Partial<IdentityMatchCandidate> = {},
+): IdentityMatchCandidate {
   return {
     id: "c1",
     email: "marie.dupont@example.com",
@@ -139,17 +141,23 @@ describe("resolveContactByIdentity", () => {
   })
 
   it("priorité 3 : nom + prénom si ni email ni téléphone ne matchent", () => {
-    const matchId = resolveContactByIdentity([identityCandidate({ email: null, telephone: null })], {
-      nom: "Dupont",
-      prenom: "Marie",
-    })
+    const matchId = resolveContactByIdentity(
+      [identityCandidate({ email: null, telephone: null })],
+      {
+        nom: "Dupont",
+        prenom: "Marie",
+      },
+    )
     expect(matchId).toBe("c1")
   })
 
   it("ne matche pas sur le nom seul (sans prénom) — trop peu fiable", () => {
-    const matchId = resolveContactByIdentity([identityCandidate({ email: null, telephone: null })], {
-      nom: "Dupont",
-    })
+    const matchId = resolveContactByIdentity(
+      [identityCandidate({ email: null, telephone: null })],
+      {
+        nom: "Dupont",
+      },
+    )
     expect(matchId).toBeNull()
   })
 

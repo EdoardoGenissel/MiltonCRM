@@ -42,7 +42,7 @@ export function buildContactLabelIndex(candidates: LabelCandidate[]): ContactLab
 
 export function resolveContactByLabel(
   index: ContactLabelIndex,
-  rawLabel: string | undefined
+  rawLabel: string | undefined,
 ): string | null {
   if (!rawLabel) return null
   const key = normalizeName(rawLabel)

@@ -78,11 +78,13 @@ export function NotificationBell() {
                     key={item.id}
                     className={cn(
                       "flex flex-col gap-0.5 rounded-[8px] px-2 py-2 text-sm",
-                      !viewingSinceAt || item.createdAt > viewingSinceAt ? "bg-muted/60" : ""
+                      !viewingSinceAt || item.createdAt > viewingSinceAt ? "bg-muted/60" : "",
                     )}
                   >
                     <span className="text-foreground">{item.message}</span>
-                    <span className="text-xs text-muted-foreground">{relativeTime(item.createdAt)}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {relativeTime(item.createdAt)}
+                    </span>
                   </li>
                 ))}
               </ul>

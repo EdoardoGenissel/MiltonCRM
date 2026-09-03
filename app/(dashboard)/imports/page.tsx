@@ -5,7 +5,13 @@ import { ImportForm } from "./import-form"
 
 export const dynamic = "force-dynamic"
 
-function LastImportStat({ label, log }: { label: string; log: { created: number; updated: number; total: number; startedAt: Date } | null }) {
+function LastImportStat({
+  label,
+  log,
+}: {
+  label: string
+  log: { created: number; updated: number; total: number; startedAt: Date } | null
+}) {
   return (
     <div className="flex flex-col gap-2 rounded-[8px] border border-border p-4">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
@@ -39,7 +45,10 @@ export default async function ImportsPage() {
       <div className="flex-1 overflow-auto p-8">
         <div className="mb-6 grid grid-cols-2 gap-4">
           <LastImportStat label="Dernier import - Contacts" log={latestByKind.contacts} />
-          <LastImportStat label="Dernier import - Biens & mandats" log={latestByKind.biensMandats} />
+          <LastImportStat
+            label="Dernier import - Biens & mandats"
+            log={latestByKind.biensMandats}
+          />
         </div>
 
         <div className="grid grid-cols-3 gap-6">
@@ -49,39 +58,33 @@ export default async function ImportsPage() {
           </div>
 
           <TableCard className="col-span-2">
-              <TableHeadRow>
-                  <th className="px-5 py-3">Date</th>
-                  <th className="px-5 py-3">Source</th>
-                  <th className="px-5 py-3">Fichier</th>
-                  <th className="px-5 py-3">Statut</th>
-                  <th className="px-5 py-3">Traités</th>
-                  <th className="px-5 py-3">Doublons</th>
-              </TableHeadRow>
-              <tbody>
-                {runs.map((run) => (
-                  <tr key={run.id} className="border-b border-border last:border-0">
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {new Date(run.startedAt).toLocaleString("fr-FR")}
-                    </td>
-                    <td className="px-5 py-3 text-foreground">{run.source}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{run.fileName}</td>
-                    <td className="px-5 py-3">
-                      <span
-                        className={
-                          run.status === "success" ? "text-success" : "text-danger"
-                        }
-                      >
-                        {run.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-muted-foreground">{run.recordsUpserted}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{run.duplicatesFound}</td>
-                  </tr>
-                ))}
-                {runs.length === 0 && (
-                  <TableEmpty label="Aucun import effectué." colSpan={6} />
-                )}
-              </tbody>
+            <TableHeadRow>
+              <th className="px-5 py-3">Date</th>
+              <th className="px-5 py-3">Source</th>
+              <th className="px-5 py-3">Fichier</th>
+              <th className="px-5 py-3">Statut</th>
+              <th className="px-5 py-3">Traités</th>
+              <th className="px-5 py-3">Doublons</th>
+            </TableHeadRow>
+            <tbody>
+              {runs.map((run) => (
+                <tr key={run.id} className="border-b border-border last:border-0">
+                  <td className="px-5 py-3 text-muted-foreground">
+                    {new Date(run.startedAt).toLocaleString("fr-FR")}
+                  </td>
+                  <td className="px-5 py-3 text-foreground">{run.source}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{run.fileName}</td>
+                  <td className="px-5 py-3">
+                    <span className={run.status === "success" ? "text-success" : "text-danger"}>
+                      {run.status}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3 text-muted-foreground">{run.recordsUpserted}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{run.duplicatesFound}</td>
+                </tr>
+              ))}
+              {runs.length === 0 && <TableEmpty label="Aucun import effectué." colSpan={6} />}
+            </tbody>
           </TableCard>
         </div>
       </div>

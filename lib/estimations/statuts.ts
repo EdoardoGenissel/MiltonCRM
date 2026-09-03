@@ -10,5 +10,5 @@ export const ESTIMATION_STATUTS = [
 ] as const
 
 export const ESTIMATION_STATUT_LABELS: Record<string, string> = Object.fromEntries(
-  ESTIMATION_STATUTS.map((s) => [s.value, s.label])
+  ESTIMATION_STATUTS.map((s) => [s.value, s.label]),
 )

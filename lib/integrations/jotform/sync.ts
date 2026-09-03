@@ -46,7 +46,10 @@ function bienJotformFields(bien: MappedBien) {
 // champs vides (priorité Apimo/Septéo, cf. lib/biens/dedupe.ts `fillBlanks`).
 // Sans rapprochement, se rabat sur un Bien propre à JotForm (upsert par
 // submissionId, comme avant).
-async function resolveBien(bienCandidates: BienMatchCandidate[], mapped: MappedEstimationSubmission) {
+async function resolveBien(
+  bienCandidates: BienMatchCandidate[],
+  mapped: MappedEstimationSubmission,
+) {
   if (!mapped.bien?.adresse) return null
 
   const matchedId = resolveBienMatch(bienCandidates, {
@@ -212,7 +215,12 @@ export async function syncJotformEstimations(): Promise<JotformSyncResult> {
     const message = err instanceof Error ? err.message : "Erreur JotForm sync inconnue"
     await prisma.syncRun.update({
       where: { id: syncRun.id },
-      data: { status: "error", finishedAt: new Date(), error: message, recordsUpserted: created + updated },
+      data: {
+        status: "error",
+        finishedAt: new Date(),
+        error: message,
+        recordsUpserted: created + updated,
+      },
     })
     return { status: "error", total: 0, created, updated, error: message }
   }

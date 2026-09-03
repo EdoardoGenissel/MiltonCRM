@@ -19,7 +19,7 @@ function base64UrlDecode(segment: string): Buffer {
 
 export function verifyRingoverSignature(
   token: string,
-  secret: string
+  secret: string,
 ): RingoverWebhookClaims | null {
   const parts = token.split(".")
   if (parts.length !== 3) return null

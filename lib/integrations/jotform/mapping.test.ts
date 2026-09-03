@@ -90,7 +90,12 @@ describe("mapEstimationSubmission", () => {
   it("parse les champs complémentaires du bien (surface, copropriété, équipements, points +/-)", () => {
     const mapped = mapEstimationSubmission(
       submission({
-        "83": { name: "surfaceDu", text: "Surface du terrain", type: "control_textbox", answer: "138m²" },
+        "83": {
+          name: "surfaceDu",
+          text: "Surface du terrain",
+          type: "control_textbox",
+          answer: "138m²",
+        },
         "68": {
           name: "copropriete",
           text: "Copropriété",
@@ -131,7 +136,7 @@ describe("mapEstimationSubmission", () => {
           type: "control_widget",
           answer: "Cuisine à moderniser",
         },
-      })
+      }),
     )
 
     expect(mapped.bien).toMatchObject({

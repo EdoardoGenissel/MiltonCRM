@@ -60,10 +60,10 @@ function asEmail(answer?: JotformAnswer): string | null {
 
 function asAddress(answer?: JotformAnswer) {
   const value = answer?.answer as
-    | { addr_line1?: string; addr_line2?: string; city?: string; postal?: string }
-    | undefined
+    { addr_line1?: string; addr_line2?: string; city?: string; postal?: string } | undefined
   if (!value) return null
-  const adresse = [value.addr_line1?.trim(), value.addr_line2?.trim()].filter(Boolean).join(" ") || null
+  const adresse =
+    [value.addr_line1?.trim(), value.addr_line2?.trim()].filter(Boolean).join(" ") || null
   return {
     adresse,
     commune: value.city?.trim() || null,
@@ -80,7 +80,9 @@ function asChecklist(answer?: JotformAnswer): string | null {
 
 function asStringList(answer?: JotformAnswer): string[] {
   const value = answer?.answer
-  return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string" && v.trim() !== "") : []
+  return Array.isArray(value)
+    ? value.filter((v): v is string => typeof v === "string" && v.trim() !== "")
+    : []
 }
 
 function asFreeText(answer?: JotformAnswer): string | null {

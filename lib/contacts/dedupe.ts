@@ -31,12 +31,7 @@ export function normalizePhone(phone: string): string {
 // espaces multiples réduits. Utilisé par `sameName` et par le resolver de
 // contact par libellé (imports gestion locative).
 export function normalizeName(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ")
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase().replace(/\s+/g, " ")
 }
 
 export function sameName(a: string, b: string): boolean {
@@ -49,11 +44,11 @@ export function sameName(a: string, b: string): boolean {
 // pas de sourceRef ou 1er import) : nom + prénom + téléphone identiques.
 export function resolveContactMatch(
   candidates: ContactMatchCandidate[],
-  incoming: IncomingContact
+  incoming: IncomingContact,
 ): string | null {
   if (incoming.sourceRef) {
     const bySourceRef = candidates.find(
-      (c) => c.source === incoming.source && c.sourceRef === incoming.sourceRef
+      (c) => c.source === incoming.source && c.sourceRef === incoming.sourceRef,
     )
     if (bySourceRef) return bySourceRef.id
   }
@@ -96,7 +91,7 @@ export type IncomingIdentity = {
 // nom seul en dernier recours seulement s'il y a aussi un prénom.
 export function resolveContactByIdentity(
   candidates: IdentityMatchCandidate[],
-  incoming: IncomingIdentity
+  incoming: IncomingIdentity,
 ): string | null {
   if (incoming.email) {
     const email = incoming.email.trim().toLowerCase()
@@ -112,7 +107,7 @@ export function resolveContactByIdentity(
 
   if (incoming.nom && incoming.prenom) {
     const byName = candidates.find(
-      (c) => sameName(c.nom, incoming.nom!) && sameName(c.prenom, incoming.prenom!)
+      (c) => sameName(c.nom, incoming.nom!) && sameName(c.prenom, incoming.prenom!),
     )
     if (byName) return byName.id
   }

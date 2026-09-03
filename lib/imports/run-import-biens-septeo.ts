@@ -66,7 +66,7 @@ function buildMandatData(
   mapped: SepteoBienRow,
   bienId: string,
   proprietaireId: string | null,
-  locataireId: string | null
+  locataireId: string | null,
 ) {
   return {
     // Toujours une gestion locative dans cet export (Mandat_Gere vaut "1" sur
@@ -95,14 +95,20 @@ function buildMandatData(
 export async function importSepteoBiens(
   buffer: ArrayBuffer,
   fileName: string,
-  onProgress?: OnProgress
+  onProgress?: OnProgress,
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
 
   const [existingBiens, existingMandats, identityCandidates] = await Promise.all([
-    prisma.bien.findMany({ where: { source: Source.SEPTEO }, select: { id: true, sourceRef: true } }),
-    prisma.mandat.findMany({ where: { source: Source.SEPTEO }, select: { id: true, sourceRef: true } }),
+    prisma.bien.findMany({
+      where: { source: Source.SEPTEO },
+      select: { id: true, sourceRef: true },
+    }),
+    prisma.mandat.findMany({
+      where: { source: Source.SEPTEO },
+      select: { id: true, sourceRef: true },
+    }),
     prisma.contact.findMany({
       select: { id: true, email: true, telephone: true, nom: true, prenom: true },
     }),
@@ -205,7 +211,7 @@ export async function importSepteoBiens(
       const contact = await prisma.contact.findUnique({ where: { id }, select: { personas: true } })
       const merged = Array.from(new Set([...(contact?.personas ?? []), ...personasToAdd]))
       await prisma.contact.update({ where: { id }, data: { personas: { set: merged } } })
-    }
+    },
   )
 
   // Phase 2b — biens.

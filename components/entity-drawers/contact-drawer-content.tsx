@@ -81,14 +81,24 @@ type ContactDetail = {
     id: string
     type: string
     statut: string | null
-    bien: { id: string; titre: string | null; adresse: string | null; commune: string | null } | null
+    bien: {
+      id: string
+      titre: string | null
+      adresse: string | null
+      commune: string | null
+    } | null
   }[]
   mandatsLocataire: {
     id: string
     type: string
     montantLoyer: string | null
     finMandat: string | null
-    bien: { id: string; titre: string | null; adresse: string | null; commune: string | null } | null
+    bien: {
+      id: string
+      titre: string | null
+      adresse: string | null
+      commune: string | null
+    } | null
   }[]
   callLogs: { id: string; receivedAt: string; transcriptSummary: string | null }[]
   estimations: {
@@ -114,12 +124,12 @@ function loyerMaxLabel(loyerMax: string | null): string | null {
 function hasProfilPersonnel(detail: NonNullable<ContactDetail["prospectDetail"]>): boolean {
   return Boolean(
     detail.dateNaissance ||
-      detail.lieuNaissance ||
-      detail.languesParlees.length > 0 ||
-      detail.adressePersonnelle ||
-      detail.codePostal ||
-      detail.villePersonnelle ||
-      detail.pays
+    detail.lieuNaissance ||
+    detail.languesParlees.length > 0 ||
+    detail.adressePersonnelle ||
+    detail.codePostal ||
+    detail.villePersonnelle ||
+    detail.pays,
   )
 }
 
@@ -156,25 +166,44 @@ export function ContactDrawerContent({
             <dl className="flex flex-col gap-3 text-sm">
               <Field label="Commune" value={contact.commune} icon={MapPin} />
               <Field label="Fiche créée le" value={dateLabel(contact.createdAt)} icon={Calendar} />
-              <Field label="Dernière mise à jour" value={dateLabel(contact.updatedAt)} icon={Clock} />
+              <Field
+                label="Dernière mise à jour"
+                value={dateLabel(contact.updatedAt)}
+                icon={Clock}
+              />
             </dl>
           </Card>
 
           {contact.prospectDetail && (
             <Card title="Qualification prospect" icon={Tag}>
               <dl className="grid grid-cols-2 gap-4 text-sm">
-                <Field label="Alerte abonné" value={contact.prospectDetail.alerteAbonne ? "Oui" : "Non"} />
+                <Field
+                  label="Alerte abonné"
+                  value={contact.prospectDetail.alerteAbonne ? "Oui" : "Non"}
+                />
                 <Field label="Classification" value={contact.prospectDetail.classification} />
                 <Field label="Origine" value={contact.prospectDetail.origine} />
                 <Field label="Co-agence" value={contact.prospectDetail.coAgence} />
                 <Field label="Catégorie" value={contact.prospectDetail.categorie} />
                 <Field label="Type de bien" value={contact.prospectDetail.typeBien} />
                 <Field label="Loyer max" value={loyerMaxLabel(contact.prospectDetail.loyerMax)} />
-                <Field label="Budget min" value={moneyLabel(contact.prospectDetail.prixMin, contact.prospectDetail.devise)} />
-                <Field label="Budget max" value={moneyLabel(contact.prospectDetail.prixMax, contact.prospectDetail.devise)} />
+                <Field
+                  label="Budget min"
+                  value={moneyLabel(contact.prospectDetail.prixMin, contact.prospectDetail.devise)}
+                />
+                <Field
+                  label="Budget max"
+                  value={moneyLabel(contact.prospectDetail.prixMax, contact.prospectDetail.devise)}
+                />
                 <Field label="Pièces" value={contact.prospectDetail.pieces} />
-                <Field label="Surface min" value={surfaceLabel(contact.prospectDetail.surfaceMin)} />
-                <Field label="Surface max" value={surfaceLabel(contact.prospectDetail.surfaceMax)} />
+                <Field
+                  label="Surface min"
+                  value={surfaceLabel(contact.prospectDetail.surfaceMin)}
+                />
+                <Field
+                  label="Surface max"
+                  value={surfaceLabel(contact.prospectDetail.surfaceMax)}
+                />
                 <Field label="Secteur" value={contact.prospectDetail.secteur} />
                 <Field label="Quartier" value={contact.prospectDetail.quartier} />
               </dl>
@@ -184,10 +213,22 @@ export function ContactDrawerContent({
           {contact.prospectDetail && hasProfilPersonnel(contact.prospectDetail) && (
             <Card title="Profil personnel" icon={UserCircle}>
               <dl className="flex flex-col gap-3 text-sm">
-                <Field label="Date de naissance" value={dateLabel(contact.prospectDetail.dateNaissance)} icon={Cake} />
+                <Field
+                  label="Date de naissance"
+                  value={dateLabel(contact.prospectDetail.dateNaissance)}
+                  icon={Cake}
+                />
                 <Field label="Lieu de naissance" value={contact.prospectDetail.lieuNaissance} />
-                <Field label="Langues parlées" value={contact.prospectDetail.languesParlees.join(", ") || undefined} />
-                <Field label="Adresse" value={adresseLabel(contact.prospectDetail)} icon={MapPin} wrap />
+                <Field
+                  label="Langues parlées"
+                  value={contact.prospectDetail.languesParlees.join(", ") || undefined}
+                />
+                <Field
+                  label="Adresse"
+                  value={adresseLabel(contact.prospectDetail)}
+                  icon={MapPin}
+                  wrap
+                />
               </dl>
             </Card>
           )}
@@ -195,7 +236,10 @@ export function ContactDrawerContent({
           {contact.prospectDetail && (
             <Card title="Consentements marketing" icon={BadgeCheck}>
               <dl className="flex flex-col gap-3 text-sm">
-                <Field label="Mailing" value={contact.prospectDetail.alerteAbonne ? "Abonné" : "Non abonné"} />
+                <Field
+                  label="Mailing"
+                  value={contact.prospectDetail.alerteAbonne ? "Abonné" : "Non abonné"}
+                />
                 <Field label="e-mailing" value={boolLabel(contact.prospectDetail.emailingAbonne)} />
                 <Field label="Magazine" value={boolLabel(contact.prospectDetail.magazineAbonne)} />
                 <Field label="Origine précise" value={contact.prospectDetail.originePrecise} />
@@ -210,15 +254,23 @@ export function ContactDrawerContent({
                 <Field label="Référence produit" value={contact.prospectDetail.referenceProduit} />
                 <Field label="Utilisateur" value={contact.prospectDetail.utilisateur} />
                 <Field label="Créé le (Apimo)" value={dateLabel(contact.prospectDetail.creeLe)} />
-                <Field label="Dernière action" value={dateLabel(contact.prospectDetail.derniereAction)} />
+                <Field
+                  label="Dernière action"
+                  value={dateLabel(contact.prospectDetail.derniereAction)}
+                />
                 <Field label="Mise à jour le" value={dateLabel(contact.prospectDetail.majLe)} />
                 <Field label="Mis à jour par" value={contact.prospectDetail.majPar} />
                 <Field label="Attributs" value={contact.prospectDetail.attributs} />
               </dl>
-              {(contact.prospectDetail.commentaire || contact.prospectDetail.criteresComplementaires) && (
+              {(contact.prospectDetail.commentaire ||
+                contact.prospectDetail.criteresComplementaires) && (
                 <dl className="mt-4 flex flex-col gap-4 border-t border-border pt-4 text-sm">
                   <Field label="Commentaire" value={contact.prospectDetail.commentaire} wrap />
-                  <Field label="Critères complémentaires" value={contact.prospectDetail.criteresComplementaires} wrap />
+                  <Field
+                    label="Critères complémentaires"
+                    value={contact.prospectDetail.criteresComplementaires}
+                    wrap
+                  />
                 </dl>
               )}
             </Card>
@@ -241,12 +293,17 @@ export function ContactDrawerContent({
                     <>
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-foreground">{mandat.type}</span>
-                        <span className="text-xs text-muted-foreground">{mandat.statut ?? "statut inconnu"}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {mandat.statut ?? "statut inconnu"}
+                        </span>
                       </div>
                       {mandat.bien && (
                         <span className="mt-1 flex items-center gap-1.5 text-muted-foreground">
                           <MapPin className="h-3 w-3 shrink-0" />
-                          {mandat.bien.titre || mandat.bien.adresse || mandat.bien.commune || "Bien sans adresse"}
+                          {mandat.bien.titre ||
+                            mandat.bien.adresse ||
+                            mandat.bien.commune ||
+                            "Bien sans adresse"}
                         </span>
                       )}
                     </>
@@ -254,9 +311,13 @@ export function ContactDrawerContent({
                   return (
                     <li key={mandat.id}>
                       {mandat.bien ? (
-                        <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>{inner}</ClickableRow>
+                        <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>
+                          {inner}
+                        </ClickableRow>
                       ) : (
-                        <div className="rounded-[8px] border border-border p-3 text-sm">{inner}</div>
+                        <div className="rounded-[8px] border border-border p-3 text-sm">
+                          {inner}
+                        </div>
                       )}
                     </li>
                   )
@@ -273,16 +334,23 @@ export function ContactDrawerContent({
                     <>
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-foreground">
-                          {mandat.montantLoyer ? `${moneyLabel(mandat.montantLoyer, undefined)} / mois` : mandat.type}
+                          {mandat.montantLoyer
+                            ? `${moneyLabel(mandat.montantLoyer, undefined)} / mois`
+                            : mandat.type}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {mandat.finMandat ? `Jusqu'au ${dateLabel(mandat.finMandat)}` : "en cours"}
+                          {mandat.finMandat
+                            ? `Jusqu'au ${dateLabel(mandat.finMandat)}`
+                            : "en cours"}
                         </span>
                       </div>
                       {mandat.bien && (
                         <span className="mt-1 flex items-center gap-1.5 text-muted-foreground">
                           <MapPin className="h-3 w-3 shrink-0" />
-                          {mandat.bien.titre || mandat.bien.adresse || mandat.bien.commune || "Bien sans adresse"}
+                          {mandat.bien.titre ||
+                            mandat.bien.adresse ||
+                            mandat.bien.commune ||
+                            "Bien sans adresse"}
                         </span>
                       )}
                     </>
@@ -290,9 +358,13 @@ export function ContactDrawerContent({
                   return (
                     <li key={mandat.id}>
                       {mandat.bien ? (
-                        <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>{inner}</ClickableRow>
+                        <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>
+                          {inner}
+                        </ClickableRow>
                       ) : (
-                        <div className="rounded-[8px] border border-border p-3 text-sm">{inner}</div>
+                        <div className="rounded-[8px] border border-border p-3 text-sm">
+                          {inner}
+                        </div>
                       )}
                     </li>
                   )
@@ -333,10 +405,17 @@ export function ContactDrawerContent({
                     {estimation.bien && (
                       <span className="mt-1.5 flex items-center gap-1.5 text-muted-foreground">
                         <MapPin className="h-3 w-3 shrink-0" />
-                        {estimation.bien.titre || estimation.bien.adresse || estimation.bien.commune || "Bien sans adresse"}
+                        {estimation.bien.titre ||
+                          estimation.bien.adresse ||
+                          estimation.bien.commune ||
+                          "Bien sans adresse"}
                         {(estimation.bien.codePostal || estimation.bien.commune) && (
                           <span className="text-xs">
-                            ({[estimation.bien.codePostal, estimation.bien.commune].filter(Boolean).join(" ")})
+                            (
+                            {[estimation.bien.codePostal, estimation.bien.commune]
+                              .filter(Boolean)
+                              .join(" ")}
+                            )
                           </span>
                         )}
                       </span>
@@ -346,7 +425,9 @@ export function ContactDrawerContent({
                 return (
                   <li key={estimation.id}>
                     {estimation.bien ? (
-                      <ClickableRow onClick={() => onOpenBien(estimation.bien!.id)}>{inner}</ClickableRow>
+                      <ClickableRow onClick={() => onOpenBien(estimation.bien!.id)}>
+                        {inner}
+                      </ClickableRow>
                     ) : (
                       <div className="rounded-[8px] border border-border p-3 text-sm">{inner}</div>
                     )}
@@ -372,7 +453,9 @@ export function ContactDrawerContent({
                         <Clock className="h-3 w-3" />
                         {dateTimeLabel(call.receivedAt)}
                       </div>
-                      {call.transcriptSummary && <div className="mt-1.5 text-foreground">{call.transcriptSummary}</div>}
+                      {call.transcriptSummary && (
+                        <div className="mt-1.5 text-foreground">{call.transcriptSummary}</div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -408,13 +491,23 @@ export function ContactDrawerContent({
 
         <div className="flex flex-wrap gap-2">
           {contact.telephone && (
-            <Button variant="outline" size="sm" nativeButton={false} render={<a href={`tel:${contact.telephone}`} />}>
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<a href={`tel:${contact.telephone}`} />}
+            >
               <Phone className="h-3.5 w-3.5" />
               {contact.telephone}
             </Button>
           )}
           {contact.email && (
-            <Button variant="outline" size="sm" nativeButton={false} render={<a href={`mailto:${contact.email}`} />}>
+            <Button
+              variant="outline"
+              size="sm"
+              nativeButton={false}
+              render={<a href={`mailto:${contact.email}`} />}
+            >
               <Mail className="h-3.5 w-3.5" />
               {contact.email}
             </Button>
