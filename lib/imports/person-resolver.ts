@@ -25,7 +25,7 @@ export type PersonInput = IncomingIdentity & {
 // Résout une personne physique (propriétaire, locataire...) contre les contacts
 // déjà en base OU déjà planifiés plus tôt dans le même import (ex. un
 // propriétaire possédant plusieurs lots, pas encore en base au moment du 1er
-// lot traité), sinon prépare sa création — factorisé pour l'import Septéo
+// lot traité), sinon prépare sa création - factorisé pour l'import Septéo
 // biens/mandats qui doit résoudre DEUX personnes par ligne (propriétaire ET
 // locataire actuel), contrairement à l'import Apimo biens (propriétaire seul).
 // `resolve` renvoie `null` sans rien planifier si `nom` est absent (ex. lot
@@ -47,7 +47,7 @@ export class PersonResolver {
     const matchId = resolveContactByIdentity(this.candidates, input)
     if (matchId) {
       if (this.plannedIds.has(matchId)) {
-        // Contact pas encore en base (planifié plus tôt dans cet import) —
+        // Contact pas encore en base (planifié plus tôt dans cet import) -
         // on ajoute directement le persona à la création prévue.
         const planned = this.toCreate.find((p) => p.id === matchId)
         if (planned && !planned.personas.includes(input.persona)) {

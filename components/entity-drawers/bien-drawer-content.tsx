@@ -18,6 +18,7 @@ import {
 import { SourceBadge } from "@/components/source-badge"
 import { Card, Field, EmptyState, Badge } from "@/components/detail-card"
 import { MandatSummary, type MandatDetail } from "@/components/entity-drawers/mandat-summary"
+import { drawerLink } from "@/components/entity-drawers/drawer-link"
 import { DrawerTabs } from "@/components/ui/drawer-tabs"
 import { ClickableRow } from "@/components/entity-drawers/clickable-row"
 import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
@@ -89,7 +90,7 @@ export function BienDrawerContent({
   // Pas encore de mandat pour ce bien (fréquent pour un bien JotForm en amont
   // d'une signature) : on retombe sur le contact de la demande d'estimation,
   // qui est typiquement le propriétaire (formulaire JotForm section
-  // "PROPRIETAIRE") — cf. lib/integrations/jotform/sync.ts.
+  // "PROPRIETAIRE") - cf. lib/integrations/jotform/sync.ts.
   const estimationContact = bien.estimations.find((e) => e.contact)?.contact ?? null
 
   const tabs = [
@@ -101,14 +102,14 @@ export function BienDrawerContent({
           <Card title="Propriétaire" icon={User}>
             {bien.mandats[0]?.proprietaire ? (
               <ClickableRow onClick={() => onOpenContact(bien.mandats[0].proprietaire!.id)}>
-                <span className="inline-flex items-center gap-1.5 text-sm text-primary">
+                <span className={`inline-flex items-center gap-1.5 text-sm ${drawerLink}`}>
                   {bien.mandats[0].proprietaire.prenom} {bien.mandats[0].proprietaire.nom}
                   <ExternalLink className="h-3 w-3" />
                 </span>
               </ClickableRow>
             ) : estimationContact ? (
               <ClickableRow onClick={() => onOpenContact(estimationContact.id)}>
-                <span className="inline-flex items-center gap-1.5 text-sm text-primary">
+                <span className={`inline-flex items-center gap-1.5 text-sm ${drawerLink}`}>
                   {estimationContact.prenom} {estimationContact.nom}
                   <ExternalLink className="h-3 w-3" />
                 </span>
@@ -132,7 +133,8 @@ export function BienDrawerContent({
           <Card title="Caractéristiques" icon={Ruler}>
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <Field label="Type de bien" value={bien.typeBien} />
-              <Field label="Catégorie" value={bien.mandats[0]?.categorie} />
+              {/* La catégorie du mandat (Location/Vente) est déjà portée par le
+                  badge de l'en-tête du drawer - on ne la répète pas ici. */}
               <Field label="Pièces" value={bien.pieces?.toString()} />
               <Field label="Chambres" value={bien.chambres?.toString()} />
               <Field label="Surface" value={bien.surface ? `${bien.surface} m²` : undefined} />
@@ -248,7 +250,7 @@ export function BienDrawerContent({
                           target="_blank"
                           rel="noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                          className={`inline-flex items-center gap-1 ${drawerLink}`}
                         >
                           Rapport CityScan
                           <ExternalLink className="h-3 w-3" />

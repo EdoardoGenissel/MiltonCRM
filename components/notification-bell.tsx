@@ -22,7 +22,7 @@ function relativeTime(iso: string): string {
   return `il y a ${diffJ} j`
 }
 
-// Cloche de notifications "best-effort" (cf. lib/notifications/queries) — pas de
+// Cloche de notifications "best-effort" (cf. lib/notifications/queries) - pas de
 // table "vu/non vu" côté serveur : le dernier horodatage consulté est gardé en
 // localStorage, comme pour un simple indicateur de nouveauté, pas un centre de
 // notifications complet.
@@ -30,7 +30,7 @@ export function NotificationBell() {
   const { data } = usePolling<{ items: NotificationItem[] }>("/api/notifications", POLL_INTERVAL_MS)
   const items = data?.items ?? []
   const [lastSeenAt, setLastSeenAt] = useState<string | null>(null)
-  // Snapshot de `lastSeenAt` pris à l'ouverture — sert à garder les items
+  // Snapshot de `lastSeenAt` pris à l'ouverture - sert à garder les items
   // surlignés "nouveaux" pendant la consultation, alors que `lastSeenAt` (qui
   // pilote le point rouge) est déjà mis à jour dès l'ouverture.
   const [viewingSinceAt, setViewingSinceAt] = useState<string | null>(null)

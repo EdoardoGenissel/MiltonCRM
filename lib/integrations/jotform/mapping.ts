@@ -2,7 +2,7 @@ import type { JotformAnswer, JotformSubmission } from "./api-client"
 
 // Mapping construit à partir de la structure réelle du formulaire JotForm
 // "ESTIMATION IMMOBILIERE" (form id cf. JOTFORM_ESTIMATION_FORM_ID), interrogée
-// via GET /form/{id}/questions — les noms de champs (`name`) sont stables tant
+// via GET /form/{id}/questions - les noms de champs (`name`) sont stables tant
 // que le formulaire n'est pas remanié dans le builder JotForm, contrairement aux
 // qid qui peuvent changer si des questions sont ajoutées/supprimées.
 
@@ -98,7 +98,7 @@ function asNumberField(answer?: JotformAnswer): number | null {
 }
 
 // "Surface du terrain" est un champ texte libre côté JotForm (ex. "138m²",
-// "138 m2", "environ 140m²") — on extrait le premier nombre trouvé plutôt que
+// "138 m2", "environ 140m²") - on extrait le premier nombre trouvé plutôt que
 // d'exiger un format strict.
 function asSurfaceText(answer?: JotformAnswer): number | null {
   const value = answer?.answer
@@ -114,7 +114,7 @@ function asBooleanChecklist(answer?: JotformAnswer, trueValue = "Oui"): boolean 
 }
 
 // Types de champs sans réponse exploitable (titres de section, sauts de page,
-// bouton de soumission) — exclus de `answers`.
+// bouton de soumission) - exclus de `answers`.
 const SKIP_TYPES = new Set(["control_head", "control_pagebreak", "control_button"])
 
 export function extractAllAnswers(submission: JotformSubmission): Record<string, string> {

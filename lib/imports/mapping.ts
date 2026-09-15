@@ -2,7 +2,7 @@
 // (scope.md §"Cadrage de la fiche") : "Export APIMMO.xlsx" (prospects) et les
 // exports Septéo "Propriétaires"/"Locataires" (mêmes colonnes dans les deux
 // fichiers, seul "Type interlocuteur" varie). Basé sur les fichiers réels transmis
-// par Milton — cf. `data/` à la racine du dépôt pour les exemples de référence.
+// par Milton - cf. `data/` à la racine du dépôt pour les exemples de référence.
 import { parseApimoContactName } from "./apimo-name"
 import { parseSepteoPersonas } from "./septeo-persona"
 import { at, buildHeaderIndex, cell, communeCell, type HeaderIndex } from "./header-index"
@@ -26,7 +26,7 @@ export type ApimoProspectRow = {
   nom: string
   telephone?: string
   email?: string
-  commune?: string // "Ville" (zone de recherche), 1ère colonne de ce nom — pas l'adresse perso
+  commune?: string // "Ville" (zone de recherche), 1ère colonne de ce nom - pas l'adresse perso
   classification?: string // valeurs réelles : "Très actif" | "Normal" | "Actif"
   categorie?: string // "Location" | "Vente" | "Programme"
   typeBien?: string // valeur brute Apimo, potentiellement multi-valeurs ("Maison Appartement")
@@ -34,7 +34,7 @@ export type ApimoProspectRow = {
   origine?: string
   alerteAbonne: boolean // colonne "Mailing" = "Abonné"
 
-  // Champs supplémentaires (au-delà du socle acté dans scope.md) — le reste des
+  // Champs supplémentaires (au-delà du socle acté dans scope.md) - le reste des
   // colonnes de l'export Apimo, importées pour une fiche prospect complète.
   coAgence?: string
   prixMin?: string
@@ -45,7 +45,7 @@ export type ApimoProspectRow = {
   surfaceMax?: string
   secteur?: string
   quartier?: string
-  derniereAction?: string // "Action" — date de la dernière action commerciale
+  derniereAction?: string // "Action" - date de la dernière action commerciale
   commentaire?: string
   creeLe?: string
   utilisateur?: string
@@ -140,7 +140,7 @@ export function mapApimoRow(headerIndex: HeaderIndex, row: unknown[]): ApimoPros
 export function mapSepteoRow(headerIndex: HeaderIndex, row: unknown[]): SepteoContactRow | null {
   const nom = cell(row, at(headerIndex, "nom"))
   // Le prénom peut être absent : de nombreuses fiches propriétaire/locataire sont
-  // des personnes morales (SCI, sociétés — "CRM MAHURY", "G&H PATRIMOINE"...) où
+  // des personnes morales (SCI, sociétés - "CRM MAHURY", "G&H PATRIMOINE"...) où
   // seul le nom (raison sociale) est renseigné.
   if (!nom) return null
   const prenom = cell(row, at(headerIndex, "prenom")) ?? ""

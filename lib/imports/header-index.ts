@@ -1,5 +1,5 @@
 // Indexation générique des en-têtes de colonnes pour les imports Excel/CSV
-// (prospects, biens/mandats) — extrait de mapping.ts pour être partagé entre les
+// (prospects, biens/mandats) - extrait de mapping.ts pour être partagé entre les
 // différents mappings sans dupliquer la logique de normalisation/lookup.
 import { unwrapQuotes } from "./text-clean"
 import { normalizeCommune } from "./normalize-commune"
@@ -42,7 +42,7 @@ export function buildHeaderIndex(headerRow: unknown[]): HeaderIndex {
 
 // Certains en-têtes Apimo apparaissent deux fois avec un sens différent selon
 // l'occurrence (ex. "Ville" = zone de recherche du prospect puis adresse
-// personnelle, "Adresse"/"Référence" pareil) — `occurrence` sélectionne le
+// personnelle, "Adresse"/"Référence" pareil) - `occurrence` sélectionne le
 // n-ième index (0 = premier, par défaut).
 export function at(index: HeaderIndex, key: string, occurrence = 0): number | undefined {
   return index.get(key)?.[occurrence]

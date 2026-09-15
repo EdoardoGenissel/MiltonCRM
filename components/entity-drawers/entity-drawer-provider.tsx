@@ -19,7 +19,7 @@ const EntityDrawerContext = createContext<EntityDrawerContextValue | null>(null)
 
 // Pile de panneaux : ouvrir une fiche depuis une autre (ex. propriétaire depuis
 // un mandat) empile un nouveau panneau par-dessus plutôt que de remplacer la
-// navigation courante — "Retour" dépile, la croix ferme tout.
+// navigation courante - "Retour" dépile, la croix ferme tout.
 export function EntityDrawerProvider({ children }: { children: React.ReactNode }) {
   const [stack, setStack] = useState<DrawerEntry[]>([])
 

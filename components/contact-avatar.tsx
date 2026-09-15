@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 
 // Palette de teintes douces, choisie pour rester lisible en clair comme en sombre
-// (fond pastel + texte foncé assorti) — la couleur est dérivée du nom, donc stable
+// (fond pastel + texte foncé assorti) - la couleur est dérivée du nom, donc stable
 // pour une même personne d'un rendu à l'autre (liste, fiche détail...).
 const PALETTE = [
   { bg: "#e0f2f1", fg: "#00695c" },

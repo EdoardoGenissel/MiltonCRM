@@ -42,8 +42,12 @@ next-env.d.ts
 # prisma (client généré, régénéré via `prisma generate`)
 /lib/generated/prisma
 
-# exports clients réels (données personnelles — RGPD, ne jamais versionner)
+# exports clients réels (données personnelles - RGPD, ne jamais versionner)
 /data
 
 # fichiers générés par les scripts de test (ex. audio Ringover téléchargé)
 /tmp
+.local-backups/
+
+# Local Netlify folder
+.netlify

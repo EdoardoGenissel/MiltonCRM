@@ -3,10 +3,11 @@ import { prisma } from "@/lib/db/prisma"
 import { Source } from "@/lib/generated/prisma/enums"
 import { resolveContactMatch } from "@/lib/contacts/dedupe"
 import { jotformSubmissionSchema } from "@/lib/integrations/jotform/types"
-import { generateEstimationReport } from "@/lib/integrations/cityscan/client"
+import { pushEstimationLead } from "@/lib/integrations/apimo/leads"
 
-// Webhook JotForm → CityScan (cf. scope.md §"Automatisation des estimations") :
-// supprime la ressaisie manuelle du rapport reçu par mail dans CityScan.
+// Webhook JotForm → Apimo (cf. lib/integrations/apimo/leads.ts) : pousse la
+// demande d'estimation comme Lead Apimo pour supprimer la ressaisie manuelle par
+// l'agent avant de lancer l'AVM depuis la fiche bien.
 // Authentifié par secret partagé en query string (proxy.ts laisse passer cette
 // route sans session Supabase).
 export async function POST(request: NextRequest) {
@@ -40,7 +41,9 @@ export async function POST(request: NextRequest) {
       nom: submission.contactNom,
       telephone: submission.contactTelephone,
       email: submission.contactEmail,
-      personas: ["prospect"],
+      // Le formulaire JotForm est une demande d'estimation -> le contact veut
+      // (faire estimer puis) vendre son bien.
+      personas: ["vendeur"],
       source: Source.JOTFORM,
     },
     update: {
@@ -73,21 +76,25 @@ export async function POST(request: NextRequest) {
   })
 
   try {
-    const { reportUrl } = await generateEstimationReport({
-      bienAdresse: bien?.adresse,
-      bienCommune: bien?.commune,
-      bienType: bien?.typeBien,
-      bienSurface: bien?.surface ? Number(bien.surface) : null,
+    const { id: apimoLeadId } = await pushEstimationLead({
+      jotformSubmissionId: submission.submissionID,
+      contact: {
+        prenom: submission.contactPrenom,
+        nom: submission.contactNom,
+        email: submission.contactEmail ?? null,
+        telephone: submission.contactTelephone ?? null,
+      },
+      bien: bien ? { adresse: bien.adresse, commune: bien.commune, codePostal: null } : null,
     })
 
     await prisma.estimation.update({
       where: { id: estimation.id },
-      data: { cityscanReportUrl: reportUrl, statut: "genere" },
+      data: { apimoLeadId, statut: "envoye_apimo" },
     })
 
-    return NextResponse.json({ estimationId: estimation.id, reportUrl })
+    return NextResponse.json({ estimationId: estimation.id, apimoLeadId })
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erreur CityScan inconnue"
+    const message = err instanceof Error ? err.message : "Erreur Apimo inconnue"
     return NextResponse.json({ estimationId: estimation.id, error: message }, { status: 502 })
   }
 }

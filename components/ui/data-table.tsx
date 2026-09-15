@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 
 // Coquille de tableau partagée par les pages liste (Contacts, Biens, Mandats,
-// Estimations, Imports) — carte à bord arrondi + ombre, `<table>` pleine largeur.
+// Estimations, Imports) - carte à bord arrondi + ombre, `<table>` pleine largeur.
 export function TableCard({
   children,
   className,
@@ -16,7 +16,7 @@ export function TableCard({
         className,
       )}
     >
-      <table className="w-full text-sm">{children}</table>
+      <table className="w-full text-left text-sm">{children}</table>
     </div>
   )
 }
@@ -33,7 +33,7 @@ export function TableHeadRow({ children }: { children: React.ReactNode }) {
   )
 }
 
-// Ligne "aucun résultat" — icône optionnelle + libellé, centrée sur toute la
+// Ligne "aucun résultat" - icône optionnelle + libellé, centrée sur toute la
 // largeur du tableau.
 export function TableEmpty({
   icon: Icon,

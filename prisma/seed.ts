@@ -6,7 +6,7 @@ import { Pole, Source } from "../lib/generated/prisma/enums"
 // Seed de développement : données plausibles pour travailler sur les vues et les
 // requêtes Prisma avant que les vraies intégrations (Pennylane, Apimo, SEPTEO...)
 // soient branchées. Volontairement cohérent avec `lib/data.ts` (mêmes ordres de
-// grandeur) mais PAS une reconstruction exacte des mêmes chiffres — les répartitions
+// grandeur) mais PAS une reconstruction exacte des mêmes chiffres - les répartitions
 // par pôle/commercial sont approximées là où la source mock ne les détaille pas
 // (ex. incidents, lots gérés par ancienneté). Ne jamais lancer contre un
 // environnement de production.
@@ -51,7 +51,7 @@ function randomDayIn(month: Date): Date {
 async function seedFactCa() {
   // CA total mensuel (k€), identique à hist.values de "ca-mensuel" dans lib/data.ts.
   const totalCaKEur = [62, 57, 68, 65, 71, 75.8]
-  // Répartition par pôle constante (poids de juin, cf. "ca-pole" dans lib/data.ts) —
+  // Répartition par pôle constante (poids de juin, cf. "ca-pole" dans lib/data.ts) -
   // simplification : la vraie répartition varie sans doute mois par mois, on
   // affinera une fois Pennylane branché.
   const poleWeights: [Pole, number][] = [
@@ -176,7 +176,7 @@ async function seedFactPipeline() {
 
 async function seedFactImpaye() {
   // Taux d'impayés mensuel (%), cf. hist "impayes" dans lib/data.ts. Le montant
-  // suppose une base de loyers appelés d'environ 380 000 €/mois — hypothèse à
+  // suppose une base de loyers appelés d'environ 380 000 €/mois - hypothèse à
   // corriger dès que SEPTEO donne le vrai chiffre.
   const tauxParMois = [3.6, 3.3, 3.9, 4.5, 4.4, 4.2]
   const loyersAppelesEstimes = 380_000
@@ -214,7 +214,7 @@ async function seedFactIncident() {
 }
 
 async function seedFactAppel() {
-  // Front office (Ringover) — stretch v1, quelques semaines de données pour ne pas
+  // Front office (Ringover) - stretch v1, quelques semaines de données pour ne pas
   // partir de zéro si la vue est scaffoldée en avance de phase.
   await prisma.factAppel.deleteMany({})
   await prisma.factAppel.createMany({
@@ -261,7 +261,7 @@ async function seedObjectifs() {
     })),
   })
   // Objectifs pipeline hebdo (RDV/estimations/visites), pôles Transaction et Gestion
-  // locative — un seul enregistrement "objectif courant" suffit, cf.
+  // locative - un seul enregistrement "objectif courant" suffit, cf.
   // `lib/kpis/*.ts` qui interroge par kpiId+pole en prenant le plus récent plutôt
   // qu'une correspondance exacte de période (les objectifs changent rarement).
   await prisma.objectif.createMany({
@@ -287,7 +287,7 @@ async function seedAdminProfile() {
 
   if (!userId || !email || !fullName) {
     console.log(
-      "⏭  SEED_ADMIN_USER_ID / SEED_ADMIN_EMAIL / SEED_ADMIN_FULL_NAME absents — " +
+      "⏭  SEED_ADMIN_USER_ID / SEED_ADMIN_EMAIL / SEED_ADMIN_FULL_NAME absents - " +
         "profil admin non seedé (créez d'abord le compte dans Supabase Auth, cf. AGENTS.md §8)."
     )
     return

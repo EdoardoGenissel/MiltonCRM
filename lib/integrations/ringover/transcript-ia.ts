@@ -1,6 +1,6 @@
 // Extraction IA des transcripts d'appels Ringover (scope.md : "piste transcripts
 // d'appels + IA... Jérémy le fait déjà sur un autre projet avec Aircall"). Mode
-// mock tant que RINGOVER_API_KEY / le provider IA ne sont pas branchés en live —
+// mock tant que RINGOVER_API_KEY / le provider IA ne sont pas branchés en live -
 // même principe adapter mock/live que Cockpit (cf. Cockpit/AGENTS.md §2).
 export async function summarizeTranscript(transcript: string): Promise<string> {
   if (!transcript.trim()) return ""
@@ -12,6 +12,6 @@ export async function summarizeTranscript(transcript: string): Promise<string> {
   }
 
   throw new Error(
-    "TRANSCRIPT_IA_MODE=live sans provider IA branché — implémenter l'appel au provider choisi ici.",
+    "TRANSCRIPT_IA_MODE=live sans provider IA branché - implémenter l'appel au provider choisi ici.",
   )
 }

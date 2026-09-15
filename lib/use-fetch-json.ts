@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 
 // Fetch client minimal partagé par les drawers d'entité (cf.
-// components/entity-drawers/*) — pas de librairie de data-fetching dans le
+// components/entity-drawers/*) - pas de librairie de data-fetching dans le
 // projet, un hook simple suffit pour un panneau qui charge une seule fiche.
 export function useFetchJson<T>(url: string | null) {
   const [data, setData] = useState<T | null>(null)
@@ -15,7 +15,7 @@ export function useFetchJson<T>(url: string | null) {
     let cancelled = false
 
     // Les resets sont différés dans un microtask (plutôt qu'appelés en tête de
-    // l'effet) pour satisfaire react-hooks/set-state-in-effect — un setState
+    // l'effet) pour satisfaire react-hooks/set-state-in-effect - un setState
     // synchrone en tête d'effet est considéré comme un signe qu'on devrait
     // calculer l'état pendant le rendu, ce qui n'est pas possible ici (fetch).
     Promise.resolve().then(() => {

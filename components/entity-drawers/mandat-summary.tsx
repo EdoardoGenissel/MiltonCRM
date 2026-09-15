@@ -1,5 +1,7 @@
 import { Calendar, User, Wallet } from "lucide-react"
 import { Field, Badge } from "@/components/detail-card"
+import { mandatBadgeLabel, mandatTypeComplement } from "@/lib/mandats/mandat-label"
+import { drawerLink } from "@/components/entity-drawers/drawer-link"
 import { dateLabel, moneyLabel } from "@/lib/format"
 
 export type MandatDetail = {
@@ -38,19 +40,26 @@ export type MandatDetail = {
   } | null
 }
 
-// Contenu détaillé d'un mandat — partagé par la fiche bien (liste de ses
+// Contenu détaillé d'un mandat - partagé par la fiche bien (liste de ses
 // mandats) et le drawer mandat autonome (cf. mandat-drawer-content.tsx),
 // portage direct du <li> qui vivait dans l'ancienne page biens/[id].
 export function MandatSummary({
   mandat,
   devise,
   onOpenContact,
+  showHeader = true,
 }: {
   mandat: MandatDetail
   devise?: string | null
   onOpenContact: (id: string) => void
+  // La ligne d'en-tête (type + catégorie + statut) fait doublon avec le bloc
+  // d'en-tête du drawer mandat autonome, qui en est la source unique - on la
+  // masque dans ce cas (cf. mandat-drawer-content.tsx). Affichée dans la fiche
+  // bien, où chaque mandat n'a pas d'autre en-tête.
+  showHeader?: boolean
 }) {
   const effectiveDevise = devise ?? mandat.bien?.devise ?? undefined
+  const typeComplement = mandatTypeComplement(mandat)
 
   function stop(e: React.MouseEvent, action: () => void) {
     e.stopPropagation()
@@ -59,14 +68,16 @@ export function MandatSummary({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-foreground">{mandat.type}</span>
-          {mandat.categorie && <Badge>{mandat.categorie}</Badge>}
+      {showHeader && (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-foreground">{mandatBadgeLabel(mandat)}</span>
+            {typeComplement && <Badge>{typeComplement}</Badge>}
+          </div>
+          <span className="text-xs text-muted-foreground">{mandat.statut ?? "statut inconnu"}</span>
         </div>
-        <span className="text-xs text-muted-foreground">{mandat.statut ?? "statut inconnu"}</span>
-      </div>
-      <dl className="mt-3 grid grid-cols-2 gap-3">
+      )}
+      <dl className={`grid grid-cols-2 gap-3 ${showHeader ? "mt-3" : ""}`}>
         <Field
           label="Propriétaire"
           value={
@@ -74,7 +85,7 @@ export function MandatSummary({
               <button
                 type="button"
                 onClick={(e) => stop(e, () => onOpenContact(mandat.proprietaire!.id))}
-                className="text-left text-primary hover:underline"
+                className={`text-left ${drawerLink}`}
               >
                 {mandat.proprietaire.prenom} {mandat.proprietaire.nom}
               </button>
@@ -89,7 +100,7 @@ export function MandatSummary({
               <button
                 type="button"
                 onClick={(e) => stop(e, () => onOpenContact(mandat.locataire!.id))}
-                className="text-left text-primary hover:underline"
+                className={`text-left ${drawerLink}`}
               >
                 {mandat.locataire.prenom} {mandat.locataire.nom}
               </button>

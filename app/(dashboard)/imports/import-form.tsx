@@ -4,15 +4,19 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Select } from "@/components/ui/select"
 import { FormField, SubmitButton } from "@/components/ui/form"
+import { IMPORT_KIND_LABELS } from "@/lib/imports/detect-kind"
+import type { ImportKind } from "@/lib/imports/mapping"
 import type { ImportResult } from "@/lib/imports/run-import"
 
 type StreamEvent =
-  { type: "progress"; processed: number; total: number } | { type: "done"; result: ImportResult }
+  | { type: "detected"; kind: ImportKind }
+  | { type: "progress"; processed: number; total: number }
+  | { type: "done"; result: ImportResult }
 
 type ImportState =
   | { phase: "idle" }
-  | { phase: "running"; processed: number; total: number }
-  | { phase: "done"; result: ImportResult }
+  | { phase: "running"; kind?: ImportKind; processed: number; total: number }
+  | { phase: "done"; kind?: ImportKind; result: ImportResult }
 
 export function ImportForm() {
   const router = useRouter()
@@ -23,6 +27,8 @@ export function ImportForm() {
     const form = e.currentTarget
     const formData = new FormData(form)
     setState({ phase: "running", processed: 0, total: 0 })
+
+    let detectedKind: ImportKind | undefined
 
     const res = await fetch("/api/imports", { method: "POST", body: formData })
     if (!res.ok || !res.body) {
@@ -52,10 +58,18 @@ export function ImportForm() {
       for (const line of lines) {
         if (!line.trim()) continue
         const event: StreamEvent = JSON.parse(line)
-        if (event.type === "progress") {
-          setState({ phase: "running", processed: event.processed, total: event.total })
+        if (event.type === "detected") {
+          detectedKind = event.kind
+          setState({ phase: "running", kind: detectedKind, processed: 0, total: 0 })
+        } else if (event.type === "progress") {
+          setState({
+            phase: "running",
+            kind: detectedKind,
+            processed: event.processed,
+            total: event.total,
+          })
         } else {
-          setState({ phase: "done", result: event.result })
+          setState({ phase: "done", kind: detectedKind, result: event.result })
         }
       }
     }
@@ -78,9 +92,10 @@ export function ImportForm() {
       <FormField
         label="Type d'export"
         htmlFor="kind"
-        hint="Les imports impayés / incidents / loyers appelés se rattachent aux biens et contacts existants : importer d'abord « Septéo - biens et mandats » et les contacts."
+        hint="Le type est reconnu automatiquement d'après les colonnes du fichier. Les imports impayés / incidents / loyers appelés se rattachent aux biens et contacts existants : importer d'abord les biens/mandats et les contacts."
       >
-        <Select id="kind" name="kind" required disabled={pending}>
+        <Select id="kind" name="kind" defaultValue="auto" disabled={pending}>
+          <option value="auto">Détection automatique</option>
           <option value="apimo_prospects">Apimo - prospects (.xlsx)</option>
           <option value="apimo_biens">Apimo - biens et mandats (.xlsx)</option>
           <option value="septeo_contacts">Septéo - propriétaires ou locataires (.csv)</option>
@@ -117,6 +132,11 @@ export function ImportForm() {
               style={{ width: `${pct}%` }}
             />
           </div>
+          {state.kind && (
+            <p className="text-xs font-medium text-foreground">
+              Type détecté : {IMPORT_KIND_LABELS[state.kind]}
+            </p>
+          )}
           <p className={`text-xs ${isError ? "text-danger" : "text-muted-foreground"}`}>
             {state.phase === "running"
               ? state.total > 0

@@ -47,8 +47,8 @@ describe("buildContactWhere", () => {
   })
 
   it("filtre persona -> hasSome (tableau)", () => {
-    const where = buildContactWhere({ persona: ["prospect", "locataire"] })
-    expect(where.AND).toContainEqual({ personas: { hasSome: ["prospect", "locataire"] } })
+    const where = buildContactWhere({ persona: ["acheteur", "locataire"] })
+    expect(where.AND).toContainEqual({ personas: { hasSome: ["acheteur", "locataire"] } })
   })
 
   it("filtre source ignore les valeurs hors enum", () => {

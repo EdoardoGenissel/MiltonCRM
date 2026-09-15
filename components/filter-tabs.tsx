@@ -2,7 +2,7 @@ import { TabStrip } from "@/components/ui/tab-strip"
 import { buildQuery, toArray } from "@/lib/search-params"
 
 // Filtre mono-valeur présenté en onglets (un seul actif à la fois), tout passe
-// par l'URL (?<param>=...) — même logique que le tri (cf.
+// par l'URL (?<param>=...) - même logique que le tri (cf.
 // components/sortable-header.tsx). Générique : `PersonaTabs` n'en est plus qu'un
 // appel préconfiguré.
 export function FilterTabs({

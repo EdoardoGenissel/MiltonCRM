@@ -3,7 +3,7 @@ import { getMandatById } from "@/lib/mandats/queries"
 import { serializeMandat } from "@/lib/mandats/serialize"
 
 // Sert la fiche mandat autonome au drawer client (cf.
-// components/entity-drawers/mandat-drawer-content.tsx) — le mandat n'a pas de
+// components/entity-drawers/mandat-drawer-content.tsx) - le mandat n'a pas de
 // page dédiée dans l'app (cf. son affichage intégré à la fiche bien), d'où
 // cette route dédiée pour l'ouvrir en drawer depuis /mandats.
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

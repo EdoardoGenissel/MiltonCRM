@@ -16,6 +16,7 @@ import {
   UserCircle,
 } from "lucide-react"
 import { PersonaBadge } from "@/components/persona-badge"
+import { StatutBadge } from "@/components/statut-badge"
 import { SourceBadge } from "@/components/source-badge"
 import { ContactAvatar } from "@/components/contact-avatar"
 import { Button } from "@/components/ui/button"
@@ -24,9 +25,11 @@ import { DrawerTabs } from "@/components/ui/drawer-tabs"
 import { ClickableRow } from "@/components/entity-drawers/clickable-row"
 import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
 import { DrawerState } from "@/components/entity-drawers/drawer-state"
+import { drawerLink } from "@/components/entity-drawers/drawer-link"
 import { useFetchJson } from "@/lib/use-fetch-json"
 import { dateLabel, dateTimeLabel, boolLabel, moneyLabel, surfaceLabel } from "@/lib/format"
 import { loyerMaxWithMargin } from "@/lib/prospects/loyer-max"
+import { contactStatut } from "@/lib/contacts/statut"
 
 type ContactDetail = {
   id: string
@@ -82,6 +85,7 @@ type ContactDetail = {
     id: string
     type: string
     statut: string | null
+    categorie: string | null
     bien: {
       id: string
       titre: string | null
@@ -279,103 +283,108 @@ export function ContactDrawerContent({
         </>
       ),
     },
-    {
-      value: "mandats",
-      label: "Mandats",
-      content: (
-        <>
-          <Card title="Mandats" icon={FileText}>
-            {contact.mandats.length === 0 ? (
-              <EmptyState label="Aucun mandat lié à ce contact." />
-            ) : (
-              <ul className="flex flex-col gap-2">
-                {contact.mandats.map((mandat) => {
-                  const inner = (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-foreground">{mandat.type}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {mandat.statut ?? "statut inconnu"}
-                        </span>
-                      </div>
-                      {mandat.bien && (
-                        <span className="mt-1 flex items-center gap-1.5 text-muted-foreground">
-                          <MapPin className="h-3 w-3 shrink-0" />
-                          {mandat.bien.titre ||
-                            mandat.bien.adresse ||
-                            mandat.bien.commune ||
-                            "Bien sans adresse"}
-                        </span>
-                      )}
-                    </>
-                  )
-                  return (
-                    <li key={mandat.id}>
-                      {mandat.bien ? (
-                        <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>
-                          {inner}
-                        </ClickableRow>
-                      ) : (
-                        <div className="rounded-md border border-border p-3 text-sm">
-                          {inner}
+    ...(contact.mandats.length > 0
+      ? [
+          {
+            value: "mandats",
+            label: "Mandats",
+            content: (
+              <Card title="Mandats" icon={FileText}>
+                <ul className="flex flex-col gap-2">
+                  {contact.mandats.map((mandat) => {
+                    const inner = (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-foreground">{mandat.type}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {mandat.statut ?? "statut inconnu"}
+                          </span>
                         </div>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </Card>
-
-          {contact.mandatsLocataire.length > 0 && (
-            <Card title="Location(s) en tant que locataire" icon={FileText}>
-              <ul className="flex flex-col gap-2">
-                {contact.mandatsLocataire.map((mandat) => {
-                  const inner = (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-foreground">
-                          {mandat.montantLoyer
-                            ? `${moneyLabel(mandat.montantLoyer, undefined)} / mois`
-                            : mandat.type}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {mandat.finMandat
-                            ? `Jusqu'au ${dateLabel(mandat.finMandat)}`
-                            : "en cours"}
-                        </span>
-                      </div>
-                      {mandat.bien && (
-                        <span className="mt-1 flex items-center gap-1.5 text-muted-foreground">
-                          <MapPin className="h-3 w-3 shrink-0" />
-                          {mandat.bien.titre ||
-                            mandat.bien.adresse ||
-                            mandat.bien.commune ||
-                            "Bien sans adresse"}
-                        </span>
-                      )}
-                    </>
-                  )
-                  return (
-                    <li key={mandat.id}>
-                      {mandat.bien ? (
-                        <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>
-                          {inner}
-                        </ClickableRow>
-                      ) : (
-                        <div className="rounded-md border border-border p-3 text-sm">
-                          {inner}
+                        {mandat.bien && (
+                          <span className="mt-1 flex items-center gap-1.5 text-muted-foreground">
+                            <MapPin className="h-3 w-3 shrink-0" />
+                            {mandat.bien.titre ||
+                              mandat.bien.adresse ||
+                              mandat.bien.commune ||
+                              "Bien sans adresse"}
+                          </span>
+                        )}
+                      </>
+                    )
+                    return (
+                      <li key={mandat.id}>
+                        {mandat.bien ? (
+                          <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>
+                            {inner}
+                          </ClickableRow>
+                        ) : (
+                          <div className="rounded-md border border-border p-3 text-sm">
+                            {inner}
+                          </div>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </Card>
+            ),
+          },
+        ]
+      : []),
+    ...(contact.mandatsLocataire.length > 0
+      ? [
+          {
+            value: "bien",
+            label: "Bien",
+            content: (
+              <Card title="Bien(s) loué(s)" icon={Building2}>
+                <ul className="flex flex-col gap-2">
+                  {contact.mandatsLocataire.map((mandat) => {
+                    const inner = (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-foreground">
+                            {mandat.montantLoyer
+                              ? `${moneyLabel(mandat.montantLoyer, undefined)} / mois`
+                              : mandat.type}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {mandat.finMandat
+                              ? `Jusqu'au ${dateLabel(mandat.finMandat)}`
+                              : "en cours"}
+                          </span>
                         </div>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            </Card>
-          )}
-        </>
-      ),
-    },
+                        {mandat.bien && (
+                          <span className="mt-1 flex items-center gap-1.5 text-muted-foreground">
+                            <MapPin className="h-3 w-3 shrink-0" />
+                            {mandat.bien.titre ||
+                              mandat.bien.adresse ||
+                              mandat.bien.commune ||
+                              "Bien sans adresse"}
+                          </span>
+                        )}
+                      </>
+                    )
+                    return (
+                      <li key={mandat.id}>
+                        {mandat.bien ? (
+                          <ClickableRow onClick={() => onOpenBien(mandat.bien!.id)}>
+                            {inner}
+                          </ClickableRow>
+                        ) : (
+                          <div className="rounded-md border border-border p-3 text-sm">
+                            {inner}
+                          </div>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </Card>
+            ),
+          },
+        ]
+      : []),
     {
       value: "estimations",
       label: "Estimations",
@@ -396,7 +405,7 @@ export function ContactDrawerContent({
                           target="_blank"
                           rel="noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                          className={`inline-flex items-center gap-1 ${drawerLink}`}
                         >
                           Rapport CityScan
                           <ExternalLink className="h-3 w-3" />
@@ -479,6 +488,7 @@ export function ContactDrawerContent({
                 {contact.prenom} {contact.nom}
               </h3>
               <SourceBadge source={contact.source} />
+              <StatutBadge statut={contactStatut(contact)} />
             </div>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {contact.personas.length === 0 ? (

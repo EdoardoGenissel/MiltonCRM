@@ -2,7 +2,7 @@ import { NextRequest } from "next/server"
 import { getContactById } from "@/lib/contacts/queries"
 
 // Sert la fiche contact complète au drawer client (cf.
-// components/entity-drawers/contact-drawer-content.tsx) — remplace la
+// components/entity-drawers/contact-drawer-content.tsx) - remplace la
 // Server Component app/(dashboard)/contacts/[id]/page.tsx comme source de
 // données pour un affichage sans navigation. Les Decimal/Date Prisma sont
 // converties en string pour rester JSON-safe (mêmes conversions que faisait la

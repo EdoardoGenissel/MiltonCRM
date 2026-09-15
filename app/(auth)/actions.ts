@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 
-export type AuthActionState = { error: string | null }
+export type AuthActionState = { error: string | null; redirectTo?: string }
 
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide."),
@@ -30,7 +30,11 @@ export async function signIn(
   }
 
   const next = formData.get("next")
-  redirect(typeof next === "string" && next.startsWith("/") ? next : "/contacts")
+  // Pas de `redirect()` ici : sur Netlify, la transition RSC côté client vers une
+  // route jamais visitée peut renvoyer une réponse malformée ("An unexpected
+  // response was received from the server."). On laisse le client faire une
+  // navigation complète (cf. login-form.tsx).
+  return { error: null, redirectTo: typeof next === "string" && next.startsWith("/") ? next : "/contacts" }
 }
 
 export async function signOut(): Promise<void> {
@@ -53,7 +57,7 @@ export async function requestPasswordReset(
   }
 
   const supabase = await createClient()
-  // On ne révèle jamais si l'email existe ou non — toujours un succès côté UI.
+  // On ne révèle jamais si l'email existe ou non - toujours un succès côté UI.
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/auth/confirm?next=/reset-password`,
   })
@@ -89,5 +93,7 @@ export async function updatePassword(
     return { error: "Impossible de mettre à jour le mot de passe. Le lien a peut-être expiré." }
   }
 
-  redirect("/contacts")
+  // Même raison que `signIn` ci-dessus : pas de `redirect()` serveur vers une route
+  // jamais visitée (cf. reset-password-form.tsx pour la navigation client).
+  return { error: null, redirectTo: "/contacts" }
 }

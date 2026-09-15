@@ -28,11 +28,11 @@ export function ColumnFilter({
   selected: string[]
   searchParams: Record<string, string | string[] | undefined>
   // Un Server Component ne peut pas passer de fonction à un Client Component
-  // (non sérialisable à travers la frontière RSC) — une table de correspondance
+  // (non sérialisable à travers la frontière RSC) - une table de correspondance
   // simple fait le même travail (cf. lib/contacts/personas.ts, lib/contacts/sources.ts).
   labelMap?: Record<string, string>
   // Réutilisé par les pages Biens/Mandats (cf. app/api/biens/column-values,
-  // app/api/mandats/column-values) — même popover, autre source de valeurs.
+  // app/api/mandats/column-values) - même popover, autre source de valeurs.
   endpoint?: string
 }) {
   const router = useRouter()
@@ -43,7 +43,7 @@ export function ColumnFilter({
   const [loading, setLoading] = useState(false)
   const [pending, setPending] = useState<Set<string>>(new Set(selected))
 
-  // Réinitialise le brouillon de sélection et la recherche à l'ouverture — fait
+  // Réinitialise le brouillon de sélection et la recherche à l'ouverture - fait
   // dans le handler d'ouverture (pas un effet) : setState y est un événement
   // utilisateur normal, pas une synchronisation avec un système externe.
   function handleOpenChange(next: boolean) {

@@ -2,6 +2,7 @@ import { Users } from "lucide-react"
 import { Topbar } from "@/components/topbar"
 import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
 import { PersonaBadge } from "@/components/persona-badge"
+import { StatutBadge } from "@/components/statut-badge"
 import { ContactAvatar } from "@/components/contact-avatar"
 import { Pagination } from "@/components/pagination"
 import { FilterBar } from "@/components/filter-bar"
@@ -9,6 +10,7 @@ import { FilterableHeader } from "@/components/filterable-header"
 import { PersonaTabs } from "@/components/persona-tabs"
 import { ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listContacts } from "@/lib/contacts/queries"
+import { contactStatut, STATUT_LABELS } from "@/lib/contacts/statut"
 import { parsePage } from "@/lib/pagination"
 import { toArray } from "@/lib/search-params"
 
@@ -22,13 +24,20 @@ type ContactsSearchParams = {
   nom?: string | string[]
   telephone?: string | string[]
   email?: string | string[]
+  statut?: string | string[]
   page?: string
   sort?: string
   dir?: string
 }
 
-const FILTER_KEYS = ["nom", "telephone", "email", "commune"]
-const KEY_LABELS = { nom: "Nom", telephone: "Téléphone", email: "Email", commune: "Commune" }
+const FILTER_KEYS = ["nom", "telephone", "email", "commune", "statut"]
+const KEY_LABELS = {
+  nom: "Nom",
+  telephone: "Téléphone",
+  email: "Email",
+  commune: "Commune",
+  statut: "Statut",
+}
 
 export default async function ContactsPage({
   searchParams,
@@ -45,6 +54,7 @@ export default async function ContactsPage({
     nom: toArray(params.nom),
     telephone: toArray(params.telephone),
     email: toArray(params.email),
+    statut: toArray(params.statut),
     sort: params.sort,
     dir: params.dir,
     page,
@@ -60,6 +70,7 @@ export default async function ContactsPage({
           searchPlaceholder="Nom, prénom, téléphone, email…"
           filterKeys={FILTER_KEYS}
           keyLabels={KEY_LABELS}
+          valueLabels={{ statut: STATUT_LABELS }}
           tabs={<PersonaTabs searchParams={params} />}
         />
 
@@ -87,7 +98,7 @@ export default async function ContactsPage({
                 currentDir={params.dir}
               />
             </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Email"
                 sortKey="email"
@@ -96,11 +107,21 @@ export default async function ContactsPage({
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
-            <th className="px-5 py-3 text-center">Type</th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">Type</th>
+            <th className="px-5 py-3">
+              <FilterableHeader
+                label="Statut"
+                filterColumn="statut"
+                selected={filters.statut}
+                labelMap={STATUT_LABELS}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+              />
+            </th>
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Commune"
                 sortKey="commune"
@@ -109,7 +130,6 @@ export default async function ContactsPage({
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
           </TableHeadRow>
@@ -130,26 +150,25 @@ export default async function ContactsPage({
                 <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">
                   {contact.telephone ?? "-"}
                 </td>
-                <td className="px-5 py-3 text-center text-muted-foreground">
-                  {contact.email ?? "-"}
-                </td>
+                <td className="px-5 py-3 text-muted-foreground">{contact.email ?? "-"}</td>
                 <td className="px-5 py-3">
-                  <div className="flex flex-wrap justify-center gap-1.5">
+                  <div className="flex flex-wrap justify-start gap-1.5">
                     {contact.personas.map((persona) => (
                       <PersonaBadge key={persona} persona={persona} />
                     ))}
                   </div>
                 </td>
-                <td className="px-5 py-3 text-center text-muted-foreground">
-                  {contact.commune ?? "-"}
+                <td className="px-5 py-3">
+                  <StatutBadge statut={contactStatut(contact)} />
                 </td>
+                <td className="px-5 py-3 text-muted-foreground">{contact.commune ?? "-"}</td>
               </tr>
             ))}
             {contacts.length === 0 && (
               <TableEmpty
                 icon={Users}
                 label="Aucun contact ne correspond à ces filtres."
-                colSpan={5}
+                colSpan={6}
               />
             )}
           </tbody>

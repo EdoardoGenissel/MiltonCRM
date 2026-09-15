@@ -7,7 +7,7 @@ export function parseNumber(value: string | undefined): number | undefined {
   // Une valeur sans aucun chiffre (ex. "Local commercial", "Studio") ne doit
   // pas devenir 0 : `Number("")` vaut 0 en JS, ce qui ferait passer un champ
   // absent pour une vraie valeur nulle (déjà vu en prod : "Pièces"/DPE affichés
-  // à "0" au lieu de "—" sur une fiche bien Septéo).
+  // à "0" au lieu de "-" sur une fiche bien Septéo).
   if (stripped === "" || stripped === ".") return undefined
   const n = Number(stripped)
   return Number.isFinite(n) ? n : undefined

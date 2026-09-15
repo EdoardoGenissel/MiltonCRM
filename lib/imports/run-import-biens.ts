@@ -10,6 +10,7 @@ import { parseTabularBuffer } from "@/lib/imports/excel-parser"
 import { buildHeaderIndex } from "@/lib/imports/header-index"
 import { mapApimoBienRow, type ApimoBienRow } from "@/lib/imports/mapping-biens"
 import { parseApimoProprietaire } from "@/lib/imports/apimo-proprietaire"
+import { apimoOwnerPersona } from "@/lib/imports/apimo-persona"
 import { parseApimoDateTime } from "@/lib/imports/parse-datetime"
 import { parseNumber } from "@/lib/imports/parse-number"
 import { chunk } from "@/lib/imports/batch"
@@ -18,7 +19,7 @@ import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
 import { recordImportRun } from "@/lib/imports/record-import-run"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
-// Import de l'export Apimo "Produits" (biens + mandats, un couple par ligne) —
+// Import de l'export Apimo "Produits" (biens + mandats, un couple par ligne) -
 // cf. lib/imports/mapping-biens.ts pour le détail des colonnes. Volume nettement
 // plus faible que l'export prospects (~700 lignes vs ~3700), donc pas besoin de la
 // même discipline de batching agressif : on garde surtout la séparation
@@ -34,7 +35,7 @@ function parseInt(value: string | undefined): number | undefined {
 
 async function loadOwnerCandidates(): Promise<IdentityMatchCandidate[]> {
   // Tous pôles/sources confondus : un propriétaire peut déjà exister comme
-  // prospect Apimo ou contact Septéo — cf. "fiche contact unifiée cross-pôle".
+  // prospect Apimo ou contact Septéo - cf. "fiche contact unifiée cross-pôle".
   return prisma.contact.findMany({
     select: { id: true, email: true, telephone: true, nom: true, prenom: true },
   })
@@ -78,7 +79,7 @@ function buildBienData(mapped: ApimoBienRow) {
 function buildMandatData(mapped: ApimoBienRow, bienId: string, proprietaireId: string | null) {
   return {
     // "Mandat" n'est renseigné que sur ~64% des lignes (cf. étapes amont comme
-    // "Attente mandat") — Mandat.type est NOT NULL, d'où ce filet par défaut,
+    // "Attente mandat") - Mandat.type est NOT NULL, d'où ce filet par défaut,
     // écrit en toutes lettres puisqu'affiché tel quel sur les fiches.
     type: mapped.typeMandat ?? "Non précisé",
     statut: mapped.etape,
@@ -128,9 +129,12 @@ export async function importApimoBiens(
     telephone?: string
     email?: string
     commune?: string
+    persona: string // "vendeur" | "bailleur", selon la catégorie du mandat
   }
   const ownersToCreate: OwnerToCreate[] = []
-  const ownerIdsToTag = new Set<string>() // contacts existants à qui ajouter le persona propriétaire
+  // contacts existants -> type(s) de prospect à leur ajouter (un même propriétaire
+  // peut avoir un mandat de vente ET un mandat de location sur deux lignes).
+  const ownerIdsToTag = new Map<string, Set<string>>()
 
   type BienPlan = { id: string; isNew: boolean; data: BienData; sourceRef: string }
   type MandatPlan = {
@@ -144,7 +148,7 @@ export async function importApimoBiens(
   const bienPlans: BienPlan[] = []
   const mandatPlans: MandatPlan[] = []
 
-  // Phase 1 — dédup/résolution en mémoire (aucun accès DB), y compris pour les
+  // Phase 1 - dédup/résolution en mémoire (aucun accès DB), y compris pour les
   // propriétaires : deux lignes (deux biens) du même propriétaire non encore en
   // base doivent aboutir au même contact plutôt qu'à deux doublons.
   for (const row of rows) {
@@ -154,6 +158,7 @@ export async function importApimoBiens(
     let proprietaireId: string | null = null
     const parsed = parseApimoProprietaire(mapped.proprietaireLabel)
     if (parsed?.nom) {
+      const ownerPersona = apimoOwnerPersona(mapped.categorie)
       const incoming: IncomingIdentity = {
         email: mapped.proprietaireEmail,
         telephone: mapped.proprietaireTelephone,
@@ -163,7 +168,9 @@ export async function importApimoBiens(
       const matchId = resolveContactByIdentity(ownerCandidates, incoming)
       if (matchId) {
         proprietaireId = matchId
-        ownerIdsToTag.add(matchId)
+        const personas = ownerIdsToTag.get(matchId) ?? new Set<string>()
+        personas.add(ownerPersona)
+        ownerIdsToTag.set(matchId, personas)
       } else {
         const id = randomUUID()
         ownersToCreate.push({
@@ -174,6 +181,7 @@ export async function importApimoBiens(
           telephone: mapped.proprietaireTelephone,
           email: mapped.proprietaireEmail,
           commune: mapped.commune,
+          persona: ownerPersona,
         })
         ownerCandidates.push({
           id,
@@ -218,7 +226,7 @@ export async function importApimoBiens(
   let processed = 0
   const tick = () => onProgress?.({ processed: ++processed, total })
 
-  // Phase 2a — propriétaires : créations en masse, tags de persona en parallèle
+  // Phase 2a - propriétaires : créations en masse, tags de persona en parallèle
   // borné (contacts déjà existants, un seul champ à mettre à jour).
   for (const batch of chunk(ownersToCreate, CREATE_BATCH_SIZE)) {
     await prisma.contact.createMany({
@@ -230,18 +238,22 @@ export async function importApimoBiens(
         telephone: o.telephone,
         email: o.email,
         commune: o.commune,
-        personas: ["proprietaire_bailleur"],
+        personas: [o.persona],
         source: Source.APIMO,
       })),
     })
   }
-  await mapWithConcurrency([...ownerIdsToTag], WRITE_CONCURRENCY, async (id) => {
-    const contact = await prisma.contact.findUnique({ where: { id }, select: { personas: true } })
-    const merged = Array.from(new Set([...(contact?.personas ?? []), "proprietaire_bailleur"]))
-    await prisma.contact.update({ where: { id }, data: { personas: { set: merged } } })
-  })
+  await mapWithConcurrency(
+    [...ownerIdsToTag.entries()],
+    WRITE_CONCURRENCY,
+    async ([id, personasToAdd]) => {
+      const contact = await prisma.contact.findUnique({ where: { id }, select: { personas: true } })
+      const merged = Array.from(new Set([...(contact?.personas ?? []), ...personasToAdd]))
+      await prisma.contact.update({ where: { id }, data: { personas: { set: merged } } })
+    },
+  )
 
-  // Phase 2b — biens.
+  // Phase 2b - biens.
   const newBiens = bienPlans.filter((b) => b.isNew)
   const existingBienPlans = bienPlans.filter((b) => !b.isNew)
   for (const batch of chunk(newBiens, CREATE_BATCH_SIZE)) {
@@ -260,7 +272,7 @@ export async function importApimoBiens(
     tick()
   })
 
-  // Phase 2c — mandats (dépendent des biens et propriétaires créés ci-dessus).
+  // Phase 2c - mandats (dépendent des biens et propriétaires créés ci-dessus).
   const newMandats = mandatPlans.filter((m) => m.isNew)
   const existingMandatPlans = mandatPlans.filter((m) => !m.isNew)
   for (const batch of chunk(newMandats, CREATE_BATCH_SIZE)) {

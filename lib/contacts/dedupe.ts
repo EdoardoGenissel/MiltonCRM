@@ -18,7 +18,7 @@ export type IncomingContact = {
 }
 
 // Normalise un numéro de téléphone français pour comparaison (espaces, points,
-// tirets, indicatif +33/0033 ignorés) — évite les faux négatifs de dédup entre
+// tirets, indicatif +33/0033 ignorés) - évite les faux négatifs de dédup entre
 // exports Apimo/Septéo qui ne formatent pas les numéros de la même façon.
 export function normalizePhone(phone: string): string {
   const digits = phone.replace(/\D/g, "")
@@ -39,7 +39,7 @@ export function sameName(a: string, b: string): boolean {
 }
 
 // Résout un contact entrant (ligne d'import Excel) contre les contacts déjà en
-// base. Priorité 1 : même source + même identifiant externe (sourceRef) —
+// base. Priorité 1 : même source + même identifiant externe (sourceRef) -
 // réconciliation exacte pour les imports successifs. Priorité 2 (fallback,
 // pas de sourceRef ou 1er import) : nom + prénom + téléphone identiques.
 export function resolveContactMatch(
@@ -82,12 +82,12 @@ export type IncomingIdentity = {
 
 // Résolution d'une personne physique (propriétaire OU locataire, exports Apimo
 // "Produits" et Septéo "biens/mandats") contre les contacts déjà en base, tous
-// pôles ET toutes sources confondus (cf. "fiche contact unifiée cross-pôle" —
+// pôles ET toutes sources confondus (cf. "fiche contact unifiée cross-pôle" -
 // un même propriétaire peut déjà exister comme prospect Apimo, un même locataire
 // peut réapparaître d'un import Septéo à l'autre, etc.). Contrairement à
 // `resolveContactMatch` (imports "personnes" où nom+prénom sont la donnée la
 // plus fiable), ces colonnes sont parfois tronquées côté Apimo ("Mme M.
-// BERGAUD", pas de prénom du tout) — on priorise donc email puis téléphone, le
+// BERGAUD", pas de prénom du tout) - on priorise donc email puis téléphone, le
 // nom seul en dernier recours seulement s'il y a aussi un prénom.
 export function resolveContactByIdentity(
   candidates: IdentityMatchCandidate[],

@@ -1,5 +1,5 @@
 // Formatters partagés entre les pages de détail et les drawers (cf.
-// components/entity-drawers/*) — les données arrivant du client (JSON, via les
+// components/entity-drawers/*) - les données arrivant du client (JSON, via les
 // routes /api/*/[id]) portent des dates en string ISO et des Decimal Prisma en
 // string, d'où les signatures acceptant `string | Date | null | undefined`.
 

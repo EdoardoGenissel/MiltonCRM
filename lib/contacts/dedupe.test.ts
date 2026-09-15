@@ -57,7 +57,7 @@ describe("resolveContactMatch", () => {
     expect(matchId).toBeNull()
   })
 
-  it("le fallback identité ne filtre pas par source — les candidats doivent déjà être pré-filtrés par l'appelant (cf. loadCandidates)", () => {
+  it("le fallback identité ne filtre pas par source - les candidats doivent déjà être pré-filtrés par l'appelant (cf. loadCandidates)", () => {
     const candidates = [candidate({ source: "APIMO", sourceRef: "42" })]
     const matchId = resolveContactMatch(candidates, {
       source: "SEPTEO",
@@ -151,7 +151,7 @@ describe("resolveContactByIdentity", () => {
     expect(matchId).toBe("c1")
   })
 
-  it("ne matche pas sur le nom seul (sans prénom) — trop peu fiable", () => {
+  it("ne matche pas sur le nom seul (sans prénom) - trop peu fiable", () => {
     const matchId = resolveContactByIdentity(
       [identityCandidate({ email: null, telephone: null })],
       {

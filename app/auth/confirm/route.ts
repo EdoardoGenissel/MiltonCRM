@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server"
 
 // Cible du lien envoyé par `resetPasswordForEmail` (cf. app/(auth)/actions.ts).
 // Le template d'email Supabase (Auth > Templates > Reset password) doit utiliser
-// `{{ .ConfirmationURL }}` — Supabase pointe alors vers cette route avec
+// `{{ .ConfirmationURL }}` - Supabase pointe alors vers cette route avec
 // `token_hash` + `type=recovery`, qu'on échange ici contre une session avant de
 // rediriger vers /reset-password pour saisir le nouveau mot de passe.
 export async function GET(request: NextRequest) {

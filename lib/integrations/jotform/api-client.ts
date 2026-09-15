@@ -1,4 +1,4 @@
-// Client API JotForm (pull) — remplace la dépendance au seul webhook
+// Client API JotForm (pull) - remplace la dépendance au seul webhook
 // (app/api/jotform/webhook) pour l'automatisation des estimations : permet de
 // rejouer tout l'historique et de ne pas perdre de soumission en cas de webhook
 // manqué. Doc : https://api.jotform.com/docs/

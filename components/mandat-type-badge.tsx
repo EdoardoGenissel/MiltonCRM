@@ -1,14 +1,16 @@
 import { Badge } from "@/components/ui/badge"
 
 // Palette fixe (indépendante du thème clair/sombre, comme success/danger/warning
-// dans globals.css) — une couleur par type de mandat, assignée par hash pour
+// dans globals.css) - une couleur par type de mandat, assignée par hash pour
 // rester stable même si de nouveaux types apparaissent via les imports.
+// Volontairement sans rouge/orange : le badge est purement informationnel (type
+// de mandat), il ne doit pas se lire comme un statut négatif.
 const PALETTE = [
   { bg: "#dbeafe", fg: "#1d4ed8" }, // bleu
   { bg: "#ede9fe", fg: "#6d28d9" }, // violet
   { bg: "#dcfce7", fg: "#15803d" }, // vert
-  { bg: "#ffedd5", fg: "#c2410c" }, // orange
-  { bg: "#fce7f3", fg: "#be185d" }, // rose
+  { bg: "#ccfbf1", fg: "#0f766e" }, // teal
+  { bg: "#e0e7ff", fg: "#4338ca" }, // indigo
   { bg: "#e0f2fe", fg: "#0369a1" }, // cyan
   { bg: "#fef9c3", fg: "#a16207" }, // jaune
   { bg: "#e2e8f0", fg: "#334155" }, // gris

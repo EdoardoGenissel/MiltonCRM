@@ -16,7 +16,7 @@ function readFilters(params: URLSearchParams): EstimationListFilters {
   }
 }
 
-// Valeurs uniques pour un filtre colonne façon Excel sur la page Estimations —
+// Valeurs uniques pour un filtre colonne façon Excel sur la page Estimations -
 // même principe que app/api/contacts/column-values (cf. components/column-filter.tsx).
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   const q = params.get("q")?.trim().toLowerCase() ?? ""
   const where = buildEstimationWhere(readFilters(params), column as EstimationFilterColumn)
 
-  // column === "statut" : liste fermée (4 valeurs connues) — on ne propose que
+  // column === "statut" : liste fermée (4 valeurs connues) - on ne propose que
   // celles réellement présentes compte tenu des autres filtres actifs.
   const rows = await prisma.estimation.findMany({
     where,

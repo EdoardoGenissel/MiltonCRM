@@ -2,7 +2,14 @@ import { prisma } from "@/lib/db/prisma"
 import { Source } from "@/lib/generated/prisma/enums"
 import { PAGE_SIZE, toPageResult } from "@/lib/pagination"
 
-export type FilterColumn = "nom" | "telephone" | "email" | "commune" | "source" | "persona"
+export type FilterColumn =
+  | "nom"
+  | "telephone"
+  | "email"
+  | "commune"
+  | "source"
+  | "persona"
+  | "statut"
 
 export type ContactListFilters = {
   search?: string
@@ -13,6 +20,7 @@ export type ContactListFilters = {
   telephone?: string[]
   email?: string[]
   categorie?: string
+  statut?: string[]
   page?: number
   sort?: string
   dir?: string
@@ -23,13 +31,16 @@ function asSource(value: string): Source | undefined {
 }
 
 // Construit le `where` Prisma à partir des filtres actifs. `excludeColumn` permet
-// de retirer le filtre d'UNE colonne — utilisé par l'API de valeurs uniques
+// de retirer le filtre d'UNE colonne - utilisé par l'API de valeurs uniques
 // (app/api/contacts/column-values) pour que la liste proposée pour une colonne
 // reflète les filtres déjà posés sur les *autres* colonnes, comme dans Excel.
 export function buildContactWhere(filters: ContactListFilters, excludeColumn?: FilterColumn) {
-  const { search, persona, source, commune, nom, telephone, email, categorie } = filters
+  const { search, persona, source, commune, nom, telephone, email, categorie, statut } = filters
   const validSources = (source ?? []).map(asSource).filter((s): s is Source => Boolean(s))
 
+  // "client" = au moins un mandat lié (propriétaire ou locataire), "prospect" =
+  // aucun (cf. lib/contacts/statut.ts `contactStatut`, même règle appliquée en
+  // mémoire côté affichage).
   return {
     AND: [
       search
@@ -49,6 +60,11 @@ export function buildContactWhere(filters: ContactListFilters, excludeColumn?: F
       excludeColumn !== "source" && validSources.length ? { source: { in: validSources } } : {},
       excludeColumn !== "commune" && commune?.length ? { commune: { in: commune } } : {},
       categorie ? { prospectDetail: { categorie } } : {},
+      excludeColumn !== "statut" && statut?.length === 1
+        ? statut[0] === "client"
+          ? { OR: [{ mandats: { some: {} } }, { mandatsLocataire: { some: {} } }] }
+          : { mandats: { none: {} }, mandatsLocataire: { none: {} } }
+        : {},
     ],
   }
 }
@@ -61,9 +77,9 @@ function asSortKey(value: string | undefined): ContactSortKey | undefined {
   return SORT_KEYS.find((key) => key === value)
 }
 
-// Tri "à la Excel" par colonne (cf. components/sortable-header.tsx) — un seul
+// Tri "à la Excel" par colonne (cf. components/sortable-header.tsx) - un seul
 // champ à la fois, direction explicite dans l'URL plutôt qu'un état client.
-// `personas` (tableau) n'a pas d'ordre naturel à un seul critère — pas de tri
+// `personas` (tableau) n'a pas d'ordre naturel à un seul critère - pas de tri
 // possible sur cette colonne, filtre uniquement.
 export function buildOrderBy(sort: string | undefined, dir: string | undefined) {
   const direction = dir === "desc" ? ("desc" as const) : ("asc" as const)
@@ -83,7 +99,7 @@ export function buildOrderBy(sort: string | undefined, dir: string | undefined) 
   }
 }
 
-// Centralise les lectures Prisma pour les contacts — pas de requête Prisma
+// Centralise les lectures Prisma pour les contacts - pas de requête Prisma
 // dispersée dans les pages (même discipline que lib/kpis/*.ts côté Cockpit).
 export async function listContacts(filters: ContactListFilters) {
   const { page = 1, sort, dir } = filters
@@ -92,7 +108,11 @@ export async function listContacts(filters: ContactListFilters) {
   const [items, total] = await prisma.$transaction([
     prisma.contact.findMany({
       where,
-      include: { prospectDetail: true },
+      include: {
+        prospectDetail: true,
+        mandats: { select: { id: true } },
+        mandatsLocataire: { select: { id: true } },
+      },
       orderBy: buildOrderBy(sort, dir),
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,

@@ -1,7 +1,7 @@
 // Script de test manuel : récupère le dernier appel avec un enregistrement
 // disponible via l'API REST Ringover (`GET /calls`, cf. developer.ringover.com/
 // web/openapi_public.yml) et télécharge l'audio en local. Ne passe pas par le
-// webhook — utile pour vérifier l'accès à l'API/l'enregistrement des appels sans
+// webhook - utile pour vérifier l'accès à l'API/l'enregistrement des appels sans
 // attendre un vrai appel entrant ni configurer le webhook côté Ringover.
 //
 // Usage : npx tsx scripts/ringover-fetch-latest-recording.ts
@@ -47,7 +47,7 @@ async function main() {
   const withRecording = data.call_list.find((call) => call.record)
   if (!withRecording) {
     console.log(
-      "Aucun appel avec enregistrement dans les résultats récents — soit l'enregistrement des appels n'est pas activé côté Ringover (Dashboard > Utilisateurs > permissions > \"Allow to record\"), soit aucun appel récent n'en a un."
+      "Aucun appel avec enregistrement dans les résultats récents - soit l'enregistrement des appels n'est pas activé côté Ringover (Dashboard > Utilisateurs > permissions > \"Allow to record\"), soit aucun appel récent n'en a un."
     )
     return
   }

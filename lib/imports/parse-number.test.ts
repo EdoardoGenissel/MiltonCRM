@@ -20,8 +20,8 @@ describe("parseNumber", () => {
   })
 
   it("returns undefined for text with no digit at all (ne doit pas devenir 0)", () => {
-    // Number("") vaut 0 en JS — régression réelle : "Local commercial" comme
-    // valeur de "Pièces" affichait "0" au lieu de "—" sur une fiche bien.
+    // Number("") vaut 0 en JS - régression réelle : "Local commercial" comme
+    // valeur de "Pièces" affichait "0" au lieu de "-" sur une fiche bien.
     expect(parseNumber("Local commercial")).toBeUndefined()
     expect(parseNumber("m²")).toBeUndefined()
   })

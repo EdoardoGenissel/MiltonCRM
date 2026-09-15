@@ -25,10 +25,16 @@ export function FilterableHeader({
   searchParams: Record<string, string | string[] | undefined>
   currentSort?: string
   currentDir?: string
-  align?: "start" | "center"
+  align?: "start" | "center" | "end"
 }) {
   return (
-    <div className={cn("flex items-center gap-1.5", align === "center" && "justify-center")}>
+    <div
+      className={cn(
+        "flex items-center gap-1.5",
+        align === "center" && "justify-center",
+        align === "end" && "justify-end",
+      )}
+    >
       {sortKey ? (
         <SortableHeader
           label={label}

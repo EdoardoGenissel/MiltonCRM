@@ -4,7 +4,7 @@ import { ESTIMATION_STATUT_LABELS } from "@/lib/estimations/statuts"
 // Une teinte par statut (secondaire par défaut pour un statut inconnu).
 const VARIANT: Record<string, BadgeVariant> = {
   en_attente: "secondary",
-  genere: "primary",
+  envoye_apimo: "primary",
   envoye_commercial: "success",
   envoye_client: "success",
 }

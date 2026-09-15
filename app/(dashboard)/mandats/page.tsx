@@ -59,7 +59,7 @@ export default async function MandatsPage({
 
         <TableCard>
           <TableHeadRow>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Type"
                 sortKey="type"
@@ -69,10 +69,9 @@ export default async function MandatsPage({
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Statut"
                 sortKey="statut"
@@ -82,10 +81,9 @@ export default async function MandatsPage({
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Catégorie"
                 sortKey="categorie"
@@ -95,7 +93,6 @@ export default async function MandatsPage({
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
             <th className="px-5 py-3">Propriétaire</th>
@@ -109,15 +106,11 @@ export default async function MandatsPage({
                 mandatId={mandat.id}
                 className="border-b border-border last:border-0 hover:bg-muted/50"
               >
-                <td className="px-5 py-3 text-center">
+                <td className="px-5 py-3">
                   <MandatTypeBadge type={mandat.type} />
                 </td>
-                <td className="px-5 py-3 text-center text-muted-foreground">
-                  {mandat.statut ?? "-"}
-                </td>
-                <td className="px-5 py-3 text-center text-muted-foreground">
-                  {mandat.categorie ?? "-"}
-                </td>
+                <td className="px-5 py-3 text-muted-foreground">{mandat.statut ?? "-"}</td>
+                <td className="px-5 py-3 text-muted-foreground">{mandat.categorie ?? "-"}</td>
                 <td className="px-5 py-3">
                   {mandat.proprietaire ? (
                     <ContactTrigger

@@ -14,14 +14,14 @@ import { recordImportRun } from "@/lib/imports/record-import-run"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
 // Import de l'export Septéo "liste loyer appelé" (~6500 écritures comptables du
-// compte locataires). On agrège par quittance — folio + pièce + date écriture +
-// compte auxiliaire — pour obtenir une ligne `LoyerAppele` par appel de loyer :
+// compte locataires). On agrège par quittance - folio + pièce + date écriture +
+// compte auxiliaire - pour obtenir une ligne `LoyerAppele` par appel de loyer :
 // `montantAppele` = somme des débits (loyer + provisions de charges + TVA...),
 // `montantRegle` = somme des crédits. Rattachement best-effort au locataire via
 // "Libellé auxiliaire", puis à son mandat/bien s'il n'en a qu'un.
 //
 // Limite connue : "Numéro folio"/"Numéro pièce" peuvent se réinitialiser d'un
-// exercice comptable à l'autre — la clé de dédup est donc best-effort.
+// exercice comptable à l'autre - la clé de dédup est donc best-effort.
 const CREATE_BATCH_SIZE = 500
 const WRITE_CONCURRENCY = 10
 
@@ -44,7 +44,7 @@ export async function importSepteoLoyersAppeles(
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
 
-  // Phase 0 — agrégation en mémoire par quittance.
+  // Phase 0 - agrégation en mémoire par quittance.
   const groups = new Map<string, Aggregate>()
   for (const row of rows) {
     const mapped = mapLoyerAppeleRow(headerIndex, row)

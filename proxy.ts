@@ -3,11 +3,11 @@ import { NextResponse, type NextRequest } from "next/server"
 
 const PUBLIC_PATHS = ["/login", "/mot-de-passe-oublie", "/reset-password", "/auth/confirm"]
 
-// Routes appelées par des services tiers (webhooks) ou par le cron Vercel — sans
+// Routes appelées par des services tiers (webhooks) ou par le cron Vercel - sans
 // cookie de session, authentifiées par secret applicatif (vérifié dans la route
 // elle-même). Cf. scope.md : pas de rôles différenciés dans le CRM, ce proxy ne
 // fait que l'authentification, pas d'autorisation fine.
-// `/api/jotform/sync` accepte AUSSI la session Supabase (bouton manuel côté UI) —
+// `/api/jotform/sync` accepte AUSSI la session Supabase (bouton manuel côté UI) -
 // dans ce cas c'est la route elle-même qui revérifie l'utilisateur via
 // `createClient().auth.getUser()`, cf. app/api/jotform/sync/route.ts.
 const NO_SESSION_PATHS = ["/api/ringover/webhook", "/api/jotform/webhook", "/api/jotform/sync"]

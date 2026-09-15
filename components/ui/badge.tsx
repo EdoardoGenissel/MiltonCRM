@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
 
-// Pastille de base — gabarit commun (forme, taille, typo) des badges du CRM.
+// Pastille de base - gabarit commun (forme, taille, typo) des badges du CRM.
 // Les badges sémantiques (PersonaBadge, SourceBadge, EstimationStatutBadge,
 // MandatTypeBadge) composent celui-ci au lieu de recopier la chaîne de classes.
 const VARIANTS = {

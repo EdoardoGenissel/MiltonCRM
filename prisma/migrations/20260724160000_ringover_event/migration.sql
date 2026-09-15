@@ -1,4 +1,4 @@
--- Écrite à la main + appliquée via `prisma migrate deploy` (pas `migrate dev`) —
+-- Écrite à la main + appliquée via `prisma migrate deploy` (pas `migrate dev`) -
 -- même limitation shadow-db documentée dans la migration profile_auth_fk et dans
 -- README.md. Ne porte que l'ajout de RingoverEvent : le schema.prisma contient par
 -- ailleurs des changements en cours (extension Role, colonnes ProspectDetail) qui

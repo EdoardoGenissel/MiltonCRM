@@ -6,7 +6,7 @@ import { ArrowLeft, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Panneau latéral générique (drawer) utilisé par les fiches contact/bien/mandat
-// (cf. components/entity-drawers/*) — remplace la navigation vers une page
+// (cf. components/entity-drawers/*) - remplace la navigation vers une page
 // dédiée par un panneau qui s'ouvre par-dessus la liste courante.
 export function SidePanel({
   open,

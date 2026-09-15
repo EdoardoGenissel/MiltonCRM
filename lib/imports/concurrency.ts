@@ -1,6 +1,6 @@
 // Exécute `fn` sur chaque item avec au plus `limit` appels en vol simultanément.
 // Sert aux updates DB de l'import (une requête par ligne, mais chaque ligne cible
-// un contact distinct — sans risque de collision, donc parallélisable sans risque).
+// un contact distinct - sans risque de collision, donc parallélisable sans risque).
 // ~15 lignes, pas besoin d'une dépendance externe (p-limit) pour ça.
 export async function mapWithConcurrency<T>(
   items: T[],

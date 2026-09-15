@@ -2,17 +2,17 @@ import { normalizeName } from "@/lib/contacts/dedupe"
 
 // Résolution d'un contact à partir d'un simple libellé texte (nom concaténé),
 // pour les exports Septéo "gestion locative" (impayés, incidents, loyers
-// appelés) qui ne portent NI email NI téléphone — le nom seul est le signal le
+// appelés) qui ne portent NI email NI téléphone - le nom seul est le signal le
 // plus faible du système (cf. `resolveContactByIdentity` qui ne l'utilise qu'en
 // dernier recours). On reste donc volontairement strict :
 //
 // - match uniquement si le libellé pointe vers *exactement un* contact ;
-// - on ne crée jamais de fiche (contrairement à `PersonResolver`) — si rien ou
+// - on ne crée jamais de fiche (contrairement à `PersonResolver`) - si rien ou
 //   trop de candidats, on renvoie null et l'appelant conserve le libellé brut.
 //
 // Les libellés Septéo mêlent personnes physiques ("SAGNE Eric", "ROMNEY Kévin"
-// — NOM en tête) et personnes morales ("GENDARMERIE NATIONALE", "TECHNIPRO
-// GUYANE" — stockées côté Contact avec `prenom` vide). On indexe donc plusieurs
+// - NOM en tête) et personnes morales ("GENDARMERIE NATIONALE", "TECHNIPRO
+// GUYANE" - stockées côté Contact avec `prenom` vide). On indexe donc plusieurs
 // formes par contact et on teste le libellé entier contre cet index.
 
 export type LabelCandidate = { id: string; nom: string; prenom: string }
@@ -24,7 +24,7 @@ function keysForContact(nom: string, prenom: string): string[] {
   const p = normalizeName(prenom)
   if (!n) return []
   if (!p) return [n]
-  // "prenom nom" et "nom prenom" — l'ordre varie selon la source du libellé.
+  // "prenom nom" et "nom prenom" - l'ordre varie selon la source du libellé.
   return [`${p} ${n}`, `${n} ${p}`]
 }
 

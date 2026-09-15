@@ -13,14 +13,14 @@ import { nullifyUndefined } from "@/lib/imports/nullify-undefined"
 import { recordImportRun } from "@/lib/imports/record-import-run"
 import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 
-// Import de l'export Septéo "biens/mandats" (gestion locative) — un lot + son
+// Import de l'export Septéo "biens/mandats" (gestion locative) - un lot + son
 // mandat de gestion par ligne, cf. lib/imports/mapping-biens-septeo.ts. Même
 // volume modeste que l'import biens Apimo (~230 lignes), même séparation
 // dédup-en-mémoire / écritures DB batchées.
 //
 // Différence clé avec l'import Apimo biens : DEUX personnes à résoudre par
 // ligne (propriétaire ET locataire actuel), toutes deux tous pôles/sources
-// confondus — un propriétaire Septéo peut déjà exister comme prospect Apimo,
+// confondus - un propriétaire Septéo peut déjà exister comme prospect Apimo,
 // et réciproquement (cf. demande explicite Milton : "un contact bien
 // propriétaires peut exister et dans septeo et dans apimo").
 const CREATE_BATCH_SIZE = 200
@@ -43,7 +43,7 @@ function buildBienData(mapped: SepteoBienRow) {
     adresse: mapped.adresse,
     commune: mapped.commune,
     typeBien: mapped.natureLot,
-    // "MandatLot_SurfaceHabitable" n'est renseignée que sur ~70% des lots —
+    // "MandatLot_SurfaceHabitable" n'est renseignée que sur ~70% des lots -
     // repli sur "SurfaceUtile" (~94%), toujours présente pour un local commercial.
     surface: parseNumber(mapped.surfaceHabitable) ?? parseNumber(mapped.surfaceUtile),
     codePostal: mapped.codePostal,
@@ -57,7 +57,7 @@ function buildBienData(mapped: SepteoBienRow) {
     meuble: parseMeuble(mapped.meuble),
     referenceProduit: mapped.numero,
     referenceLot: mapped.referenceLot,
-    // Pas de "prix" : un lot en gestion locative n'est pas à vendre — le loyer
+    // Pas de "prix" : un lot en gestion locative n'est pas à vendre - le loyer
     // vit sur le mandat (Mandat.montantLoyer), pas sur le bien.
   }
 }
@@ -70,7 +70,7 @@ function buildMandatData(
 ) {
   return {
     // Toujours une gestion locative dans cet export (Mandat_Gere vaut "1" sur
-    // 100% des lignes, aucune variation) — texte fixe informatif, cf. le même
+    // 100% des lignes, aucune variation) - texte fixe informatif, cf. le même
     // filet côté import biens Apimo pour Mandat.type (NOT NULL).
     type: "Gestion locative",
     categorie: "Location",
@@ -130,7 +130,7 @@ export async function importSepteoBiens(
   const bienPlans: BienPlan[] = []
   const mandatPlans: MandatPlan[] = []
 
-  // Phase 1 — dédup/résolution en mémoire (aucun accès DB).
+  // Phase 1 - dédup/résolution en mémoire (aucun accès DB).
   for (const row of rows) {
     const mapped = mapSepteoBienRow(headerIndex, row)
     if (!mapped) continue
@@ -142,7 +142,9 @@ export async function importSepteoBiens(
       telephone: mapped.proprietaireTelephone,
       email: mapped.proprietaireEmail,
       commune: mapped.commune,
-      persona: "proprietaire_bailleur",
+      // Cet export est 100% gestion locative (Mandat_Gere = "1" partout) - le
+      // propriétaire y est donc toujours bailleur, jamais vendeur.
+      persona: "bailleur",
     })
 
     const locataireId = persons.resolve({
@@ -168,7 +170,7 @@ export async function importSepteoBiens(
     const existingMandatId = mandatIdByRef.get(mapped.idMandatLot)
     const mandatId = existingMandatId ?? randomUUID()
     // "MandatLot_IDMandatLot" est presque toujours unique (232/233 sur l'export
-    // réel) mais pas garanti — sans ce `set`, deux lignes partageant le même id
+    // réel) mais pas garanti - sans ce `set`, deux lignes partageant le même id
     // généreraient deux `createMany` en conflit sur la contrainte unique
     // (source, sourceRef) plutôt que de fusionner en une mise à jour.
     if (!existingMandatId) mandatIdByRef.set(mapped.idMandatLot, mandatId)
@@ -187,7 +189,7 @@ export async function importSepteoBiens(
   let processed = 0
   const tick = () => onProgress?.({ processed: ++processed, total })
 
-  // Phase 2a — propriétaires/locataires : créations en masse, tags de persona
+  // Phase 2a - propriétaires/locataires : créations en masse, tags de persona
   // en parallèle borné pour les contacts déjà existants.
   for (const batch of chunk(persons.toCreate, CREATE_BATCH_SIZE)) {
     await prisma.contact.createMany({
@@ -214,7 +216,7 @@ export async function importSepteoBiens(
     },
   )
 
-  // Phase 2b — biens.
+  // Phase 2b - biens.
   const newBiens = bienPlans.filter((b) => b.isNew)
   const existingBienPlans = bienPlans.filter((b) => !b.isNew)
   for (const batch of chunk(newBiens, CREATE_BATCH_SIZE)) {
@@ -233,7 +235,7 @@ export async function importSepteoBiens(
     tick()
   })
 
-  // Phase 2c — mandats (dépendent des biens/contacts créés ci-dessus).
+  // Phase 2c - mandats (dépendent des biens/contacts créés ci-dessus).
   const newMandats = mandatPlans.filter((m) => m.isNew)
   const existingMandatPlans = mandatPlans.filter((m) => !m.isNew)
   for (const batch of chunk(newMandats, CREATE_BATCH_SIZE)) {

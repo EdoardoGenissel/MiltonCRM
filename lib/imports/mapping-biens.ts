@@ -1,12 +1,12 @@
 // Mapping colonnes → champs CRM pour l'export Apimo "Produits" (feuille
 // "Produits" du classeur biens/mandats, ex. `data/properties/Properties
-// APImmo.xlsx`) — un bien + un mandat par ligne, éventuellement rattachés à un
+// APImmo.xlsx`) - un bien + un mandat par ligne, éventuellement rattachés à un
 // propriétaire (cf. `lib/imports/apimo-proprietaire.ts` pour le parsing de la
 // colonne "Propriétaire", volontairement pauvre côté Apimo).
 import { at, cell, communeCell, type HeaderIndex } from "./header-index"
 
 export type ApimoBienRow = {
-  // Identité du bien — "Apinumber" est l'id interne Apimo, toujours renseigné,
+  // Identité du bien - "Apinumber" est l'id interne Apimo, toujours renseigné,
   // utilisé comme sourceRef pour le dédoublonnage (contrairement à "Référence",
   // la référence publique de l'annonce, moins systématiquement remplie).
   apinumber: string
@@ -49,7 +49,7 @@ export type ApimoBienRow = {
   creeLe?: string
   majLe?: string
 
-  // Propriétaire — texte brut conservé sur le bien quel que soit le résultat du
+  // Propriétaire - texte brut conservé sur le bien quel que soit le résultat du
   // rapprochement (co-propriétaires, raison sociale...), coordonnées utilisées
   // pour tenter de relier/créer une fiche contact (cf. run-import-biens.ts).
   proprietaireLabel?: string

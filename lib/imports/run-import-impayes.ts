@@ -15,7 +15,7 @@ import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 // Import de l'export Septéo "liste impayés loyers" (~50 lignes, une par lot en
 // situation d'impayé). Rattachement direct au bien via "Ref. Lot" →
 // `Bien.referenceLot` (alimenté par l'import biens Septéo) ; le mandat de gestion
-// du bien fournit ensuite locataire et propriétaire — les libellés du CSV
+// du bien fournit ensuite locataire et propriétaire - les libellés du CSV
 // ("Nom Locataire", "Propriétaire") sont trop sales pour un matching fiable et
 // sont conservés bruts (`*Label`).
 const CREATE_BATCH_SIZE = 200

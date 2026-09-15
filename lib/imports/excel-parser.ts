@@ -17,7 +17,7 @@ async function parseXlsxBuffer(buffer: ArrayBuffer): Promise<ParsedSheet> {
   const allRows: unknown[][] = []
   sheet.eachRow((row) => {
     const values = row.values as unknown[]
-    // ExcelJS renvoie un tableau 1-indexé (values[0] est vide) — on aligne sur 0.
+    // ExcelJS renvoie un tableau 1-indexé (values[0] est vide) - on aligne sur 0.
     allRows.push(values.slice(1))
   })
 
@@ -25,7 +25,7 @@ async function parseXlsxBuffer(buffer: ArrayBuffer): Promise<ParsedSheet> {
   return { headerRow: headerRow ?? [], rows }
 }
 
-// Détecte le séparateur sur la ligne d'en-tête (avant tout champ quoté) — les
+// Détecte le séparateur sur la ligne d'en-tête (avant tout champ quoté) - les
 // exports Septéo/Milton sont en point-virgule, mais certains outils exportent en
 // virgule.
 function detectDelimiter(text: string): string {

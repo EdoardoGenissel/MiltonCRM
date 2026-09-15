@@ -1,9 +1,9 @@
 -- Écrite à la main (même limitation de shadow database que les migrations
--- précédentes — schéma `auth` absent d'une base fraîche). Appliquer avec
+-- précédentes - schéma `auth` absent d'une base fraîche). Appliquer avec
 -- `prisma migrate deploy`.
 --
 -- Imports manuels Septéo "gestion locative" (détail) : impayés de loyer,
--- incidents, loyers appelés. Modèles propres au CRM — les tables Fact* (agrégats
+-- incidents, loyers appelés. Modèles propres au CRM - les tables Fact* (agrégats
 -- KPI Cockpit) ne sont pas touchées.
 
 -- AlterTable

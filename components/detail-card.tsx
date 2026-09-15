@@ -1,5 +1,5 @@
 // Card/Field/EmptyState partagés par les drawers d'entité (cf.
-// components/entity-drawers/*) — extraits des anciennes pages de détail
+// components/entity-drawers/*) - extraits des anciennes pages de détail
 // (contacts/[id], biens/[id]) pour éviter la duplication une fois leur contenu
 // porté dans des drawers.
 

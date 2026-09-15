@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 
-// Primitives de formulaire partagées par les pages d'auth et l'import — même
+// Primitives de formulaire partagées par les pages d'auth et l'import - même
 // gabarit label + champ, message d'erreur et bouton de soumission avec libellé
 // « en cours ».
 

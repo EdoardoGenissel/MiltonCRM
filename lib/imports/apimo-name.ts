@@ -1,7 +1,7 @@
 // L'export Apimo ne fournit pas prénom/nom/civilité en colonnes séparées : tout
 // est concaténé dans une seule colonne "Contact" (ex. "Madame Sabrina MOZONOE",
 // "Annamet CEDER", "Madame BETSHA"). Format observé : civilité optionnelle, puis
-// "Prénom NOM" où NOM est en capitales — on s'appuie sur la casse pour séparer les
+// "Prénom NOM" où NOM est en capitales - on s'appuie sur la casse pour séparer les
 // deux plutôt que sur une position fixe, sinon les entrées à un seul mot (nom
 // seul) ou à nom composé cassent tout.
 const CIVILITES = ["Madame", "Monsieur", "Mademoiselle"]

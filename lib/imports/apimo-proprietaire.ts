@@ -4,7 +4,7 @@
 // initiale ("Mme M. BERGAUD"), parfois plusieurs co-propriétaires séparés par
 // " - " ("M. CHATAIGNE - M. GOILLOT"), parfois une raison sociale nue ("COETA").
 // On n'essaie de résoudre/créer un contact que pour le cas simple (un seul
-// propriétaire) — au-delà, le risque de mal attribuer une fiche est trop élevé
+// propriétaire) - au-delà, le risque de mal attribuer une fiche est trop élevé
 // (cf. décision produit : le texte brut reste affiché sur la fiche bien via
 // `Bien.proprietaireLabel`, que la résolution réussisse ou non).
 const CIVILITES: Record<string, string> = {

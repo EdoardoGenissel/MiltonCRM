@@ -23,7 +23,7 @@ npx prisma migrate deploy # applique les migrations existantes sur la base parta
 npm run dev
 ```
 
-**Important — ne pas utiliser `prisma migrate dev` sur cette base.** Le shadow
+**Important - ne pas utiliser `prisma migrate dev` sur cette base.** Le shadow
 database que `migrate dev` utilise pour calculer les diffs échoue systématiquement
 sur la migration `20260712203504_profile_auth_fk` (le schéma `auth` de Supabase
 n'existe pas dans une base fraîche). Toute évolution du schéma doit donc suivre ce
@@ -35,28 +35,28 @@ répercuter ici toute migration déjà appliquée côté Cockpit (et inversement
 
 ## Scripts
 
-- `npm run dev` — serveur de dev
-- `npm run build` — build production
-- `npm run test` — tests Vitest (logique métier pure : dédup import, matching Ringover)
-- `npm run lint` — ESLint
+- `npm run dev` - serveur de dev
+- `npm run build` - build production
+- `npm run test` - tests Vitest (logique métier pure : dédup import, matching Ringover)
+- `npm run lint` - ESLint
 
 ## Structure
 
-- `app/(auth)` — login / mot de passe oublié / reset (Supabase Auth, pas d'inscription)
-- `app/(dashboard)` — contacts, mandats, biens, imports, estimations
-- `app/api/imports` — import manuel Excel (Apimo/Septéo)
-- `app/api/ringover/webhook` — matching appel entrant
-- `app/api/jotform/webhook` — automatisation JotForm → CityScan
-- `lib/contacts/dedupe.ts`, `lib/integrations/ringover/match.ts` — logique de
+- `app/(auth)` - login / mot de passe oublié / reset (Supabase Auth, pas d'inscription)
+- `app/(dashboard)` - contacts, mandats, biens, imports, estimations
+- `app/api/imports` - import manuel Excel (Apimo/Septéo)
+- `app/api/ringover/webhook` - matching appel entrant
+- `app/api/jotform/webhook` - automatisation JotForm → CityScan
+- `lib/contacts/dedupe.ts`, `lib/integrations/ringover/match.ts` - logique de
   réconciliation/matching, pure et testée (Vitest)
-- `lib/imports/mapping.ts` — mapping colonnes → champs CRM, basé sur les exports
+- `lib/imports/mapping.ts` - mapping colonnes → champs CRM, basé sur les exports
   réels transmis par Milton (cf. `data/` : `Export APIMMO.xlsx`, `Export
   excel_Propriétaires SEPTEO (2).csv`, `Export_Locataires SEPTEO (2).csv`).
   Particularités gérées : colonne "Contact" Apimo combinant civilité/prénom/nom en
   une seule chaîne (`lib/imports/apimo-name.ts`), valeurs entourées de guillemets
   littéraux (`lib/imports/text-clean.ts`), "Type interlocuteur" Septéo multi-valué
   cumulant plusieurs personas sur une même fiche (`lib/imports/septeo-persona.ts`).
-  Les exports Septéo Propriétaires/Locataires n'ont **pas** de colonne bien/mandat —
+  Les exports Septéo Propriétaires/Locataires n'ont **pas** de colonne bien/mandat -
   seuls des contacts sont importés depuis ces deux fichiers ; l'import Excel Septéo
   crée uniquement des `Contact`, pas de `Bien`/`Mandat` pour l'instant.
 

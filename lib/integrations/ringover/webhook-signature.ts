@@ -1,10 +1,10 @@
 import { createHmac, timingSafeEqual } from "node:crypto"
 
-// Vérification/signature des webhooks Ringover — mécanisme V1 (actuellement par
+// Vérification/signature des webhooks Ringover - mécanisme V1 (actuellement par
 // défaut) : un JWT signé HS512, envoyé dans le header `X-Ringover-Webhook-Signature`
 // (l'ancien header `Authorization` est conservé pour rétrocompatibilité). Les claims
 // décodées exposent `url` (l'endpoint configuré) et `payload` (le corps de
-// l'événement) — cf. developer.ringover.com/web/openapi_public.yml, section
+// l'événement) - cf. developer.ringover.com/web/openapi_public.yml, section
 // "Securing your webhooks". Pas de dépendance `jsonwebtoken` : HS512 se vérifie en
 // ~10 lignes avec le module `crypto` natif de Node.
 export type RingoverWebhookClaims = {
@@ -42,7 +42,7 @@ export function verifyRingoverSignature(
   }
 }
 
-// Construit un JWT HS512 identique à ce que Ringover enverrait — utilisé par les
+// Construit un JWT HS512 identique à ce que Ringover enverrait - utilisé par les
 // tests et par le script de simulation manuelle (cf. scripts/), pas par la route
 // webhook elle-même (qui ne fait que vérifier).
 export function signRingoverPayload(secret: string, claims: RingoverWebhookClaims): string {

@@ -9,11 +9,11 @@ import {
 } from "@/lib/integrations/ringover/parse-event"
 import { verifyRingoverSignature } from "@/lib/integrations/ringover/webhook-signature"
 
-// Webhook Ringover — un seul point d'entrée pour tous les types d'événements
+// Webhook Ringover - un seul point d'entrée pour tous les types d'événements
 // (ringing, answered, hangup, missed, voicemail, record_available,
 // transcription_available, summary_available, tags/comments_updated...), cf.
 // scope.md §"Ringover - matching des appels". Schéma confirmé via le fichier
-// OpenAPI public de Ringover (developer.ringover.com/web/openapi_public.yml) —
+// OpenAPI public de Ringover (developer.ringover.com/web/openapi_public.yml) -
 // {event, resource, timestamp, data: {...}}, pas une simple structure plate.
 export async function POST(request: NextRequest) {
   // Lu en texte brut d'abord : nécessaire à la fois pour la vérification de
@@ -27,13 +27,13 @@ export async function POST(request: NextRequest) {
   let authorized = false
   if (signatureHeader && process.env.RINGOVER_WEBHOOK_SECRET) {
     // Mécanisme réel Ringover (V1) : JWT HS512 signé avec la clé webhook du
-    // dashboard Ringover (Paramètres > Webhooks) — cf. lib/integrations/ringover/
+    // dashboard Ringover (Paramètres > Webhooks) - cf. lib/integrations/ringover/
     // webhook-signature.ts.
     authorized =
       verifyRingoverSignature(signatureHeader, process.env.RINGOVER_WEBHOOK_SECRET) !== null
   }
   if (!authorized) {
-    // Repli : secret en query string — utile pour nos propres tests manuels tant
+    // Repli : secret en query string - utile pour nos propres tests manuels tant
     // qu'on n'a pas récupéré la vraie clé webhook dans le dashboard Ringover.
     const querySecret = request.nextUrl.searchParams.get("secret")
     authorized =
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
   // Bandeau "Appel en cours" + CallLog (Lot 4) : uniquement pour l'appel entrant
   // qui sonne. Les événements suivants du même appel (hangup, record_available,
   // transcription_available...) enrichissent ce CallLog s'il existe déjà, mais ne
-  // déclenchent pas la création d'un nouveau CallLog à eux seuls — on ne veut pas
+  // déclenchent pas la création d'un nouveau CallLog à eux seuls - on ne veut pas
   // créer une entrée "appel" à partir d'un événement type tags_updated isolé.
   if (!existing && !isIncomingCall(parsed)) {
     return NextResponse.json({ matchedContactId })

@@ -12,7 +12,7 @@ export type IncomingCall = {
   callerName?: string | null // "Prénom Nom" tel que fourni par Ringover
 }
 
-// Matching à l'appel entrant — cf. scope.md : "le matching se fait sur les 3 seules
+// Matching à l'appel entrant - cf. scope.md : "le matching se fait sur les 3 seules
 // données Ringover (nom, prénom, numéro)". Le numéro est la donnée la plus fiable
 // (le nom transmis par l'opérateur peut être absent ou mal formaté), donc priorité
 // au téléphone, avec le nom en confirmation/fallback si plusieurs contacts

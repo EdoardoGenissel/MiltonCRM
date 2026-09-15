@@ -1,6 +1,6 @@
 // Next.js App Router ne renvoie un tableau pour une clé de searchParams que si
 // elle apparaît plusieurs fois dans l'URL (une seule occurrence -> string simple)
-// — à normaliser systématiquement pour les filtres multi-valeurs (cf.
+// - à normaliser systématiquement pour les filtres multi-valeurs (cf.
 // components/column-filter.tsx).
 export function toArray(value: string | string[] | undefined): string[] {
   if (!value) return []
@@ -18,7 +18,7 @@ type BuildQueryOptions = {
   append?: Record<string, string[]>
 }
 
-// Reconstruit une query string à partir des searchParams courants — recopie tout
+// Reconstruit une query string à partir des searchParams courants - recopie tout
 // sauf `page` (toute navigation filtre/tri/recherche revient à la page 1) et les
 // clés explicitement pilotées. Centralise le boilerplate répété dans
 // sortable-header / pagination / filter-tabs / filter-bar / column-filter.

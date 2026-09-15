@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { syncJotformEstimations } from "@/lib/integrations/jotform/sync"
 
 // Un sync complet tourne sur ~500 soumissions avec plusieurs upserts DB chacune
-// (cf. imports Excel, même contrainte) — au-delà du timeout par défaut Vercel.
+// (cf. imports Excel, même contrainte) - au-delà du timeout par défaut Vercel.
 export const maxDuration = 300
 
 // Déclenché principalement par le cron Vercel tous les soirs (cf. vercel.json,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { FormField, FormError, SubmitButton } from "@/components/ui/form"
 import { updatePassword, type AuthActionState } from "../actions"
@@ -9,6 +9,12 @@ const initialState: AuthActionState = { error: null }
 
 export function ResetPasswordForm() {
   const [state, formAction, pending] = useActionState(updatePassword, initialState)
+
+  useEffect(() => {
+    if (state.redirectTo) {
+      window.location.href = state.redirectTo
+    }
+  }, [state.redirectTo])
 
   return (
     <form action={formAction} className="mt-6 flex flex-col gap-4">

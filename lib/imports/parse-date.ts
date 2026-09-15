@@ -1,5 +1,5 @@
 // Les dates texte "jj/mm/aa" ou "jj/mm/aaaa" des exports Apimo/Septéo (ex.
-// "12/07/23", "19/01/2024") — année sur 2 ou 4 chiffres selon l'export
+// "12/07/23", "19/01/2024") - année sur 2 ou 4 chiffres selon l'export
 // (prospects Apimo : 2 chiffres ; mandats Septéo : 4 chiffres), toujours dans
 // les années 2000 vu la période couverte par les exports Milton.
 export function parseFrDate(value: string | undefined): Date | undefined {

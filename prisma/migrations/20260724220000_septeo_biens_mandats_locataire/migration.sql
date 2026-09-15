@@ -1,5 +1,5 @@
 -- Écrite à la main (même limitation de shadow database que les migrations
--- précédentes — schéma `auth` absent d'une base fraîche). Appliquer avec
+-- précédentes - schéma `auth` absent d'une base fraîche). Appliquer avec
 -- `prisma migrate deploy`.
 
 -- AlterTable

@@ -16,7 +16,7 @@ function readFilters(params: URLSearchParams): BienListFilters {
   }
 }
 
-// Valeurs uniques pour un filtre colonne façon Excel sur la page Biens — même
+// Valeurs uniques pour un filtre colonne façon Excel sur la page Biens - même
 // principe que app/api/contacts/column-values (cf. components/column-filter.tsx).
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ values, hasMore: false })
   }
 
-  // `categorie` vit sur Mandat, pas sur Bien (cf. lib/biens/queries.ts) — on
+  // `categorie` vit sur Mandat, pas sur Bien (cf. lib/biens/queries.ts) - on
   // interroge donc les mandats dont le bien correspond aux filtres actifs.
   if (column === "categorie") {
     const rows = await prisma.mandat.findMany({

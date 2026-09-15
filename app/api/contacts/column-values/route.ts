@@ -6,8 +6,17 @@ import {
   type FilterColumn,
 } from "@/lib/contacts/queries"
 import { PERSONAS } from "@/lib/contacts/personas"
+import { STATUTS } from "@/lib/contacts/statut"
 
-const COLUMNS: FilterColumn[] = ["nom", "telephone", "email", "commune", "source", "persona"]
+const COLUMNS: FilterColumn[] = [
+  "nom",
+  "telephone",
+  "email",
+  "commune",
+  "source",
+  "persona",
+  "statut",
+]
 const MAX_VALUES = 100
 
 function readFilters(params: URLSearchParams): ContactListFilters {
@@ -19,11 +28,12 @@ function readFilters(params: URLSearchParams): ContactListFilters {
     commune: params.getAll("commune"),
     source: params.getAll("source"),
     persona: params.getAll("persona"),
+    statut: params.getAll("statut"),
   }
 }
 
 // Valeurs uniques disponibles pour un filtre colonne façon Excel (cf.
-// components/column-filter.tsx) — respecte les filtres déjà actifs sur les
+// components/column-filter.tsx) - respecte les filtres déjà actifs sur les
 // *autres* colonnes (excludeColumn) et une recherche texte `q` sur la liste
 // elle-même, plafonné à MAX_VALUES pour ne jamais renvoyer les ~3800 valeurs
 // nom/téléphone/email d'un coup.
@@ -40,7 +50,7 @@ export async function GET(request: NextRequest) {
   const qFilter = q ? { contains: q, mode: "insensitive" as const } : undefined
 
   if (column === "persona") {
-    // `personas` est un tableau (pas de `distinct` Prisma possible dessus) — on
+    // `personas` est un tableau (pas de `distinct` Prisma possible dessus) - on
     // vérifie juste, pour chacun des 4 personas connus, s'il existe au moins une
     // fiche qui le porte compte tenu des filtres déjà actifs sur les autres
     // colonnes (ex. commune=CAYENNE -> ne proposer que les personas réellement
@@ -52,6 +62,27 @@ export async function GET(request: NextRequest) {
     )
     const values = PERSONAS.filter((_, i) => counts[i] > 0)
       .map((p) => p.value)
+      .filter((v) => v.toLowerCase().includes(q.toLowerCase()))
+    return Response.json({ values, hasMore: false })
+  }
+
+  if (column === "statut") {
+    // Comme "persona" : pas une colonne DB brute, donc un count par valeur
+    // possible (prospect/client) plutôt qu'un `distinct`.
+    const counts = await Promise.all(
+      STATUTS.map((s) =>
+        prisma.contact.count({
+          where: {
+            ...where,
+            ...(s.value === "client"
+              ? { OR: [{ mandats: { some: {} } }, { mandatsLocataire: { some: {} } }] }
+              : { mandats: { none: {} }, mandatsLocataire: { none: {} } }),
+          },
+        }),
+      ),
+    )
+    const values = STATUTS.filter((_, i) => counts[i] > 0)
+      .map((s) => s.value)
       .filter((v) => v.toLowerCase().includes(q.toLowerCase()))
     return Response.json({ values, hasMore: false })
   }

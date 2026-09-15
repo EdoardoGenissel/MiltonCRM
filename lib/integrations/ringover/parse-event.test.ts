@@ -10,7 +10,7 @@ import {
 // Payloads conformes au vrai schéma Ringover (developer.ringover.com/web/
 // openapi_public.yml), pas à ce qu'on avait initialement supposé.
 //
-// Le call_id ci-dessous (1234567890987654321) dépasse Number.MAX_SAFE_INTEGER —
+// Le call_id ci-dessous (1234567890987654321) dépasse Number.MAX_SAFE_INTEGER -
 // s'il était écrit comme littéral JS dans un objet, il perdrait déjà sa précision
 // AVANT tout JSON.stringify (perte au moment même où le moteur JS parse le
 // littéral source). D'où la chaîne brute écrite à la main ci-dessous plutôt qu'un

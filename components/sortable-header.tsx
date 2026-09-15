@@ -3,7 +3,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { buildQuery } from "@/lib/search-params"
 
-// Tri "à la Excel" en cliquant l'en-tête de colonne — pas d'état client, tout
+// Tri "à la Excel" en cliquant l'en-tête de colonne - pas d'état client, tout
 // passe par l'URL (?sort=...&dir=...), cohérent avec le pattern déjà utilisé pour
 // les filtres et la pagination (cf. components/pagination.tsx).
 export function SortableHeader({

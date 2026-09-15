@@ -19,7 +19,7 @@ function asSource(value: string): Source | undefined {
   return (Object.values(Source) as string[]).includes(value) ? (value as Source) : undefined
 }
 
-// Même logique que `buildContactWhere`/`buildBienWhere` — `excludeColumn` pour
+// Même logique que `buildContactWhere`/`buildBienWhere` - `excludeColumn` pour
 // que l'API de valeurs uniques d'une colonne reflète les filtres déjà posés sur
 // les *autres* colonnes. La recherche texte porte sur le bien et le propriétaire
 // (le mandat lui-même n'a pas de champ "libellé").

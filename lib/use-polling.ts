@@ -19,7 +19,7 @@ export function usePolling<T>(url: string, intervalMs: number): { data: T | null
         const json = (await res.json()) as T
         if (!cancelled) setData(json)
       } catch {
-        // ignoré volontairement — le dashboard ne doit pas casser sur un tick raté
+        // ignoré volontairement - le dashboard ne doit pas casser sur un tick raté
       }
     }
 

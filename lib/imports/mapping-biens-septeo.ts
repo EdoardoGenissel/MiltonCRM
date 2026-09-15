@@ -1,29 +1,29 @@
 // Mapping colonnes → champs CRM pour l'export Septéo "biens/mandats" (gestion
-// locative — un lot + son mandat de gestion par ligne, ex. `data/properties/
+// locative - un lot + son mandat de gestion par ligne, ex. `data/properties/
 // import septeo.csv`). Export très large (593 colonnes) : la plupart décrivent
 // des états datés de copropriété (amiante, plomb, ascenseur...) ou de la
-// plomberie comptable interne Septéo (RIB/IBAN, contacts technique/comptable) —
+// plomberie comptable interne Septéo (RIB/IBAN, contacts technique/comptable) -
 // hors périmètre d'un CRM commercial, non mappés ici. Cf. AGENTS/scope.md :
 // seuls les champs utiles à la fiche bien/mandat/contact sont repris.
 //
 // Deux simplifications actées après inspection du fichier réel transmis par
 // Milton (233 lignes) :
 // - "Destinataire_*" et "Proprietaire_*" sont strictement identiques sur les
-//   233 lignes (même nom, même prénom...) — on ne mappe que "Proprietaire_*".
+//   233 lignes (même nom, même prénom...) - on ne mappe que "Proprietaire_*".
 // - "Lot_*" et "MandatLot_*" sont strictement identiques (adresse, surfaces,
-//   DPE...) — on ne mappe que "MandatLot_*", plus complet (loyers, locataire
+//   DPE...) - on ne mappe que "MandatLot_*", plus complet (loyers, locataire
 //   actuel, dates).
 import { at, cell, type HeaderIndex } from "./header-index"
 
 export type SepteoBienRow = {
-  // Identité — cf. run-import-biens-septeo.ts pour le choix de sourceRef :
+  // Identité - cf. run-import-biens-septeo.ts pour le choix de sourceRef :
   // "MandatLot_IDLot" (le lot physique) pour le Bien, "MandatLot_IDMandatLot"
-  // (l'association lot+mandat, ~1-1 avec les lignes) pour le Mandat — un même
+  // (l'association lot+mandat, ~1-1 avec les lignes) pour le Mandat - un même
   // "Mandat_IDMandat" Septéo peut en réalité couvrir plusieurs lots.
   idLot: string
   idMandatLot: string
   numero?: string // "Mandat_Numero", numéro de mandat lisible
-  referenceLot?: string // "MandatLot_Reference" / "Lot_Reference" (ex. "SAGER") — clé de rattachement des impayés
+  referenceLot?: string // "MandatLot_Reference" / "Lot_Reference" (ex. "SAGER") - clé de rattachement des impayés
 
   // Bien (Immeuble + Lot/MandatLot)
   residence?: string // "Immeuble_Nom"
@@ -54,7 +54,7 @@ export type SepteoBienRow = {
   honorairesGestion?: string
   pourcentageHonorairesGestion?: string
 
-  // Propriétaire — coordonnées utilisées pour rattacher/créer une fiche contact
+  // Propriétaire - coordonnées utilisées pour rattacher/créer une fiche contact
   // (cf. resolveContactByIdentity), pas stockées telles quelles sur le bien.
   proprietaireCivilite?: string
   proprietaireNom?: string
@@ -62,7 +62,7 @@ export type SepteoBienRow = {
   proprietaireTelephone?: string
   proprietaireEmail?: string
 
-  // Locataire actuel du lot (snapshot Septéo au moment de l'export) — idem,
+  // Locataire actuel du lot (snapshot Septéo au moment de l'export) - idem,
   // sert à rattacher/créer une fiche contact persona "locataire".
   locataireCivilite?: string
   locataireNom?: string

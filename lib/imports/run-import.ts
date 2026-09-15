@@ -10,6 +10,7 @@ import {
   type ApimoProspectRow,
   type ImportKind,
 } from "@/lib/imports/mapping"
+import { apimoProspectPersona } from "@/lib/imports/apimo-persona"
 import { chunk } from "@/lib/imports/batch"
 import { mapWithConcurrency } from "@/lib/imports/concurrency"
 import { parseFrDate } from "@/lib/imports/parse-date"
@@ -26,11 +27,11 @@ import type { ImportResult, OnProgress } from "@/lib/imports/import-types"
 export type { ImportResult, ImportProgress, OnProgress } from "@/lib/imports/import-types"
 
 // Écrire une ligne à la fois (upsert par ligne) fait ~2 allers-retours réseau par
-// ligne vers le pooler Supabase — pour 3 700 lignes Apimo ça peut prendre plusieurs
+// ligne vers le pooler Supabase - pour 3 700 lignes Apimo ça peut prendre plusieurs
 // minutes. On sépare donc dédup (en mémoire, quasi instantané) et écriture DB (en
 // masse) : les nouvelles fiches partent en `createMany` par lots de 500 (1 aller-
 // retour pour 500 lignes au lieu de 500), les fiches déjà existantes (doublons
-// détectés) sont mises à jour en parallèle borné — chacune cible un id distinct,
+// détectés) sont mises à jour en parallèle borné - chacune cible un id distinct,
 // donc sans risque de collision entre écritures concurrentes.
 const CREATE_BATCH_SIZE = 500
 const UPDATE_CONCURRENCY = 10
@@ -53,14 +54,14 @@ async function loadCandidates(source: Source): Promise<CandidateWithPersonas[]> 
 }
 
 // `resolveContactMatch` ne compare que des contacts de même source (cf. son
-// contrat : "les candidats doivent déjà être pré-filtrés par l'appelant") — un
+// contrat : "les candidats doivent déjà être pré-filtrés par l'appelant") - un
 // prospect Apimo et un propriétaire/locataire Septéo pour la même personne ne
 // matchaient donc jamais, même avec un email identique. Repéré lors de l'audit
 // du 2026-07-24 (166 paires de contacts dupliqués par email, cf. mémoire du
 // projet) : la fiche la plus ancienne restait orpheline, la plus récente
 // n'était jamais reliée dessus. Ce filet de secours vérifie l'email tous
 // sources confondues *avant* de créer une nouvelle fiche ; volontairement
-// conservateur (persona ajouté, aucun champ écrasé) — cf. `PersonResolver`
+// conservateur (persona ajouté, aucun champ écrasé) - cf. `PersonResolver`
 // (import biens), même logique.
 async function loadContactIdsByEmail(): Promise<Map<string, string>> {
   const rows = await prisma.contact.findMany({
@@ -135,7 +136,7 @@ async function importApimoProspects(
   const candidates = await loadCandidates(Source.APIMO)
   const emailIndex = await loadContactIdsByEmail()
 
-  // Phase 1 — dédup en mémoire, aucun accès DB : rapide même sur des milliers de
+  // Phase 1 - dédup en mémoire, aucun accès DB : rapide même sur des milliers de
   // lignes, donc pas besoin d'y reporter de progression.
   type ToCreate = { id: string; mapped: NonNullable<ReturnType<typeof mapApimoRow>> }
   type ToUpdate = { matchId: string; mapped: NonNullable<ReturnType<typeof mapApimoRow>> }
@@ -146,6 +147,8 @@ async function importApimoProspects(
   for (const row of rows) {
     const mapped = mapApimoRow(headerIndex, row)
     if (!mapped || !mapped.nom) continue
+
+    const persona = apimoProspectPersona(mapped.categorie)
 
     const matchId = resolveContactMatch(candidates, {
       source: Source.APIMO,
@@ -163,13 +166,13 @@ async function importApimoProspects(
       toUpdate.push({ matchId, mapped })
     } else if (emailMatchId) {
       const personas = crossSourceTags.get(emailMatchId) ?? new Set<string>()
-      personas.add("prospect")
+      personas.add(persona)
       crossSourceTags.set(emailMatchId, personas)
     } else {
       const id = randomUUID()
       toCreate.push({ id, mapped })
       // Visible immédiatement pour les lignes suivantes du même fichier (ex. une
-      // même personne présente deux fois dans l'export) — sans ça, deux lignes
+      // même personne présente deux fois dans l'export) - sans ça, deux lignes
       // identiques créeraient deux contacts au lieu d'un doublon détecté.
       candidates.push({
         id,
@@ -178,7 +181,7 @@ async function importApimoProspects(
         nom: mapped.nom,
         prenom: mapped.prenom,
         telephone: mapped.telephone ?? null,
-        personas: ["prospect"],
+        personas: [persona],
       })
       if (mapped.email) emailIndex.set(mapped.email.trim().toLowerCase(), id)
     }
@@ -187,7 +190,7 @@ async function importApimoProspects(
   const total = toCreate.length + toUpdate.length + crossSourceTags.size
   let processed = 0
 
-  // Phase 2a — nouvelles fiches, par lots.
+  // Phase 2a - nouvelles fiches, par lots.
   for (const batch of chunk(toCreate, CREATE_BATCH_SIZE)) {
     await prisma.contact.createMany({
       data: batch.map(({ id, mapped }) => ({
@@ -198,7 +201,7 @@ async function importApimoProspects(
         email: mapped.email,
         telephone: mapped.telephone,
         commune: mapped.commune,
-        personas: ["prospect"],
+        personas: [apimoProspectPersona(mapped.categorie)],
         source: Source.APIMO,
         sourceRef: mapped.sourceRef,
       })),
@@ -222,17 +225,19 @@ async function importApimoProspects(
     onProgress?.({ processed, total })
   }
 
-  // Phase 2b — doublons détectés (matchId existant) : update en parallèle borné.
+  // Phase 2b - doublons détectés (matchId existant) : update en parallèle borné.
   await mapWithConcurrency(toUpdate, UPDATE_CONCURRENCY, async ({ matchId, mapped }) => {
     const loyerMax =
       mapped.categorie?.toLowerCase() === "location" ? parseLoyerMax(mapped.loyerMax) : undefined
 
     // Fusionne avec les personas existants plutôt que d'écraser : un contact peut
-    // avoir été rattaché entretemps comme propriétaire/locataire (import biens ou
-    // Septéo) — un ré-import Apimo prospects ne doit pas faire disparaître ce
-    // persona (cf. bug corrigé lors de l'ajout de l'import biens).
+    // avoir été rattaché entretemps comme vendeur/bailleur/locataire (import biens
+    // ou Septéo) - un ré-import Apimo prospects ne doit pas faire disparaître ce
+    // type (cf. bug corrigé lors de l'ajout de l'import biens).
     const existingPersonas = candidates.find((c) => c.id === matchId)?.personas ?? []
-    const mergedPersonas = Array.from(new Set([...existingPersonas, "prospect"]))
+    const mergedPersonas = Array.from(
+      new Set([...existingPersonas, apimoProspectPersona(mapped.categorie)]),
+    )
 
     await prisma.contact.update({
       where: { id: matchId },
@@ -271,7 +276,7 @@ async function importApimoProspects(
     onProgress?.({ processed, total })
   })
 
-  // Phase 2c — doublons cross-source détectés par email (contact déjà existant
+  // Phase 2c - doublons cross-source détectés par email (contact déjà existant
   // côté Septéo) : on ajoute seulement le persona, sans écraser ses champs.
   await tagCrossSourcePersonas(crossSourceTags)
   processed += crossSourceTags.size

@@ -4,6 +4,7 @@ import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
 import { Pagination } from "@/components/pagination"
 import { FilterBar } from "@/components/filter-bar"
 import { FilterableHeader } from "@/components/filterable-header"
+import { BienType } from "@/components/bien-type"
 import { BienTrigger, ContactTrigger } from "@/components/entity-drawers/entity-triggers"
 import { listBiens } from "@/lib/biens/queries"
 import { parsePage } from "@/lib/pagination"
@@ -67,6 +68,18 @@ export default async function BiensPage({
           <TableHeadRow>
             <th className="px-5 py-3">
               <FilterableHeader
+                label="Type"
+                sortKey="typeBien"
+                filterColumn="typeBien"
+                filterEndpoint={ENDPOINT}
+                selected={filters.typeBien}
+                searchParams={params}
+                currentSort={params.sort}
+                currentDir={params.dir}
+              />
+            </th>
+            <th className="px-5 py-3">
+              <FilterableHeader
                 label="Adresse"
                 sortKey="adresse"
                 searchParams={params}
@@ -74,7 +87,7 @@ export default async function BiensPage({
                 currentDir={params.dir}
               />
             </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Commune"
                 sortKey="commune"
@@ -84,53 +97,36 @@ export default async function BiensPage({
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
-            <th className="px-5 py-3 text-center">
-              <FilterableHeader
-                label="Type"
-                sortKey="typeBien"
-                filterColumn="typeBien"
-                filterEndpoint={ENDPOINT}
-                selected={filters.typeBien}
-                searchParams={params}
-                currentSort={params.sort}
-                currentDir={params.dir}
-                align="center"
-              />
-            </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Catégorie"
                 filterColumn="categorie"
                 filterEndpoint={ENDPOINT}
                 selected={filters.categorie}
                 searchParams={params}
-                align="center"
               />
             </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Surface"
                 sortKey="surface"
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Prix"
                 sortKey="prix"
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
-            <th className="px-5 py-3 text-center">
+            <th className="px-5 py-3">
               <FilterableHeader
                 label="Statut"
                 sortKey="statut"
@@ -140,7 +136,6 @@ export default async function BiensPage({
                 searchParams={params}
                 currentSort={params.sort}
                 currentDir={params.dir}
-                align="center"
               />
             </th>
             <th className="px-5 py-3">Propriétaire</th>
@@ -154,29 +149,23 @@ export default async function BiensPage({
                   key={bien.id}
                   className="border-b border-border last:border-0 hover:bg-muted/50"
                 >
+                  <td className="px-5 py-3">
+                    <BienType value={bien.typeBien} />
+                  </td>
                   <td className="px-5 py-3 font-medium text-foreground">
                     <BienTrigger id={bien.id} className="hover:underline">
                       {bien.titre || bien.adresse || "-"}
                     </BienTrigger>
                   </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">
-                    {bien.commune ?? "-"}
-                  </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">
-                    {bien.typeBien ?? "-"}
-                  </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">
-                    {categorie ?? "-"}
-                  </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">
+                  <td className="px-5 py-3 text-muted-foreground">{bien.commune ?? "-"}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{categorie ?? "-"}</td>
+                  <td className="px-5 py-3 text-muted-foreground">
                     {bien.surface ? `${bien.surface} m²` : "-"}
                   </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">
+                  <td className="px-5 py-3 text-muted-foreground">
                     {bien.prix ? `${bien.prix} €` : "-"}
                   </td>
-                  <td className="px-5 py-3 text-center text-muted-foreground">
-                    {bien.statut ?? "-"}
-                  </td>
+                  <td className="px-5 py-3 text-muted-foreground">{bien.statut ?? "-"}</td>
                   <td className="px-5 py-3">
                     {proprietaire ? (
                       <ContactTrigger

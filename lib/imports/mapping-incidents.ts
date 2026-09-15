@@ -1,5 +1,5 @@
 // Mapping colonnes → champs CRM pour l'export Septéo "Liste incident" (gestion
-// locative) — un événement de gestion par ligne (travaux, remboursement DG,
+// locative) - un événement de gestion par ligne (travaux, remboursement DG,
 // courrier...), cf. `data/Liste incident.csv`. Fichier CSV quoté avec des
 // retours-ligne embarqués dans "Objet / Libellé" (cf. lib/imports/excel-parser.ts).
 // Le rattachement contact/bien/mandat se fait dans le runner

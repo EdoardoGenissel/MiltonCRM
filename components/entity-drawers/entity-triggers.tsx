@@ -10,7 +10,7 @@ type TriggerProps = {
 }
 
 // Remplace les <Link href="/contacts/:id"> etc. des listes par l'ouverture du
-// drawer correspondant — mêmes styles (hover:underline) que les anciens liens.
+// drawer correspondant - mêmes styles (hover:underline) que les anciens liens.
 export function ContactTrigger({ id, className, children }: TriggerProps) {
   const { openContact } = useEntityDrawers()
   return (
@@ -38,7 +38,7 @@ export function MandatTrigger({ id, className, children }: TriggerProps) {
   )
 }
 
-// Ligne de tableau entièrement cliquable ouvrant un drawer — équivalent de
+// Ligne de tableau entièrement cliquable ouvrant un drawer - équivalent de
 // components/clickable-row.tsx mais sans navigation (cf. son commentaire pour
 // la logique de stopPropagation sur les liens/boutons imbriqués).
 export function DrawerRow({
@@ -62,7 +62,7 @@ export function DrawerRow({
   )
 }
 
-// Ligne de la liste des mandats — ouvre le drawer du mandat correspondant.
+// Ligne de la liste des mandats - ouvre le drawer du mandat correspondant.
 // Composant client dédié car la page /mandats reste une Server Component.
 export function MandatDrawerRow({
   mandatId,

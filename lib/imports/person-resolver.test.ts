@@ -16,12 +16,12 @@ describe("PersonResolver", () => {
     const id = resolver.resolve({
       nom: "Dupont",
       email: "marie@example.com",
-      persona: "proprietaire_bailleur",
+      persona: "bailleur",
     })
 
     expect(id).toBe("c1")
     expect(resolver.toCreate).toHaveLength(0)
-    expect(resolver.idsToTagPersonas.get("c1")).toEqual(new Set(["proprietaire_bailleur"]))
+    expect(resolver.idsToTagPersonas.get("c1")).toEqual(new Set(["bailleur"]))
   })
 
   it("planifie une création pour une personne inconnue", () => {
@@ -52,17 +52,17 @@ describe("PersonResolver", () => {
     const id1 = resolver.resolve({
       nom: "Kong",
       email: "kong@example.com",
-      persona: "proprietaire_bailleur",
+      persona: "bailleur",
     })
     const id2 = resolver.resolve({
       nom: "Kong",
       email: "kong@example.com",
-      persona: "proprietaire_bailleur",
+      persona: "bailleur",
     })
 
     expect(id2).toBe(id1)
     expect(resolver.toCreate).toHaveLength(1)
-    expect(resolver.toCreate[0].personas).toEqual(["proprietaire_bailleur"])
+    expect(resolver.toCreate[0].personas).toEqual(["bailleur"])
   })
 
   it("ajoute un second persona à une création planifiée (même personne, rôles différents)", () => {
@@ -70,12 +70,12 @@ describe("PersonResolver", () => {
     const id1 = resolver.resolve({
       nom: "Kong",
       email: "kong@example.com",
-      persona: "proprietaire_bailleur",
+      persona: "bailleur",
     })
     const id2 = resolver.resolve({ nom: "Kong", email: "kong@example.com", persona: "locataire" })
 
     expect(id2).toBe(id1)
-    expect(resolver.toCreate[0].personas).toEqual(["proprietaire_bailleur", "locataire"])
+    expect(resolver.toCreate[0].personas).toEqual(["bailleur", "locataire"])
   })
 
   it("renvoie null sans rien planifier quand le nom est absent (ex. lot vacant)", () => {

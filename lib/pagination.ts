@@ -26,7 +26,7 @@ export function toPageResult<T>(items: T[], total: number, page: number): PageRe
 export type PageListItem = number | "ellipsis"
 
 // Liste de numéros de page à afficher façon "1 2 3 … 12" : toujours la première,
-// la dernière, la page courante et ses voisines immédiates — "ellipsis" pour les
+// la dernière, la page courante et ses voisines immédiates - "ellipsis" pour les
 // trous, plutôt que d'afficher les dizaines de pages intermédiaires.
 export function buildPageList(current: number, total: number): PageListItem[] {
   if (total <= 1) return [1]

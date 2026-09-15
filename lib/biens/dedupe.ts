@@ -13,7 +13,7 @@ export type IncomingBienAddress = {
 }
 
 // Normalise une adresse pour comparaison (accents, casse, ponctuation, espaces
-// multiples) — un même bien n'est pas forcément saisi de façon identique entre
+// multiples) - un même bien n'est pas forcément saisi de façon identique entre
 // un export Apimo/Septéo et une saisie libre JotForm.
 export function normalizeAddress(value: string): string {
   return value
@@ -26,7 +26,7 @@ export function normalizeAddress(value: string): string {
 
 // Résout un bien issu du formulaire JotForm contre les biens déjà importés
 // depuis Apimo/Septéo (seules sources faisant foi pour la fiche bien, cf. demande
-// "favoriser Apimo/Septéo") — pour éviter de créer un doublon quand un commercial
+// "favoriser Apimo/Septéo") - pour éviter de créer un doublon quand un commercial
 // a rempli le formulaire pour un bien déjà en mandat. Correspondance stricte sur
 // l'adresse normalisée (+ commune si les deux la renseignent) : pas de fuzzy
 // matching, un faux positif fusionnerait les données de deux biens différents.
@@ -38,7 +38,7 @@ export function resolveBienMatch(
   const incomingAddress = normalizeAddress(incoming.adresse)
   // Comparaison accent/casse-insensible aussi pour la commune (contrairement à
   // `normalizeCommune`, qui uppercase sans retirer les accents et sert
-  // uniquement à l'affichage/filtre des imports — cf. lib/imports/normalize-commune.ts).
+  // uniquement à l'affichage/filtre des imports - cf. lib/imports/normalize-commune.ts).
   const incomingCommune = incoming.commune ? normalizeAddress(incoming.commune) : null
 
   const match = candidates.find((c) => {
@@ -51,11 +51,11 @@ export function resolveBienMatch(
 }
 
 // Ne retient, parmi `incoming`, que les champs actuellement vides sur `existing`
-// — c'est ce qui matérialise la priorité Apimo/Septéo : une valeur déjà présente
+// - c'est ce qui matérialise la priorité Apimo/Septéo : une valeur déjà présente
 // (donc issue d'Apimo/Septéo, seules sources qui écrivent sur un bien matché)
 // n'est jamais écrasée par une donnée JotForm.
 // `E` (le type "lu" en base, ex. Decimal pour un champ numérique Prisma) et `I`
-// (le type "écrit", ex. number — Prisma accepte les deux en entrée) diffèrent
+// (le type "écrit", ex. number - Prisma accepte les deux en entrée) diffèrent
 // volontairement : on ne compare que la présence de valeur, jamais le type.
 export function fillBlanks<
   E extends Record<string, unknown>,

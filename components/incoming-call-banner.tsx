@@ -14,7 +14,7 @@ type ActiveCall = {
 
 const POLL_INTERVAL_MS = 5000
 
-// Bandeau "Appel en cours" — cf. scope.md : "à l'appel entrant, détecter
+// Bandeau "Appel en cours" - cf. scope.md : "à l'appel entrant, détecter
 // automatiquement le contact dans le CRM". Le webhook Ringover
 // (app/api/ringover/webhook) fait le matching et écrit le CallLog ; ce composant
 // se contente d'interroger /api/calls/active à intervalle régulier (pas de

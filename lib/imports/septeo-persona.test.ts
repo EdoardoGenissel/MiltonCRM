@@ -3,7 +3,7 @@ import { parseSepteoPersonas } from "./septeo-persona"
 
 describe("parseSepteoPersonas", () => {
   it("propriétaire gérance", () => {
-    expect(parseSepteoPersonas("Propriétaire Gérance")).toEqual(["proprietaire_bailleur"])
+    expect(parseSepteoPersonas("Propriétaire Gérance")).toEqual(["bailleur"])
   })
 
   it("locataire gérance", () => {
@@ -12,7 +12,7 @@ describe("parseSepteoPersonas", () => {
 
   it("cumul propriétaire + locataire sur la même fiche", () => {
     expect(parseSepteoPersonas("Locataire Gérance,Propriétaire Gérance")).toEqual(
-      expect.arrayContaining(["locataire", "proprietaire_bailleur"]),
+      expect.arrayContaining(["locataire", "bailleur"]),
     )
   })
 
@@ -26,8 +26,8 @@ describe("parseSepteoPersonas", () => {
   })
 
   it("tolère une virgule en tête (valeur vide) et les espaces superflus", () => {
-    expect(parseSepteoPersonas(",Propriétaire Gérance")).toEqual(["proprietaire_bailleur"])
-    expect(parseSepteoPersonas("Propriétaire Location simple ")).toEqual(["proprietaire_bailleur"])
+    expect(parseSepteoPersonas(",Propriétaire Gérance")).toEqual(["bailleur"])
+    expect(parseSepteoPersonas("Propriétaire Location simple ")).toEqual(["bailleur"])
   })
 
   it("valeur absente", () => {

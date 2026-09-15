@@ -1,5 +1,5 @@
 // Mapping colonnes → champs CRM pour l'export Septéo "liste impayés loyers"
-// (gestion locative) — une ligne par lot en situation d'impayé, cf.
+// (gestion locative) - une ligne par lot en situation d'impayé, cf.
 // `data/liste impayés loyers.csv`. Le rattachement bien/mandat/contacts se fait
 // dans le runner (run-import-impayes.ts) via `Ref. Lot` → `Bien.referenceLot`.
 import { at, cell, type HeaderIndex } from "./header-index"

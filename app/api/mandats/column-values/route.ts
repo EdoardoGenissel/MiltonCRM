@@ -19,7 +19,7 @@ function readFilters(params: URLSearchParams): MandatListFilters {
   }
 }
 
-// Valeurs uniques pour un filtre colonne façon Excel sur la page Mandats — même
+// Valeurs uniques pour un filtre colonne façon Excel sur la page Mandats - même
 // principe que app/api/contacts/column-values (cf. components/column-filter.tsx).
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams

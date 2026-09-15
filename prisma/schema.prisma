@@ -19,7 +19,7 @@ enum Role {
   MANAGER_TRANSACTION
   MANAGER_GESTION_LOCATIVE
   // MANAGER_LOCATION_DEV / MANAGER_ESTIMATION / COMMERCIAL ajoutés côté Cockpit
-  // (migration 20260723150000_extend_role_enum, `ALTER TYPE ... ADD VALUE`) — ce
+  // (migration 20260723150000_extend_role_enum, `ALTER TYPE ... ADD VALUE`) - ce
   // modèle appartient à Cockpit (cf. README "sans toucher aux tables Fact*/
   // KpiSnapshot"), copié ici pour éviter qu'un futur `prisma migrate dev` côté CRM
   // ne détecte une "dérive" sur ce type. Même traitement que `FactContrat.externalId`
@@ -59,7 +59,7 @@ model Profile {
 }
 
 /// Utilisé pour les syncs API (Cockpit) ET pour tracer les imports manuels Excel du
-/// CRM (Lot 3) — fileName/duplicatesFound restent null pour les runs de sync API.
+/// CRM (Lot 3) - fileName/duplicatesFound restent null pour les runs de sync API.
 model SyncRun {
   id              String    @id @default(cuid())
   source          Source
@@ -72,7 +72,7 @@ model SyncRun {
   duplicatesFound Int       @default(0)
 }
 
-/// Statistiques détaillées d'un import CRM réussi (Lot 3) — table propre au CRM,
+/// Statistiques détaillées d'un import CRM réussi (Lot 3) - table propre au CRM,
 /// pas partagée avec Cockpit (contrairement à SyncRun ci-dessus) : elle complète
 /// un SyncRun sans modifier son schéma, pour ne pas risquer de dériver de celui
 /// de Cockpit. Alimente la page Imports (stats du dernier import) et la cloche
@@ -89,7 +89,7 @@ model ImportLog {
   startedAt DateTime @default(now())
 }
 
-/// CA facturé par mois/pôle — Pennylane
+/// CA facturé par mois/pôle - Pennylane
 model FactCa {
   id          String   @id @default(cuid())
   periodMonth DateTime
@@ -101,11 +101,11 @@ model FactCa {
   @@unique([periodMonth, pole])
 }
 
-/// Mandats / baux / actes signés — Apimo (+ SEPTEO pour baux)
+/// Mandats / baux / actes signés - Apimo (+ SEPTEO pour baux)
 model FactContrat {
   id             String   @id @default(cuid())
   // Ajouté côté Cockpit (migration 20260720120000_fact_contrat_external_id) pour
-  // l'upsert idempotent du sync Apimo — ce modèle appartient à Cockpit (cf. README
+  // l'upsert idempotent du sync Apimo - ce modèle appartient à Cockpit (cf. README
   // "sans toucher aux tables Fact*/KpiSnapshot"), copié ici pour éviter qu'un futur
   // `prisma migrate dev` côté CRM ne détecte une "dérive" et ne propose de retirer la
   // colonne. Ne pas ajouter de migration CRM pour ce modèle.
@@ -125,7 +125,7 @@ model FactContrat {
   @@index([commercialId])
 }
 
-/// Pipeline commercial (RDV, estimations, visites, offres, compromis) — Notion / Apimo
+/// Pipeline commercial (RDV, estimations, visites, offres, compromis) - Notion / Apimo
 model FactPipeline {
   id             String   @id @default(cuid())
   pole           Pole
@@ -140,7 +140,7 @@ model FactPipeline {
   @@unique([pole, commercialId, metric, period])
 }
 
-/// Incidents — SEPTEO
+/// Incidents - SEPTEO
 model FactIncident {
   id       String    @id @default(cuid())
   openedAt DateTime
@@ -150,7 +150,7 @@ model FactIncident {
   @@index([closedAt])
 }
 
-/// Loyers impayés (taux mensuel) — SEPTEO
+/// Loyers impayés (taux mensuel) - SEPTEO
 model FactImpaye {
   id          String   @id @default(cuid())
   periodMonth DateTime
@@ -160,7 +160,7 @@ model FactImpaye {
   @@unique([periodMonth])
 }
 
-/// Appels — Ringover (Front office, stretch)
+/// Appels - Ringover (Front office, stretch)
 model FactAppel {
   id         String   @id @default(cuid())
   periodWeek DateTime
@@ -198,12 +198,12 @@ model KpiSnapshot {
 }
 
 // ---------------------------------------------------------------------------
-// CRM — fiche contact unifiée, mandats, biens (cf. scope.md / devis.md, Lots 1-5)
+// CRM - fiche contact unifiée, mandats, biens (cf. scope.md / devis.md, Lots 1-5)
 // ---------------------------------------------------------------------------
 
-/// Fiche contact unifiée cross-pôle. Un contact peut cumuler plusieurs personas
-/// (ex. prospect ET propriétaire) — cf. cadrage : "pas de conflit de personas
-/// attendu, mais un prospect peut aussi être propriétaire".
+/// Fiche contact unifiée cross-pôle. Un contact peut cumuler plusieurs types de
+/// prospect (ex. vendeur ET acheteur, ou bailleur ET vendeur) - cf. cadrage :
+/// "pas de conflit de personas attendu".
 model Contact {
   id        String   @id @default(cuid())
   civilite  String?
@@ -211,9 +211,9 @@ model Contact {
   nom       String
   email     String?
   telephone String?
-  personas  String[] // "prospect" | "acquereur" | "locataire" | "proprietaire_bailleur"
+  personas  String[] // "vendeur" | "acheteur" | "bailleur" | "locataire" (cf. lib/contacts/personas.ts)
   commune   String?
-  source    Source // traçabilité commerciale — affichée pour tous (pas de rôles différenciés)
+  source    Source // traçabilité commerciale - affichée pour tous (pas de rôles différenciés)
   sourceRef String? // id externe Apimo/Septeo, pour reconciliation/dédup à l'import
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -235,8 +235,8 @@ model Contact {
 }
 
 /// Qualification prospect reprise d'Apimo (cf. scope.md §"Champs de qualification
-/// prospect") — 1-1 avec Contact, présent uniquement si "prospect" fait partie des
-/// personas.
+/// prospect") - 1-1 avec Contact, présent uniquement pour les contacts issus de
+/// l'export Apimo "prospects" (personas acheteur / locataire).
 model ProspectDetail {
   id             String   @id @default(cuid())
   contactId      String   @unique
@@ -250,7 +250,7 @@ model ProspectDetail {
   updatedAt      DateTime @updatedAt
 
   // Reste des colonnes de l'export Apimo (au-delà du socle acté dans scope.md
-  // §"Champs de qualification prospect") — importées pour une fiche prospect
+  // §"Champs de qualification prospect") - importées pour une fiche prospect
   // complète, cf. lib/imports/mapping.ts `mapApimoRow`.
   coAgence                String?
   prixMin                 Decimal?  @db.Decimal(12, 2)
@@ -261,7 +261,7 @@ model ProspectDetail {
   surfaceMax              Decimal?  @db.Decimal(10, 2)
   secteur                 String?
   quartier                String?
-  derniereAction          DateTime? // colonne "Action" — date de la dernière action commerciale
+  derniereAction          DateTime? // colonne "Action" - date de la dernière action commerciale
   commentaire             String?
   creeLe                  DateTime? // date de création côté Apimo (distincte de Contact.createdAt, date de l'import)
   utilisateur             String?
@@ -284,7 +284,7 @@ model ProspectDetail {
   majPar                  String?
 }
 
-/// Mandats (vente/gestion) — Apimo pour Transaction, Septéo pour Gestion locative.
+/// Mandats (vente/gestion) - Apimo pour Transaction, Septéo pour Gestion locative.
 model Mandat {
   id             String    @id @default(cuid())
   type           String // "simple" | "exclusif"
@@ -299,7 +299,7 @@ model Mandat {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  // Reste des colonnes de l'export Apimo "Produits" (biens/mandats) — cf.
+  // Reste des colonnes de l'export Apimo "Produits" (biens/mandats) - cf.
   // lib/imports/mapping-biens.ts `mapApimoBienRow`.
   categorie              String? // "Vente" | "Location"
   coAgent                String?
@@ -312,13 +312,13 @@ model Mandat {
   montantCompromis       Decimal?  @db.Decimal(12, 2)
   venduLe                DateTime?
 
-  // Gestion locative (export Septéo "biens/mandats") — cf.
+  // Gestion locative (export Septéo "biens/mandats") - cf.
   // lib/imports/mapping-biens-septeo.ts `mapSepteoBienRow`. `locataireId` : le
   // locataire actuel du lot, snapshot Septéo au moment de l'export (pas
   // d'historique des baux successifs pour l'instant).
   locataireId                  String?
   locataire                    Contact? @relation("MandatLocataire", fields: [locataireId], references: [id])
-  numero                       String? // "Mandat_Numero" — numéro de mandat lisible (IDMandat interne sert de sourceRef)
+  numero                       String? // "Mandat_Numero" - numéro de mandat lisible (IDMandat interne sert de sourceRef)
   typeBail                     String?
   usage                        String? // "Habitation" | "Commercial" | "Mixte Habitation et commerce" | "Professionnel"
   regimeFiscal                 String?
@@ -336,7 +336,7 @@ model Mandat {
   @@unique([source, sourceRef])
 }
 
-/// Biens en mandat — Apimo (vente) / Septéo (gestion locative).
+/// Biens en mandat - Apimo (vente) / Septéo (gestion locative).
 model Bien {
   id        String   @id @default(cuid())
   adresse   String?
@@ -356,12 +356,12 @@ model Bien {
   incidents     Incident[]
   loyersAppeles LoyerAppele[]
 
-  // "Lot_Reference" / "MandatLot_Reference" Septéo (ex. "SAGER", "BLA-02-H-M") —
+  // "Lot_Reference" / "MandatLot_Reference" Septéo (ex. "SAGER", "BLA-02-H-M") -
   // référence lisible du lot, sert de clé de rattachement pour l'import des
   // impayés de loyer (colonne "Ref. Lot").
   referenceLot String?
 
-  // Reste des colonnes de l'export Apimo "Produits" (biens/mandats) — cf.
+  // Reste des colonnes de l'export Apimo "Produits" (biens/mandats) - cf.
   // lib/imports/mapping-biens.ts `mapApimoBienRow`.
   codePostal          String?
   quartier            String?
@@ -374,22 +374,22 @@ model Bien {
   chambres            Int?
   devise              String?
   attributs           String?
-  titre               String? // "Titre Fr" — titre marketing de l'annonce
-  description         String? // "Commentaire Fr" — texte de l'annonce
+  titre               String? // "Titre Fr" - titre marketing de l'annonce
+  description         String? // "Commentaire Fr" - texte de l'annonce
   photos              String[]
-  energieConsommation Decimal?  @db.Decimal(8, 2) // DPE — kWh/m²/an
-  energieEmission     Decimal?  @db.Decimal(8, 2) // DPE — kg CO2/m²/an
+  energieConsommation Decimal?  @db.Decimal(8, 2) // DPE - kWh/m²/an
+  energieEmission     Decimal?  @db.Decimal(8, 2) // DPE - kg CO2/m²/an
   agence              String?
   utilisateur         String?
   referenceProduit    String?
   proprietaireLabel   String? // texte brut colonne "Propriétaire" (peut lister plusieurs co-propriétaires)
   creeLe              DateTime?
   majLe               DateTime?
-  meuble              Boolean? // gestion locative Septéo — "MandatLot_Meuble"
+  meuble              Boolean? // gestion locative Septéo - "MandatLot_Meuble"
 
   // Colonnes alimentées par le formulaire JotForm "ESTIMATION IMMOBILIERE" (cf.
   // lib/integrations/jotform/sync.ts). Remplies seulement si vides (Apimo/Septéo
-  // priment en cas de conflit, cf. lib/biens/dedupe.ts `fillBlanks`) — ni Apimo ni
+  // priment en cas de conflit, cf. lib/biens/dedupe.ts `fillBlanks`) - ni Apimo ni
   // Septéo n'alimentent ces champs aujourd'hui, donc pas de conflit en pratique.
   surfaceTerrain      Decimal?  @db.Decimal(10, 2)
   referenceCadastrale String?
@@ -420,7 +420,7 @@ model CallLog {
   matchedContact    Contact? @relation(fields: [matchedContactId], references: [id])
   receivedAt        DateTime
   recordUrl         String? // data.record (hangup) ou data.record_link (record_available)
-  transcriptionUrl  String? // data.transcription_url (transcription_available) — lien JSON, pas le texte
+  transcriptionUrl  String? // data.transcription_url (transcription_available) - lien JSON, pas le texte
   transcript        String?
   transcriptSummary String? // extraction IA du transcript
   createdAt         DateTime @default(now())
@@ -430,7 +430,7 @@ model CallLog {
 
 /// Copie brute de CHAQUE événement webhook Ringover reçu (appel entrant, manqué,
 /// répondu, raccroché, messagerie vocale, tags/commentaires...), quel que soit son
-/// type — la documentation publique Ringover ne liste pas exhaustivement les champs
+/// type - la documentation publique Ringover ne liste pas exhaustivement les champs
 /// par événement, donc on conserve le payload complet plutôt que de perdre ce qu'on
 /// ne connaît pas encore. `CallLog` reste le modèle dédié au matching temps réel
 /// (Lot 4, bandeau "appel en cours") pour les événements qui ont un numéro
@@ -457,28 +457,34 @@ model Estimation {
   bien                Bien?     @relation(fields: [bienId], references: [id])
   jotformSubmissionId String    @unique
   // Date de soumission côté JotForm (distincte de createdAt, date de sync côté
-  // CRM) — alimentée par le sync API (cf. lib/integrations/jotform/sync.ts).
+  // CRM) - alimentée par le sync API (cf. lib/integrations/jotform/sync.ts).
   submittedAt         DateTime?
   // Intégralité des réponses du formulaire JotForm (libellé de question -> valeur
-  // lisible), au-delà des champs mappés sur Contact/Bien — pour ne perdre aucune
+  // lisible), au-delà des champs mappés sur Contact/Bien - pour ne perdre aucune
   // information saisie par le commercial (nombre de pièces, points positifs/
   // négatifs, équipements, infos financières, observations...).
   answers             Json?
   cityscanReportUrl   String?
-  statut              String    @default("en_attente") // "en_attente" | "genere" | "envoye_commercial" | "envoye_client"
+  // Id du lead créé côté Apimo (POST /agencies/{agency_id}/leads, cf.
+  // lib/integrations/apimo/leads.ts) - Apimo/Cityscan n'exposent pas d'API AVM
+  // directe, la voie officielle est d'injecter les données dans Apimo pour que
+  // l'agent lance l'estimation depuis la fiche bien sans ressaisie. `null` tant
+  // que le push n'a pas réussi (retenté au sync suivant, cf. sync.ts).
+  apimoLeadId         Int?
+  statut              String    @default("en_attente") // "en_attente" | "envoye_apimo" | "envoye_commercial" | "envoye_client"
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 }
 
 // ---------------------------------------------------------------------------
-// Gestion locative — imports manuels Septéo "détail" (impayés, incidents,
+// Gestion locative - imports manuels Septéo "détail" (impayés, incidents,
 // loyers appelés). Modèles propres au CRM : les tables Fact* (FactImpaye,
 // FactIncident, FactAppel) sont des agrégats KPI appartenant à Cockpit et ne
 // sont pas touchées ici. Rattachement best-effort à Bien/Mandat/Contact via
 // `Bien.referenceLot`, `Mandat.locataireId` et le nom (cf. lib/imports/).
 // ---------------------------------------------------------------------------
 
-/// Loyers impayés — export Septéo "liste impayés loyers" (1 ligne par lot).
+/// Loyers impayés - export Septéo "liste impayés loyers" (1 ligne par lot).
 model Impaye {
   id        String @id @default(cuid())
   source    Source @default(SEPTEO)
@@ -515,7 +521,7 @@ model Impaye {
   @@index([bienId])
 }
 
-/// Incidents / événements de gestion — export Septéo "Liste incident".
+/// Incidents / événements de gestion - export Septéo "Liste incident".
 model Incident {
   id        String @id @default(cuid())
   source    Source @default(SEPTEO)
@@ -542,7 +548,7 @@ model Incident {
   @@index([contactId])
 }
 
-/// Loyers appelés — export Septéo "liste loyer appelé", agrégé par quittance
+/// Loyers appelés - export Septéo "liste loyer appelé", agrégé par quittance
 /// (folio + pièce + date + compte auxiliaire locataire). `montantAppele` =
 /// somme des débits des postes (loyer + charges + TVA...), `montantRegle` =
 /// somme des crédits.

@@ -1,7 +1,7 @@
 import { FilterTabs } from "@/components/filter-tabs"
 import { PERSONAS } from "@/lib/contacts/personas"
 
-// Onglets "type de contact" — appel préconfiguré de FilterTabs.
+// Onglets "type de contact" - appel préconfiguré de FilterTabs.
 export function PersonaTabs({
   searchParams,
 }: {

@@ -1,5 +1,5 @@
 // Extraction des champs utiles d'un événement webhook Ringover, d'après le vrai
-// schéma publié par Ringover (developer.ringover.com/web/openapi_public.yml) —
+// schéma publié par Ringover (developer.ringover.com/web/openapi_public.yml) -
 // pas une supposition : `{ event, resource, timestamp, data: {...}, attempt? }`,
 // tous les champs utiles nichés sous `data`. Un seul type d'événement à la fois
 // (ringing/answered/hangup/missed/voicemail/record_available/
@@ -30,7 +30,7 @@ function asDirection(value: unknown): "inbound" | "outbound" | undefined {
   return value === "inbound" || value === "outbound" ? value : undefined
 }
 
-// `call_id` est un uint64 (ex. 1234567890987654321) — bien au-delà de
+// `call_id` est un uint64 (ex. 1234567890987654321) - bien au-delà de
 // Number.MAX_SAFE_INTEGER (2^53). `JSON.parse` le convertirait déjà en `number`
 // avec perte de précision avant qu'on puisse intervenir, donc on l'extrait par
 // regex sur le corps brut, avant tout parsing JSON, pour ne jamais le faire
@@ -65,7 +65,7 @@ export function parseRingoverEvent(payload: unknown, rawBody?: string): ParsedRi
     event: firstString(root, ["event"]),
     resource: firstString(root, ["resource"]),
     callId,
-    // On ne s'intéresse qu'au numéro de l'appelant externe — pour un appel
+    // On ne s'intéresse qu'au numéro de l'appelant externe - pour un appel
     // entrant (le seul cas qui déclenche le bandeau, cf. isIncomingCall), c'est
     // `from_number`. Un événement sortant n'alimente pas le bandeau de toute
     // façon (cf. app/api/ringover/webhook).
@@ -80,7 +80,7 @@ export function parseRingoverEvent(payload: unknown, rawBody?: string): ParsedRi
 }
 
 // `new Date(chaîne invalide)` produit un "Invalid Date" que Postgres/Prisma
-// rejette à l'insertion — on retombe sur l'instant présent plutôt que de faire
+// rejette à l'insertion - on retombe sur l'instant présent plutôt que de faire
 // échouer tout l'enregistrement pour un timestamp mal formé. `timestamp` Ringover
 // est un epoch en secondes (ex. 1554823493.76), pas une chaîne ISO.
 export function safeDate(value: string | undefined): Date {
@@ -95,7 +95,7 @@ export function safeDate(value: string | undefined): Date {
 }
 
 // Le bandeau "Appel en cours" (cf. components/incoming-call-banner.tsx) et le
-// CallLog associé ne concernent que l'appel entrant en train de sonner — pas les
+// CallLog associé ne concernent que l'appel entrant en train de sonner - pas les
 // appels sortants, ni manqué/répondu/raccroché/messagerie vocale/mise à jour de
 // tags, qui restent uniquement dans RingoverEvent (cf. scope.md "à l'appel
 // entrant, détecter automatiquement le contact").

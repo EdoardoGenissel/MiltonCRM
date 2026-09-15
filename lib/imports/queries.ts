@@ -9,7 +9,7 @@ export function listImportRuns() {
   })
 }
 
-// Le dernier import réussi par type (contacts / biens & mandats) — utilisé pour
+// Le dernier import réussi par type (contacts / biens & mandats) - utilisé pour
 // le résumé "statistiques du dernier import" en haut de la page Imports.
 export async function listLatestImportLogByKind() {
   const [contacts, biensMandats] = await Promise.all([

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-// <select> natif au même style que <Input> (cf. components/ui/input.tsx) — évite
+// <select> natif au même style que <Input> (cf. components/ui/input.tsx) - évite
 // de recopier la chaîne de classes dans chaque formulaire.
 function Select({ className, ...props }: React.ComponentProps<"select">) {
   return (

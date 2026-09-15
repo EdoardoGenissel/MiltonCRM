@@ -1,5 +1,5 @@
 // Mapping colonnes → champs CRM pour l'export Septéo "liste loyer appelé"
-// (gestion locative) — grand-livre du compte locataires : une ligne = un poste
+// (gestion locative) - grand-livre du compte locataires : une ligne = un poste
 // comptable (loyer, provisions de charges, TVA...), cf.
 // `data/liste loyer appelé.csv`. Le runner (run-import-loyers-appeles.ts)
 // agrège ensuite les lignes par quittance (folio + pièce + date + auxiliaire).

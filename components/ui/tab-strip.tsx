@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 
-// Barre d'onglets à soulignement — apparence commune aux onglets internes des
+// Barre d'onglets à soulignement - apparence commune aux onglets internes des
 // drawers (DrawerTabs, état local) et aux filtres en onglets (FilterTabs, URL).
 // Chaque item porte soit `href` (rendu <Link>), soit `onClick` (rendu <button>).
 export type TabStripItem = {

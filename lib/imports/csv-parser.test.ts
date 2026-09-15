@@ -5,7 +5,7 @@ function csv(text: string) {
   return parseTabularBuffer(new TextEncoder().encode(text).buffer as ArrayBuffer, "x.csv")
 }
 
-describe("parseTabularBuffer — CSV", () => {
+describe("parseTabularBuffer - CSV", () => {
   it("parse un CSV point-virgule non quoté (forme Septéo)", async () => {
     const { headerRow, rows } = await csv(
       "Nom;Prénom;Ville;;Email\r\nDUPONT;Jean;Cayenne;;jean@ex.fr\r\nSCI MAHURY;;;;\r\n",
