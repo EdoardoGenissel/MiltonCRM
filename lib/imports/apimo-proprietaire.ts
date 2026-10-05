@@ -7,6 +7,8 @@
 // propriétaire) - au-delà, le risque de mal attribuer une fiche est trop élevé
 // (cf. décision produit : le texte brut reste affiché sur la fiche bien via
 // `Bien.proprietaireLabel`, que la résolution réussisse ou non).
+// `parseApimoProprietaires` gère le cas multiple : un contact par co-propriétaire,
+// le premier étant celui lié au mandat.
 const CIVILITES: Record<string, string> = {
   Mme: "Madame",
   "M.": "Monsieur",
@@ -49,4 +51,13 @@ export function parseApimoProprietaire(raw: string | undefined): ParsedApimoProp
   }
 
   return { civilite, prenom: "", nom: tokens.join(" ") }
+}
+
+// Un contact par co-propriétaire ("M. A - M. B"), dans l'ordre du texte brut.
+export function parseApimoProprietaires(raw: string | undefined): ParsedApimoProprietaire[] {
+  if (!raw) return []
+  return raw
+    .split(" - ")
+    .map((part) => parseApimoProprietaire(part))
+    .filter((p): p is ParsedApimoProprietaire => p !== null && !!p.nom)
 }

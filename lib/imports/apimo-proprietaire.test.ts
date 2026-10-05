@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parseApimoProprietaire } from "./apimo-proprietaire"
+import { parseApimoProprietaire, parseApimoProprietaires } from "./apimo-proprietaire"
 
 describe("parseApimoProprietaire", () => {
   it("parses civilité + nom seul", () => {
@@ -41,5 +41,18 @@ describe("parseApimoProprietaire", () => {
   it("renvoie null pour une valeur vide", () => {
     expect(parseApimoProprietaire(undefined)).toBeNull()
     expect(parseApimoProprietaire("")).toBeNull()
+  })
+})
+
+describe("parseApimoProprietaires", () => {
+  it("renvoie un propriétaire par co-propriétaire", () => {
+    expect(parseApimoProprietaires("M. CHATAIGNE - Mme GOILLOT")).toEqual([
+      { civilite: "Monsieur", prenom: "", nom: "CHATAIGNE" },
+      { civilite: "Madame", prenom: "", nom: "GOILLOT" },
+    ])
+  })
+
+  it("renvoie [] pour une valeur vide", () => {
+    expect(parseApimoProprietaires(undefined)).toEqual([])
   })
 })

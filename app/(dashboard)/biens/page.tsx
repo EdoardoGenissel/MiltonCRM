@@ -66,6 +66,7 @@ export default async function BiensPage({
 
         <TableCard>
           <TableHeadRow>
+            <th className="px-5 py-3">Photo</th>
             <th className="px-5 py-3">
               <FilterableHeader
                 label="Type"
@@ -87,6 +88,7 @@ export default async function BiensPage({
                 currentDir={params.dir}
               />
             </th>
+            <th className="px-5 py-3">Référence</th>
             <th className="px-5 py-3">
               <FilterableHeader
                 label="Commune"
@@ -150,12 +152,28 @@ export default async function BiensPage({
                   className="border-b border-border last:border-0 hover:bg-muted/50"
                 >
                   <td className="px-5 py-3">
+                    {bien.photos[0] ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- photos externes Apimo
+                      <img
+                        src={bien.photos[0]}
+                        alt=""
+                        loading="lazy"
+                        className="h-12 w-16 rounded-md object-cover"
+                      />
+                    ) : (
+                      <div className="h-12 w-16 rounded-md bg-muted" />
+                    )}
+                  </td>
+                  <td className="px-5 py-3">
                     <BienType value={bien.typeBien} />
                   </td>
                   <td className="px-5 py-3 font-medium text-foreground">
                     <BienTrigger id={bien.id} className="hover:underline">
-                      {bien.titre || bien.adresse || "-"}
+                      {bien.adresse || bien.titre || "-"}
                     </BienTrigger>
+                  </td>
+                  <td className="px-5 py-3 text-muted-foreground">
+                    {bien.referenceProduit ?? "-"}
                   </td>
                   <td className="px-5 py-3 text-muted-foreground">{bien.commune ?? "-"}</td>
                   <td className="px-5 py-3 text-muted-foreground">{categorie ?? "-"}</td>
@@ -185,7 +203,7 @@ export default async function BiensPage({
               <TableEmpty
                 icon={Building2}
                 label="Aucun bien ne correspond à ces filtres."
-                colSpan={8}
+                colSpan={10}
               />
             )}
           </tbody>

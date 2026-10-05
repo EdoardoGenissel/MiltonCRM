@@ -9,7 +9,7 @@ import {
 import { parseTabularBuffer } from "@/lib/imports/excel-parser"
 import { buildHeaderIndex } from "@/lib/imports/header-index"
 import { mapApimoBienRow, type ApimoBienRow } from "@/lib/imports/mapping-biens"
-import { parseApimoProprietaire } from "@/lib/imports/apimo-proprietaire"
+import { parseApimoProprietaires } from "@/lib/imports/apimo-proprietaire"
 import { apimoOwnerPersona } from "@/lib/imports/apimo-persona"
 import { parseApimoDateTime } from "@/lib/imports/parse-datetime"
 import { parseNumber } from "@/lib/imports/parse-number"
@@ -156,42 +156,45 @@ export async function importApimoBiens(
     if (!mapped) continue
 
     let proprietaireId: string | null = null
-    const parsed = parseApimoProprietaire(mapped.proprietaireLabel)
-    if (parsed?.nom) {
+    const owners = parseApimoProprietaires(mapped.proprietaireLabel)
+    // Email/téléphone de l'export : seulement fiables pour un propriétaire unique.
+    const single = owners.length === 1
+    for (const parsed of owners) {
       const ownerPersona = apimoOwnerPersona(mapped.categorie)
+      const email = single ? mapped.proprietaireEmail : undefined
+      const telephone = single ? mapped.proprietaireTelephone : undefined
       const incoming: IncomingIdentity = {
-        email: mapped.proprietaireEmail,
-        telephone: mapped.proprietaireTelephone,
+        email,
+        telephone,
         nom: parsed.nom,
         prenom: parsed.prenom,
       }
-      const matchId = resolveContactByIdentity(ownerCandidates, incoming)
-      if (matchId) {
-        proprietaireId = matchId
-        const personas = ownerIdsToTag.get(matchId) ?? new Set<string>()
+      let ownerId = resolveContactByIdentity(ownerCandidates, incoming)
+      if (ownerId) {
+        const personas = ownerIdsToTag.get(ownerId) ?? new Set<string>()
         personas.add(ownerPersona)
-        ownerIdsToTag.set(matchId, personas)
+        ownerIdsToTag.set(ownerId, personas)
       } else {
-        const id = randomUUID()
+        ownerId = randomUUID()
         ownersToCreate.push({
-          id,
+          id: ownerId,
           civilite: parsed.civilite,
           prenom: parsed.prenom,
           nom: parsed.nom,
-          telephone: mapped.proprietaireTelephone,
-          email: mapped.proprietaireEmail,
+          telephone,
+          email,
           commune: mapped.commune,
           persona: ownerPersona,
         })
         ownerCandidates.push({
-          id,
-          email: mapped.proprietaireEmail ?? null,
-          telephone: mapped.proprietaireTelephone ?? null,
+          id: ownerId,
+          email: email ?? null,
+          telephone: telephone ?? null,
           nom: parsed.nom,
           prenom: parsed.prenom,
         })
-        proprietaireId = id
       }
+      proprietaireId ??= ownerId
     }
 
     const existingBienId = bienIdByRef.get(mapped.apinumber)
