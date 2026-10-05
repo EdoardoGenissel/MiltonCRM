@@ -96,8 +96,9 @@ export default async function MandatsPage({
               />
             </th>
             <th className="px-5 py-3">Propriétaire</th>
-            <th className="px-5 py-3">Locataire</th>
             <th className="px-5 py-3">Bien</th>
+            <th className="px-5 py-3">Adresse du bien</th>
+            <th className="px-5 py-3">En charge du bien</th>
           </TableHeadRow>
           <tbody>
             {mandats.map((mandat) => (
@@ -123,20 +124,14 @@ export default async function MandatsPage({
                     <span className="text-muted-foreground">-</span>
                   )}
                 </td>
-                <td className="px-5 py-3">
-                  {mandat.locataire ? (
-                    <ContactTrigger
-                      id={mandat.locataire.id}
-                      className="text-foreground hover:underline"
-                    >
-                      {mandat.locataire.prenom} {mandat.locataire.nom}
-                    </ContactTrigger>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </td>
                 <td className="px-5 py-3 text-muted-foreground">
                   {mandat.bien?.titre || mandat.bien?.adresse || mandat.bien?.commune || "-"}
+                </td>
+                <td className="px-5 py-3 text-muted-foreground">
+                  {[mandat.bien?.adresse, mandat.bien?.commune].filter(Boolean).join(", ") || "-"}
+                </td>
+                <td className="px-5 py-3 text-muted-foreground">
+                  {mandat.bien?.utilisateur || "-"}
                 </td>
               </MandatDrawerRow>
             ))}
@@ -144,7 +139,7 @@ export default async function MandatsPage({
               <TableEmpty
                 icon={FileText}
                 label="Aucun mandat ne correspond à ces filtres."
-                colSpan={6}
+                colSpan={7}
               />
             )}
           </tbody>
