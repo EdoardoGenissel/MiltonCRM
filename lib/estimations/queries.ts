@@ -58,7 +58,7 @@ export async function listEstimations(filters: EstimationListFilters = {}) {
   const { page = 1, sort, dir } = filters
   const where = buildEstimationWhere(filters)
 
-  const [items, total] = await prisma.$transaction([
+  const [items, total] = await Promise.all([
     prisma.estimation.findMany({
       where,
       include: { contact: true, bien: true },

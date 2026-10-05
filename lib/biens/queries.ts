@@ -84,7 +84,7 @@ export async function listBiens(filters: BienListFilters = {}) {
   const { page = 1, sort, dir } = filters
   const where = buildBienWhere(filters)
 
-  const [items, total] = await prisma.$transaction([
+  const [items, total] = await Promise.all([
     prisma.bien.findMany({
       where,
       include: {

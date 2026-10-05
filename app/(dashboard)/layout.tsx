@@ -6,10 +6,13 @@ import { createClient } from "@/lib/supabase/server"
 import { prisma } from "@/lib/db/prisma"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  // Le proxy a déjà validé la session via `getUser()` (aller-retour Supabase) :
+  // ici `getClaims()` suffit - vérification locale du JWT, sans nouvel appel réseau
+  // tant que le projet signe ses JWT en asymétrique (sinon repli sur `getUser()`).
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data } = await supabase.auth.getClaims()
+  const claims = data?.claims
+  const user = claims ? { id: claims.sub, email: claims.email } : null
   const profile = user
     ? await prisma.profile.findUnique({
         where: { id: user.id },

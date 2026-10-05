@@ -105,7 +105,7 @@ export async function listContacts(filters: ContactListFilters) {
   const { page = 1, sort, dir } = filters
   const where = buildContactWhere(filters)
 
-  const [items, total] = await prisma.$transaction([
+  const [items, total] = await Promise.all([
     prisma.contact.findMany({
       where,
       include: {

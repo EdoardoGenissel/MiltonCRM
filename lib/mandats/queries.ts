@@ -82,7 +82,7 @@ export async function listMandats(filters: MandatListFilters = {}) {
   const { page = 1, sort, dir } = filters
   const where = buildMandatWhere(filters)
 
-  const [items, total] = await prisma.$transaction([
+  const [items, total] = await Promise.all([
     prisma.mandat.findMany({
       where,
       include: { proprietaire: true, locataire: true, bien: true },
