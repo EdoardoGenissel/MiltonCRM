@@ -9,8 +9,14 @@ const PUBLIC_PATHS = ["/login", "/mot-de-passe-oublie", "/reset-password", "/aut
 // fait que l'authentification, pas d'autorisation fine.
 // `/api/jotform/sync` accepte AUSSI la session Supabase (bouton manuel côté UI) -
 // dans ce cas c'est la route elle-même qui revérifie l'utilisateur via
-// `createClient().auth.getUser()`, cf. app/api/jotform/sync/route.ts.
-const NO_SESSION_PATHS = ["/api/ringover/webhook", "/api/jotform/webhook", "/api/jotform/sync"]
+// `createClient().auth.getUser()`, cf. app/api/jotform/sync/route.ts. Idem pour
+// `/api/prospects/sync` (cron d'analyse des mails + bouton de la page Prospects).
+const NO_SESSION_PATHS = [
+  "/api/ringover/webhook",
+  "/api/jotform/webhook",
+  "/api/jotform/sync",
+  "/api/prospects/sync",
+]
 
 export async function proxy(request: NextRequest) {
   if (NO_SESSION_PATHS.some((path) => request.nextUrl.pathname.startsWith(path))) {

@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { patchHandler } from "@/lib/entity-edit/route-handler"
 import { getBienById } from "@/lib/biens/queries"
 import { serializeMandat } from "@/lib/mandats/serialize"
 
@@ -58,3 +59,5 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     })),
   })
 }
+
+export const PATCH = patchHandler("bien")

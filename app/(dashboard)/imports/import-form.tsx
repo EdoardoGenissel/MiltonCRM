@@ -96,8 +96,6 @@ export function ImportForm() {
       >
         <Select id="kind" name="kind" defaultValue="auto" disabled={pending}>
           <option value="auto">Détection automatique</option>
-          <option value="apimo_prospects">Apimo - prospects (.xlsx)</option>
-          <option value="apimo_biens">Apimo - biens et mandats (.xlsx)</option>
           <option value="septeo_contacts">Septéo - propriétaires ou locataires (.csv)</option>
           <option value="septeo_biens">Septéo - biens et mandats (.csv)</option>
           <option value="septeo_impayes">Septéo - impayés de loyer (.csv)</option>

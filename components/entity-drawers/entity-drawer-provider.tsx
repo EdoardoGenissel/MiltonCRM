@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react"
+import { Pencil } from "lucide-react"
 import { SidePanel } from "@/components/ui/side-panel"
 import { ContactDrawerContent } from "@/components/entity-drawers/contact-drawer-content"
 import { BienDrawerContent } from "@/components/entity-drawers/bien-drawer-content"
@@ -81,25 +82,82 @@ function SidePanelRouter({
     )
   }
 
-  if (entry.type === "contact") {
-    return (
-      <SidePanel open onClose={onClose} onBack={onBack} title="Contact">
-        <ContactDrawerContent id={entry.id} onOpenBien={openBien} />
-      </SidePanel>
-    )
-  }
+  // `key` : changer de fiche (empiler / dépiler) repart en lecture seule.
+  return (
+    <EntityPanel key={`${entry.type}-${entry.id}`} entry={entry} onClose={onClose} onBack={onBack}>
+      {(editing, setEditing) =>
+        entry.type === "contact" ? (
+          <ContactDrawerContent
+            id={entry.id}
+            onOpenBien={openBien}
+            editing={editing}
+            onEditingChange={setEditing}
+          />
+        ) : entry.type === "bien" ? (
+          <BienDrawerContent
+            id={entry.id}
+            onOpenContact={openContact}
+            onOpenMandat={openMandat}
+            editing={editing}
+            onEditingChange={setEditing}
+          />
+        ) : (
+          <MandatDrawerContent
+            id={entry.id}
+            onOpenContact={openContact}
+            onOpenBien={openBien}
+            editing={editing}
+            onEditingChange={setEditing}
+          />
+        )
+      }
+    </EntityPanel>
+  )
+}
 
-  if (entry.type === "bien") {
-    return (
-      <SidePanel open onClose={onClose} onBack={onBack} title="Bien">
-        <BienDrawerContent id={entry.id} onOpenContact={openContact} onOpenMandat={openMandat} />
-      </SidePanel>
-    )
-  }
+const PANEL_TITLES: Record<DrawerEntry["type"], string> = {
+  contact: "Contact",
+  bien: "Bien",
+  mandat: "Mandat",
+}
+
+// Panneau d'une fiche + bouton "Modifier" d'en-tête : le mode édition est
+// porté ici, le contenu (qui a les données chargées) affiche le formulaire.
+function EntityPanel({
+  entry,
+  onClose,
+  onBack,
+  children,
+}: {
+  entry: DrawerEntry
+  onClose: () => void
+  onBack: (() => void) | undefined
+  children: (editing: boolean, setEditing: (editing: boolean) => void) => React.ReactNode
+}) {
+  const [editing, setEditing] = useState(false)
 
   return (
-    <SidePanel open onClose={onClose} onBack={onBack} title="Mandat">
-      <MandatDrawerContent id={entry.id} onOpenContact={openContact} onOpenBien={openBien} />
+    <SidePanel
+      open
+      onClose={onClose}
+      onBack={onBack}
+      title={
+        editing ? `Modifier - ${PANEL_TITLES[entry.type].toLowerCase()}` : PANEL_TITLES[entry.type]
+      }
+      actions={
+        !editing && (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            Modifier
+          </button>
+        )
+      }
+    >
+      {children(editing, setEditing)}
     </SidePanel>
   )
 }

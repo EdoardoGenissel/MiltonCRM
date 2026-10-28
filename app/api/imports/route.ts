@@ -27,9 +27,10 @@ export async function POST(request: NextRequest) {
   const file = formData.get("file")
   const kind = formData.get("kind")
 
+  // Les exports Apimo ne s'importent plus à la main : la synchro par l'API les
+  // remplace (cf. lib/integrations/apimo/sync.ts). Les runners Excel restent en
+  // place le temps de valider la synchro en production, mais ne sont plus exposés.
   const validKinds: ImportKind[] = [
-    "apimo_prospects",
-    "apimo_biens",
     "septeo_contacts",
     "septeo_biens",
     "septeo_impayes",
@@ -60,12 +61,21 @@ export async function POST(request: NextRequest) {
       return Response.json(
         {
           error:
-            "Type d'export non reconnu. Vérifie qu'il s'agit d'un export Apimo (prospects / biens) " +
-            "ou Septéo (propriétaires-locataires / biens / impayés / incidents / loyers appelés) non modifié.",
+            "Type d'export non reconnu. Vérifie qu'il s'agit d'un export Septéo (propriétaires-locataires / biens / impayés / incidents / loyers appelés) non modifié.",
         },
         { status: 400 },
       )
     }
+  }
+  if (resolvedKind === "apimo_prospects" || resolvedKind === "apimo_biens") {
+    return Response.json(
+      {
+        error:
+          "Les données Apimo sont synchronisées automatiquement chaque nuit : inutile d'importer " +
+          "cet export. Utilise « Synchroniser maintenant » pour une mise à jour immédiate.",
+      },
+      { status: 400 },
+    )
   }
   const importKind: ImportKind = resolvedKind
 

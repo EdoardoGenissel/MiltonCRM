@@ -1,6 +1,11 @@
 import { Topbar } from "@/components/topbar"
 import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
-import { listImportRuns, listLatestImportLogByKind } from "@/lib/imports/queries"
+import {
+  getLatestApimoSync,
+  listImportRuns,
+  listLatestImportLogByKind,
+} from "@/lib/imports/queries"
+import { ApimoSyncButton } from "./apimo-sync-button"
 import { ImportForm } from "./import-form"
 
 export const dynamic = "force-dynamic"
@@ -37,12 +42,44 @@ function LastImportStat({
 }
 
 export default async function ImportsPage() {
-  const [runs, latestByKind] = await Promise.all([listImportRuns(), listLatestImportLogByKind()])
+  const [runs, latestByKind, latestApimoSync] = await Promise.all([
+    listImportRuns(),
+    listLatestImportLogByKind(),
+    getLatestApimoSync(),
+  ])
 
   return (
     <>
       <Topbar title="Imports" />
       <div className="flex-1 overflow-auto p-8">
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-md border border-border bg-card p-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-semibold text-foreground">Synchro Apimo</p>
+            <p className="text-xs text-muted-foreground">
+              Prospects, biens et mandats Apimo sont synchronisés automatiquement chaque nuit - plus
+              besoin d&apos;importer les exports Excel.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {latestApimoSync ? (
+                <>
+                  Dernière synchro : {new Date(latestApimoSync.startedAt).toLocaleString("fr-FR")}
+                  {" - "}
+                  <span
+                    className={
+                      latestApimoSync.status === "success" ? "text-success" : "text-danger"
+                    }
+                  >
+                    {latestApimoSync.status === "success" ? "réussie" : "en erreur"}
+                  </span>
+                </>
+              ) : (
+                "Aucune synchro pour le moment."
+              )}
+            </p>
+          </div>
+          <ApimoSyncButton />
+        </div>
+
         <div className="mb-6 grid grid-cols-2 gap-4">
           <LastImportStat label="Dernier import - Contacts" log={latestByKind.contacts} />
           <LastImportStat

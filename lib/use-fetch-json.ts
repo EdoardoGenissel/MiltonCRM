@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 // Fetch client minimal partagé par les drawers d'entité (cf.
 // components/entity-drawers/*) - pas de librairie de data-fetching dans le
@@ -9,6 +9,8 @@ export function useFetchJson<T>(url: string | null) {
   const [data, setData] = useState<T | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  // Incrémenté par `reload` (ex. après une modification depuis le drawer).
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     if (!url) return
@@ -46,7 +48,9 @@ export function useFetchJson<T>(url: string | null) {
     return () => {
       cancelled = true
     }
-  }, [url])
+  }, [url, version])
 
-  return { data, error, loading }
+  const reload = useCallback(() => setVersion((v) => v + 1), [])
+
+  return { data, error, loading, reload }
 }

@@ -47,6 +47,7 @@ enum Source {
   JOTFORM
   CITYSCAN
   MANUEL
+  GMAIL
 }
 
 model Profile {
@@ -581,4 +582,41 @@ model LoyerAppele {
 
   @@unique([source, sourceRef])
   @@index([contactId])
+}
+
+// ---------------------------------------------------------------------------
+// Page Prospects - analyse IA (Gemini) des boîtes mail contact@ / prospects@ et
+// propositions de création / mise à jour de fiches, validées à la main.
+// ---------------------------------------------------------------------------
+
+/// Une proposition par fil Gmail analysé (cf. lib/prospects-mail/sync.ts) :
+/// `gmailMessageId` est le dernier message du fil au moment de l'analyse. Tant
+/// que la proposition est "en_attente", un nouveau message dans le fil la
+/// réanalyse sur place ; une fois traitée (validée/rejetée), un nouveau message
+/// crée une nouvelle proposition.
+model MailSuggestion {
+  id             String    @id @default(cuid())
+  mailbox        String // adresse de la boîte analysée (ex. contact@miltonimmobilier.fr)
+  gmailMessageId String
+  gmailThreadId  String
+  fromName       String?
+  fromEmail      String?
+  subject        String?
+  receivedAt     DateTime
+  excerpt        String? // texte du fil envoyé à l'IA (tronqué) - affiché pour vérification
+  pertinent      Boolean   @default(false)
+  resume         String?
+  extraction     Json? // sortie brute de Gemini (cf. lib/prospects-mail/extract.ts)
+  actions        Json      @default("[]") // ProposedAction[] (cf. lib/prospects-mail/proposals.ts)
+  resultat       Json? // ids des fiches créées/mises à jour à la validation
+  statut         String    @default("en_attente") // "en_attente" | "validee" | "rejetee" | "ignoree" | "erreur"
+  error          String?
+  traiteLe       DateTime?
+  traitePar      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([mailbox, gmailMessageId])
+  @@index([statut, receivedAt])
+  @@index([gmailThreadId])
 }

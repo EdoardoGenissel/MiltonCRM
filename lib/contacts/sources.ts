@@ -5,4 +5,5 @@ export const SOURCE_LABELS: Record<string, string> = {
   SEPTEO: "Septéo",
   JOTFORM: "JotForm",
   MANUEL: "Manuel",
+  GMAIL: "Email",
 }

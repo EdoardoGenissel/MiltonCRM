@@ -26,6 +26,7 @@ import { ClickableRow } from "@/components/entity-drawers/clickable-row"
 import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
 import { DrawerState } from "@/components/entity-drawers/drawer-state"
 import { drawerLink } from "@/components/entity-drawers/drawer-link"
+import { EntityEditForm } from "@/components/entity-drawers/entity-edit-form"
 import { useFetchJson } from "@/lib/use-fetch-json"
 import { dateLabel, dateTimeLabel, boolLabel, moneyLabel, surfaceLabel } from "@/lib/format"
 import { loyerMaxWithMargin } from "@/lib/prospects/loyer-max"
@@ -151,14 +152,42 @@ function adresseLabel(detail: NonNullable<ContactDetail["prospectDetail"]>): str
 export function ContactDrawerContent({
   id,
   onOpenBien,
+  editing,
+  onEditingChange,
 }: {
   id: string
   onOpenBien: (id: string) => void
+  editing: boolean
+  onEditingChange: (editing: boolean) => void
 }) {
-  const { data: contact, error, loading } = useFetchJson<ContactDetail>(`/api/contacts/${id}`)
+  const {
+    data: contact,
+    error,
+    loading,
+    reload,
+  } = useFetchJson<ContactDetail>(`/api/contacts/${id}`)
 
   if (loading || !contact) {
     return <DrawerState error={error} />
+  }
+
+  if (editing) {
+    return (
+      <EntityEditForm
+        entity="contact"
+        id={contact.id}
+        initial={{
+          ...contact,
+          origine: contact.prospectDetail?.origine,
+          originePrecise: contact.prospectDetail?.originePrecise,
+        }}
+        onCancel={() => onEditingChange(false)}
+        onSaved={() => {
+          onEditingChange(false)
+          reload()
+        }}
+      />
+    )
   }
 
   const tabs = [
@@ -318,9 +347,7 @@ export function ContactDrawerContent({
                             {inner}
                           </ClickableRow>
                         ) : (
-                          <div className="rounded-md border border-border p-3 text-sm">
-                            {inner}
-                          </div>
+                          <div className="rounded-md border border-border p-3 text-sm">{inner}</div>
                         )}
                       </li>
                     )
@@ -372,9 +399,7 @@ export function ContactDrawerContent({
                             {inner}
                           </ClickableRow>
                         ) : (
-                          <div className="rounded-md border border-border p-3 text-sm">
-                            {inner}
-                          </div>
+                          <div className="rounded-md border border-border p-3 text-sm">{inner}</div>
                         )}
                       </li>
                     )

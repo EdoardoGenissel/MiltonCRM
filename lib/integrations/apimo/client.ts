@@ -12,7 +12,7 @@ const API_BASE = "https://api.apimo.pro"
 export class ApimoAuthError extends Error {
   constructor(
     public status: number,
-    public detail: string
+    public detail: string,
   ) {
     super(`Apimo auth error ${status}: ${detail}`)
   }
@@ -23,7 +23,7 @@ export class ApimoForbiddenError extends Error {
     super(
       `Apimo a répondu 403 Forbidden : ${detail}. Vérifier d'abord APIMO_AGENCY_ID ` +
         "(doit être l'id retourné par GET /agencies, pas APIMO_PROVIDER) avant de " +
-        "suspecter une whitelist IP ou un scope manquant."
+        "suspecter une whitelist IP ou un scope manquant.",
     )
   }
 }
@@ -33,7 +33,9 @@ function getCredentials(): { provider: string; token: string; agencyId: string }
   const token = process.env.APIMO_API_KEY
   const agencyId = process.env.APIMO_AGENCY_ID
   if (!provider || !token || !agencyId) {
-    throw new Error("APIMO_PROVIDER / APIMO_API_KEY / APIMO_AGENCY_ID manquants dans l'environnement")
+    throw new Error(
+      "APIMO_PROVIDER / APIMO_API_KEY / APIMO_AGENCY_ID manquants dans l'environnement",
+    )
   }
   return { provider, token, agencyId }
 }
@@ -65,7 +67,7 @@ async function parseAndCheck<T>(response: Response): Promise<T> {
  */
 export async function apimoGet<T = unknown>(
   path: string,
-  params?: Record<string, string | number>
+  params?: Record<string, string | number>,
 ): Promise<T> {
   const { agencyId } = getCredentials()
   const url = new URL(`${API_BASE}/agencies/${agencyId}${path}`)
@@ -77,6 +79,35 @@ export async function apimoGet<T = unknown>(
     headers: { Authorization: authHeader(), Accept: "application/json" },
   })
   return parseAndCheck<T>(response)
+}
+
+// Maximum accepté par l'API sur tous les endpoints de liste (cf. Cockpit/apimmo.md).
+const PAGE_SIZE = 1000
+
+/**
+ * Parcourt toutes les pages d'un endpoint de liste (`limit`/`offset`), ex.
+ * `apimoGetAll("contacts")` → GET /agencies/{agency_id}/contacts?limit=1000&offset=0,
+ * puis offset=1000... jusqu'à `total_items`. La réponse est toujours enveloppée
+ * (`{ total_items, timestamp, <resource>: [...] }`), jamais un tableau brut.
+ */
+export async function apimoGetAll<T>(
+  resource: string,
+  params?: Record<string, string | number>,
+): Promise<T[]> {
+  const items: T[] = []
+  for (let offset = 0; ; offset += PAGE_SIZE) {
+    const page = await apimoGet<Record<string, unknown> & { total_items?: number }>(
+      `/${resource}`,
+      {
+        ...params,
+        limit: PAGE_SIZE,
+        offset,
+      },
+    )
+    const batch = (page[resource] ?? []) as T[]
+    items.push(...batch)
+    if (batch.length < PAGE_SIZE || items.length >= (page.total_items ?? 0)) return items
+  }
 }
 
 /**
@@ -105,7 +136,7 @@ export async function apimoPost<T = unknown>(path: string, body: unknown): Promi
  */
 export async function apimoGetAbsolute<T = unknown>(
   path: string,
-  params?: Record<string, string | number>
+  params?: Record<string, string | number>,
 ): Promise<T> {
   const url = new URL(`${API_BASE}${path}`)
   for (const [key, value] of Object.entries(params ?? {})) {

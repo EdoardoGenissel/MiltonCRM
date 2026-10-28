@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { patchHandler } from "@/lib/entity-edit/route-handler"
 import { getMandatById } from "@/lib/mandats/queries"
 import { serializeMandat } from "@/lib/mandats/serialize"
 
@@ -13,3 +14,5 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
   return Response.json(serializeMandat(mandat))
 }
+
+export const PATCH = patchHandler("mandat")

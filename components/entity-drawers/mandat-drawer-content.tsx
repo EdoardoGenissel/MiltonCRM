@@ -7,6 +7,7 @@ import { MandatTypeBadge } from "@/components/mandat-type-badge"
 import { mandatBadgeLabel, mandatTypeComplement } from "@/lib/mandats/mandat-label"
 import { drawerLink } from "@/components/entity-drawers/drawer-link"
 import { DrawerState } from "@/components/entity-drawers/drawer-state"
+import { EntityEditForm } from "@/components/entity-drawers/entity-edit-form"
 import { useFetchJson } from "@/lib/use-fetch-json"
 
 // Fiche mandat autonome ouverte depuis /mandats - le mandat n'a pas de page
@@ -16,15 +17,34 @@ export function MandatDrawerContent({
   id,
   onOpenContact,
   onOpenBien,
+  editing,
+  onEditingChange,
 }: {
   id: string
   onOpenContact: (id: string) => void
   onOpenBien: (id: string) => void
+  editing: boolean
+  onEditingChange: (editing: boolean) => void
 }) {
-  const { data: mandat, error, loading } = useFetchJson<MandatDetail>(`/api/mandats/${id}`)
+  const { data: mandat, error, loading, reload } = useFetchJson<MandatDetail>(`/api/mandats/${id}`)
 
   if (loading || !mandat) {
     return <DrawerState error={error} />
+  }
+
+  if (editing) {
+    return (
+      <EntityEditForm
+        entity="mandat"
+        id={mandat.id}
+        initial={mandat}
+        onCancel={() => onEditingChange(false)}
+        onSaved={() => {
+          onEditingChange(false)
+          reload()
+        }}
+      />
+    )
   }
 
   const typeComplement = mandatTypeComplement(mandat)

@@ -88,41 +88,115 @@ function parseLoyerMax(value: string | undefined): number | undefined {
   return parseNumber(value)
 }
 
-// Reste des colonnes Apimo (au-delà du socle de scope.md) → champs
-// `ProspectDetail`, factorisé pour être utilisé à la fois en création
-// (`createMany`) et en mise à jour (`upsert`) d'une fiche déjà existante.
-function buildProspectDetailExtras(mapped: ApimoProspectRow) {
+// Fiche prospect déjà typée - produite soit depuis une ligne de l'export Excel
+// (rowToProspectItem ci-dessous), soit depuis une recherche Apimo + son contact
+// (lib/integrations/apimo/map-request.ts) : `upsertApimoProspects` ne sait pas
+// d'où elle vient.
+export type ApimoProspectDetailFields = {
+  alerteAbonne: boolean
+  classification?: string
+  origine?: string
+  categorie?: string
+  typeBien?: string
+  loyerMax?: number
+  coAgence?: string
+  prixMin?: number
+  prixMax?: number
+  devise?: string
+  pieces?: string
+  surfaceMin?: number
+  surfaceMax?: number
+  secteur?: string
+  quartier?: string
+  derniereAction?: Date
+  commentaire?: string
+  creeLe?: Date
+  utilisateur?: string
+  emailingAbonne?: boolean
+  magazineAbonne?: boolean
+  originePrecise?: string
+  languesParlees: string[]
+  dateNaissance?: Date
+  lieuNaissance?: string
+  adressePersonnelle?: string
+  adresseComplement?: string
+  codePostal?: string
+  villePersonnelle?: string
+  pays?: string
+  agence?: string
+  referenceProduit?: string
+  criteresComplementaires?: string
+  attributs?: string
+  majLe?: Date
+  majPar?: string
+}
+
+// Une ligne = une recherche : une même personne peut apparaître plusieurs fois
+// (ex. une recherche en location + une en achat). Ses types de prospect se
+// cumulent, les critères sont ceux de la dernière ligne traitée.
+export type ApimoProspectItem = {
+  sourceRef?: string
+  civilite?: string
+  prenom: string
+  nom: string
+  telephone?: string
+  email?: string
+  commune?: string
+  persona: string
+  detail: ApimoProspectDetailFields
+}
+
+// Ligne Excel → item. Le loyer max n'a de sens que pour une recherche en
+// location ("Prix max" = budget d'achat sinon).
+function rowToProspectItem(mapped: ApimoProspectRow): ApimoProspectItem {
   return {
-    coAgence: mapped.coAgence,
-    prixMin: parseNumber(mapped.prixMin),
-    prixMax: parseNumber(mapped.prixMax),
-    devise: mapped.devise,
-    pieces: mapped.pieces,
-    surfaceMin: parseNumber(mapped.surfaceMin),
-    surfaceMax: parseNumber(mapped.surfaceMax),
-    secteur: mapped.secteur,
-    quartier: mapped.quartier,
-    derniereAction: parseFrDate(mapped.derniereAction),
-    commentaire: mapped.commentaire,
-    creeLe: parseFrDate(mapped.creeLe),
-    utilisateur: mapped.utilisateur,
-    emailingAbonne: mapped.emailingAbonne,
-    magazineAbonne: mapped.magazineAbonne,
-    originePrecise: mapped.originePrecise,
-    languesParlees: mapped.languesParlees,
-    dateNaissance: parseFrDate(mapped.dateNaissance),
-    lieuNaissance: mapped.lieuNaissance,
-    adressePersonnelle: mapped.adressePersonnelle,
-    adresseComplement: mapped.adresseComplement,
-    codePostal: mapped.codePostal,
-    villePersonnelle: mapped.villePersonnelle,
-    pays: mapped.pays,
-    agence: mapped.agence,
-    referenceProduit: mapped.referenceProduit,
-    criteresComplementaires: mapped.criteresComplementaires,
-    attributs: mapped.attributs,
-    majLe: parseFrDate(mapped.majLe),
-    majPar: mapped.majPar,
+    sourceRef: mapped.sourceRef,
+    civilite: mapped.civilite,
+    prenom: mapped.prenom,
+    nom: mapped.nom,
+    telephone: mapped.telephone,
+    email: mapped.email,
+    commune: mapped.commune,
+    persona: apimoProspectPersona(mapped.categorie),
+    detail: {
+      alerteAbonne: mapped.alerteAbonne,
+      classification: mapped.classification,
+      origine: mapped.origine,
+      categorie: mapped.categorie,
+      typeBien: mapped.typeBien,
+      loyerMax:
+        mapped.categorie?.toLowerCase() === "location" ? parseLoyerMax(mapped.loyerMax) : undefined,
+      coAgence: mapped.coAgence,
+      prixMin: parseNumber(mapped.prixMin),
+      prixMax: parseNumber(mapped.prixMax),
+      devise: mapped.devise,
+      pieces: mapped.pieces,
+      surfaceMin: parseNumber(mapped.surfaceMin),
+      surfaceMax: parseNumber(mapped.surfaceMax),
+      secteur: mapped.secteur,
+      quartier: mapped.quartier,
+      derniereAction: parseFrDate(mapped.derniereAction),
+      commentaire: mapped.commentaire,
+      creeLe: parseFrDate(mapped.creeLe),
+      utilisateur: mapped.utilisateur,
+      emailingAbonne: mapped.emailingAbonne,
+      magazineAbonne: mapped.magazineAbonne,
+      originePrecise: mapped.originePrecise,
+      languesParlees: mapped.languesParlees,
+      dateNaissance: parseFrDate(mapped.dateNaissance),
+      lieuNaissance: mapped.lieuNaissance,
+      adressePersonnelle: mapped.adressePersonnelle,
+      adresseComplement: mapped.adresseComplement,
+      codePostal: mapped.codePostal,
+      villePersonnelle: mapped.villePersonnelle,
+      pays: mapped.pays,
+      agence: mapped.agence,
+      referenceProduit: mapped.referenceProduit,
+      criteresComplementaires: mapped.criteresComplementaires,
+      attributs: mapped.attributs,
+      majLe: parseFrDate(mapped.majLe),
+      majPar: mapped.majPar,
+    },
   }
 }
 
@@ -133,57 +207,65 @@ async function importApimoProspects(
 ): Promise<ImportResult> {
   const { headerRow, rows } = await parseTabularBuffer(buffer, fileName)
   const headerIndex = buildHeaderIndex(headerRow)
+  const items = rows
+    .map((row) => mapApimoRow(headerIndex, row))
+    .filter((mapped): mapped is ApimoProspectRow => mapped !== null)
+    .map(rowToProspectItem)
+  return upsertApimoProspects(items, { fileName, onProgress })
+}
+
+export async function upsertApimoProspects(
+  items: ApimoProspectItem[],
+  { fileName, onProgress }: { fileName: string; onProgress?: OnProgress },
+): Promise<ImportResult> {
   const candidates = await loadCandidates(Source.APIMO)
   const emailIndex = await loadContactIdsByEmail()
 
   // Phase 1 - dédup en mémoire, aucun accès DB : rapide même sur des milliers de
   // lignes, donc pas besoin d'y reporter de progression.
-  type ToCreate = { id: string; mapped: NonNullable<ReturnType<typeof mapApimoRow>> }
-  type ToUpdate = { matchId: string; mapped: NonNullable<ReturnType<typeof mapApimoRow>> }
+  type ToCreate = { id: string; item: ApimoProspectItem }
+  type ToUpdate = { matchId: string; item: ApimoProspectItem }
   const toCreate: ToCreate[] = []
   const toUpdate: ToUpdate[] = []
   const crossSourceTags = new Map<string, Set<string>>()
 
-  for (const row of rows) {
-    const mapped = mapApimoRow(headerIndex, row)
-    if (!mapped || !mapped.nom) continue
-
-    const persona = apimoProspectPersona(mapped.categorie)
+  for (const item of items) {
+    if (!item.nom) continue
 
     const matchId = resolveContactMatch(candidates, {
       source: Source.APIMO,
-      sourceRef: mapped.sourceRef,
-      nom: mapped.nom,
-      prenom: mapped.prenom,
-      telephone: mapped.telephone,
+      sourceRef: item.sourceRef,
+      nom: item.nom,
+      prenom: item.prenom,
+      telephone: item.telephone,
     })
 
     const emailMatchId = matchId
       ? null
-      : (mapped.email && emailIndex.get(mapped.email.trim().toLowerCase())) || null
+      : (item.email && emailIndex.get(item.email.trim().toLowerCase())) || null
 
     if (matchId) {
-      toUpdate.push({ matchId, mapped })
+      toUpdate.push({ matchId, item })
     } else if (emailMatchId) {
       const personas = crossSourceTags.get(emailMatchId) ?? new Set<string>()
-      personas.add(persona)
+      personas.add(item.persona)
       crossSourceTags.set(emailMatchId, personas)
     } else {
       const id = randomUUID()
-      toCreate.push({ id, mapped })
+      toCreate.push({ id, item })
       // Visible immédiatement pour les lignes suivantes du même fichier (ex. une
       // même personne présente deux fois dans l'export) - sans ça, deux lignes
       // identiques créeraient deux contacts au lieu d'un doublon détecté.
       candidates.push({
         id,
         source: Source.APIMO,
-        sourceRef: mapped.sourceRef ?? null,
-        nom: mapped.nom,
-        prenom: mapped.prenom,
-        telephone: mapped.telephone ?? null,
-        personas: [persona],
+        sourceRef: item.sourceRef ?? null,
+        nom: item.nom,
+        prenom: item.prenom,
+        telephone: item.telephone ?? null,
+        personas: [item.persona],
       })
-      if (mapped.email) emailIndex.set(mapped.email.trim().toLowerCase(), id)
+      if (item.email) emailIndex.set(item.email.trim().toLowerCase(), id)
     }
   }
 
@@ -193,88 +275,68 @@ async function importApimoProspects(
   // Phase 2a - nouvelles fiches, par lots.
   for (const batch of chunk(toCreate, CREATE_BATCH_SIZE)) {
     await prisma.contact.createMany({
-      data: batch.map(({ id, mapped }) => ({
+      data: batch.map(({ id, item }) => ({
         id,
-        civilite: mapped.civilite,
-        prenom: mapped.prenom,
-        nom: mapped.nom,
-        email: mapped.email,
-        telephone: mapped.telephone,
-        commune: mapped.commune,
-        personas: [apimoProspectPersona(mapped.categorie)],
+        civilite: item.civilite,
+        prenom: item.prenom,
+        nom: item.nom,
+        email: item.email,
+        telephone: item.telephone,
+        commune: item.commune,
+        personas: [item.persona],
         source: Source.APIMO,
-        sourceRef: mapped.sourceRef,
+        sourceRef: item.sourceRef,
       })),
     })
     await prisma.prospectDetail.createMany({
-      data: batch.map(({ id, mapped }) => ({
-        contactId: id,
-        alerteAbonne: mapped.alerteAbonne,
-        classification: mapped.classification,
-        origine: mapped.origine,
-        categorie: mapped.categorie,
-        typeBien: mapped.typeBien,
-        loyerMax:
-          mapped.categorie?.toLowerCase() === "location"
-            ? parseLoyerMax(mapped.loyerMax)
-            : undefined,
-        ...buildProspectDetailExtras(mapped),
-      })),
+      data: batch.map(({ id, item }) => ({ contactId: id, ...item.detail })),
     })
     processed += batch.length
     onProgress?.({ processed, total })
   }
 
   // Phase 2b - doublons détectés (matchId existant) : update en parallèle borné.
-  await mapWithConcurrency(toUpdate, UPDATE_CONCURRENCY, async ({ matchId, mapped }) => {
-    const loyerMax =
-      mapped.categorie?.toLowerCase() === "location" ? parseLoyerMax(mapped.loyerMax) : undefined
+  // Une personne présente sur plusieurs lignes (plusieurs recherches) est mise à
+  // jour une fois par ligne : chacune ajoute son persona, la dernière fixe les
+  // critères. D'où l'écriture séquentielle par contact (chaîne de promesses) -
+  // deux lignes du même contact en parallèle pourraient s'écraser leurs personas.
+  const updatesByContact = new Map<string, ApimoProspectItem[]>()
+  for (const { matchId, item } of toUpdate) {
+    updatesByContact.set(matchId, [...(updatesByContact.get(matchId) ?? []), item])
+  }
+  await mapWithConcurrency(
+    [...updatesByContact.entries()],
+    UPDATE_CONCURRENCY,
+    async ([matchId, contactItems]) => {
+      // Fusionne avec les personas existants plutôt que d'écraser : un contact peut
+      // avoir été rattaché entretemps comme vendeur/bailleur/locataire (import biens
+      // ou Septéo) - un ré-import Apimo prospects ne doit pas faire disparaître ce
+      // type (cf. bug corrigé lors de l'ajout de l'import biens).
+      const existingPersonas = candidates.find((c) => c.id === matchId)?.personas ?? []
+      const mergedPersonas = Array.from(
+        new Set([...existingPersonas, ...contactItems.map((item) => item.persona)]),
+      )
+      const item = contactItems[contactItems.length - 1]
 
-    // Fusionne avec les personas existants plutôt que d'écraser : un contact peut
-    // avoir été rattaché entretemps comme vendeur/bailleur/locataire (import biens
-    // ou Septéo) - un ré-import Apimo prospects ne doit pas faire disparaître ce
-    // type (cf. bug corrigé lors de l'ajout de l'import biens).
-    const existingPersonas = candidates.find((c) => c.id === matchId)?.personas ?? []
-    const mergedPersonas = Array.from(
-      new Set([...existingPersonas, apimoProspectPersona(mapped.categorie)]),
-    )
-
-    await prisma.contact.update({
-      where: { id: matchId },
-      data: {
-        civilite: mapped.civilite,
-        email: mapped.email,
-        telephone: mapped.telephone,
-        commune: mapped.commune,
-        personas: { set: mergedPersonas },
-      },
-    })
-    const extras = buildProspectDetailExtras(mapped)
-    await prisma.prospectDetail.upsert({
-      where: { contactId: matchId },
-      create: {
-        contactId: matchId,
-        alerteAbonne: mapped.alerteAbonne,
-        classification: mapped.classification,
-        origine: mapped.origine,
-        categorie: mapped.categorie,
-        typeBien: mapped.typeBien,
-        loyerMax,
-        ...extras,
-      },
-      update: nullifyUndefined({
-        alerteAbonne: mapped.alerteAbonne,
-        classification: mapped.classification,
-        origine: mapped.origine,
-        categorie: mapped.categorie,
-        typeBien: mapped.typeBien,
-        loyerMax,
-        ...extras,
-      }),
-    })
-    processed += 1
-    onProgress?.({ processed, total })
-  })
+      await prisma.contact.update({
+        where: { id: matchId },
+        data: {
+          civilite: item.civilite,
+          email: item.email,
+          telephone: item.telephone,
+          commune: item.commune,
+          personas: { set: mergedPersonas },
+        },
+      })
+      await prisma.prospectDetail.upsert({
+        where: { contactId: matchId },
+        create: { contactId: matchId, ...item.detail },
+        update: nullifyUndefined(item.detail),
+      })
+      processed += contactItems.length
+      onProgress?.({ processed, total })
+    },
+  )
 
   // Phase 2c - doublons cross-source détectés par email (contact déjà existant
   // côté Septéo) : on ajoute seulement le persona, sans écraser ses champs.

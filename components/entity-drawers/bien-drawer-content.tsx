@@ -23,6 +23,7 @@ import { DrawerTabs } from "@/components/ui/drawer-tabs"
 import { ClickableRow } from "@/components/entity-drawers/clickable-row"
 import { EstimationStatutBadge } from "@/components/estimation-statut-badge"
 import { DrawerState } from "@/components/entity-drawers/drawer-state"
+import { EntityEditForm } from "@/components/entity-drawers/entity-edit-form"
 import { useFetchJson } from "@/lib/use-fetch-json"
 import { dateLabel, moneyLabel, boolLabelOuiNon } from "@/lib/format"
 
@@ -72,15 +73,34 @@ export function BienDrawerContent({
   id,
   onOpenContact,
   onOpenMandat,
+  editing,
+  onEditingChange,
 }: {
   id: string
   onOpenContact: (id: string) => void
   onOpenMandat: (id: string) => void
+  editing: boolean
+  onEditingChange: (editing: boolean) => void
 }) {
-  const { data: bien, error, loading } = useFetchJson<BienDetail>(`/api/biens/${id}`)
+  const { data: bien, error, loading, reload } = useFetchJson<BienDetail>(`/api/biens/${id}`)
 
   if (loading || !bien) {
     return <DrawerState error={error} />
+  }
+
+  if (editing) {
+    return (
+      <EntityEditForm
+        entity="bien"
+        id={bien.id}
+        initial={bien}
+        onCancel={() => onEditingChange(false)}
+        onSaved={() => {
+          onEditingChange(false)
+          reload()
+        }}
+      />
+    )
   }
 
   const adresseComplete = [bien.adresse, bien.adresseComplement].filter(Boolean).join(", ")

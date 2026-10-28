@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { patchHandler } from "@/lib/entity-edit/route-handler"
 import { getContactById } from "@/lib/contacts/queries"
 
 // Sert la fiche contact complète au drawer client (cf.
@@ -114,3 +115,5 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     })),
   })
 }
+
+export const PATCH = patchHandler("contact")

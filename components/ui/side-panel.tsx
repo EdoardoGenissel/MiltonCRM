@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { createPortal } from "react-dom"
 import { ArrowLeft, X } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -14,6 +14,7 @@ export function SidePanel({
   onBack,
   title,
   subtitle,
+  actions,
   children,
 }: {
   open: boolean
@@ -21,9 +22,12 @@ export function SidePanel({
   onBack?: () => void
   title: React.ReactNode
   subtitle?: React.ReactNode
+  // Boutons d'en-tête à gauche de la croix (ex. "Modifier").
+  actions?: React.ReactNode
   children: React.ReactNode
 }) {
   const [mounted, setMounted] = useState(false)
+  const titleId = useId()
 
   useEffect(() => {
     setMounted(true)
@@ -56,6 +60,7 @@ export function SidePanel({
       <aside
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
         className={cn(
           "absolute top-0 right-0 flex h-full w-full max-w-xl flex-col border-l border-border bg-background shadow-2xl transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "translate-x-full",
@@ -74,20 +79,26 @@ export function SidePanel({
               </button>
             )}
             <div className="min-w-0">
-              <h2 className="truncate text-base font-semibold tracking-tight text-foreground">
+              <h2
+                id={titleId}
+                className="truncate text-base font-semibold tracking-tight text-foreground"
+              >
                 {title}
               </h2>
               {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Fermer"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            {actions}
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fermer"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
         <div className="flex-1 overflow-auto p-6">{children}</div>
       </aside>
