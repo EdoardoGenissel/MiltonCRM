@@ -2,16 +2,26 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useCallback, useMemo, useState } from "react"
-import { ChevronRight } from "lucide-react"
+import { useCallback, useId, useMemo, useState } from "react"
+import { ChevronDown, ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ToastProvider, useToast } from "@/components/ui/toaster"
 import { useEntityDrawers } from "@/components/entity-drawers/entity-drawer-provider"
 import { cn } from "@/lib/utils"
 import { cardView } from "@/lib/prospects-mail/card"
 import type { SuggestionSummary } from "@/lib/prospects-mail/queries"
-import { appliedLabel, clockLabel, dayLabel, STATUTS, StatutDot, TimeAgo } from "./shared"
+import { appliedLabel, TimeAgo } from "./shared"
+import {
+  clockLabel,
+  dayLabel,
+  daySummary,
+  ecartesLabel,
+  groupByDay,
+  historyDate,
+  plural,
+  treatedToday,
+} from "./days"
 import { ValidateModal, type ValidateOutcome } from "./validate-modal"
 import { HistoryPanel, type OpenEntity } from "./history-panel"
 
@@ -124,27 +134,289 @@ function QueueRow({
   )
 }
 
-function historyDetail(s: SuggestionSummary): string {
-  const by = s.traitePar ? ` · ${s.traitePar.split("@")[0]}` : ""
-  switch (s.statut) {
-    case "validee": {
-      const text = appliedLabel(s.applied ?? s.actions)
-      return `${text[0].toUpperCase()}${text.slice(1)}${by}`
-    }
-    case "rejetee":
-      return `Rejeté${by}`
-    default:
-      return `${STATUTS[s.statut]?.label ?? s.statut} · ${s.subject ?? "(sans objet)"}`
-  }
+// Type de demande (cf. lib/prospects-mail/card.ts). Repli pour les mails sans
+// extraction (anciens mails) : ce qui a été enregistré, si le mail a été validé.
+function requestType(s: SuggestionSummary): string | null {
+  if (s.carte) return cardView(s).typeLabel
+  if (s.statut !== "validee") return null
+  const text = appliedLabel(s.applied ?? s.actions)
+  return text[0].toUpperCase() + text.slice(1)
 }
 
-function TimelineRow({
+// Bien ou recherche en une ligne ; absent, le segment disparaît.
+function bienOf(s: SuggestionSummary): string | null {
+  return s.carte ? cardView(s).bienLine : null
+}
+
+const FOCUS_RING = "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+
+// Ligne cliquable de la carte "Aujourd'hui" : toute la ligne est la cible.
+// Survol en muted/60 (et non muted) pour garder le texte secondaire à 4,5:1.
+const TODAY_ROW = cn(
+  "group/row w-full rounded-md text-left transition-colors hover:bg-muted/60 motion-reduce:transition-none",
+  FOCUS_RING,
+)
+const ROW_CHEVRON =
+  "size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-visible/row:opacity-100 motion-reduce:transition-none"
+const OVERLINE = "px-2 pt-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+
+function TodayCard({
+  history,
+  historyHref,
+  onOpen,
+}: {
+  history: SuggestionSummary[]
+  historyHref: string
+  onOpen: (id: string) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const listId = useId()
+  const { validees, parVous, parAnalyse } = treatedToday(history)
+
+  return (
+    <section
+      aria-labelledby="today-title"
+      className="max-w-[340px] flex-[1_1_300px] rounded-md border border-border bg-card px-2 pt-4 pb-2"
+    >
+      <div className="flex items-baseline justify-between gap-3 px-2 pb-2">
+        <h2 id="today-title" className="text-sm font-semibold text-foreground">
+          Aujourd&apos;hui
+        </h2>
+        <Link
+          href={historyHref}
+          className={cn(
+            "rounded-md text-sm font-medium text-primary-strong hover:underline",
+            FOCUS_RING,
+          )}
+        >
+          Historique →
+        </Link>
+      </div>
+
+      {validees.length > 0 ? (
+        <ol className="flex flex-col gap-0.5">
+          {validees.map((s) => (
+            <li key={s.id}>
+              <button
+                type="button"
+                onClick={() => onOpen(s.id)}
+                className={cn("grid grid-cols-[12px_minmax(0,1fr)] gap-x-1 p-2", TODAY_ROW)}
+              >
+                <span aria-hidden className="mt-1.5 size-2 rounded-full bg-success" />
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2">
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground decoration-muted-foreground underline-offset-2 group-hover/row:underline">
+                      {s.displayName}
+                    </span>
+                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                      {clockLabel(historyDate(s))}
+                    </span>
+                    <ChevronRight aria-hidden className={ROW_CHEVRON} />
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {["Validé", requestType(s), bienOf(s)].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="px-2 py-2 text-xs text-muted-foreground">
+          Aucun mail validé aujourd&apos;hui.
+        </p>
+      )}
+
+      {parVous.length + parAnalyse.length > 0 && (
+        <>
+          <div aria-hidden className="mx-2 mt-2 border-t border-border" />
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={listId}
+            onClick={() => setOpen((v) => !v)}
+            className={cn(
+              "mt-1 flex items-center justify-between gap-2 px-2 py-2.5 text-sm text-muted-foreground",
+              TODAY_ROW,
+            )}
+          >
+            {ecartesLabel(parVous.length, parAnalyse.length)}
+            <ChevronDown
+              aria-hidden
+              className={cn(
+                "size-3.5 shrink-0 transition-transform motion-reduce:transition-none",
+                open && "rotate-180",
+              )}
+            />
+          </button>
+          <div id={listId} hidden={!open}>
+            {parVous.length > 0 && (
+              <section aria-labelledby={`${listId}-vous`}>
+                <h3 id={`${listId}-vous`} className={OVERLINE}>
+                  Ignorés par vous
+                </h3>
+                <ol className="mt-1">
+                  {parVous.map((s) => {
+                    const time = clockLabel(historyDate(s))
+                    return (
+                      <li key={s.id}>
+                        <button
+                          type="button"
+                          onClick={() => onOpen(s.id)}
+                          aria-label={
+                            s.statut === "erreur"
+                              ? `${s.displayName}, analyse échouée, ${time}`
+                              : undefined
+                          }
+                          className={cn(
+                            "grid grid-cols-[12px_minmax(0,1fr)_14px] items-center gap-x-1 px-2 py-1.5",
+                            TODAY_ROW,
+                          )}
+                        >
+                          <span
+                            aria-hidden
+                            className={cn(
+                              "size-2 rounded-full",
+                              s.statut === "erreur"
+                                ? "bg-warning"
+                                : "border-2 border-muted-foreground/60",
+                            )}
+                          />
+                          <span className="flex min-w-0 items-baseline gap-2">
+                            <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground/80">
+                              {s.displayName}
+                            </span>
+                            <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                              {time}
+                            </span>
+                          </span>
+                          <ChevronRight aria-hidden className={ROW_CHEVRON} />
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ol>
+              </section>
+            )}
+            {parAnalyse.length > 0 && (
+              <section aria-labelledby={`${listId}-analyse`}>
+                <h3 id={`${listId}-analyse`} className={OVERLINE}>
+                  Écartés par l&apos;analyse
+                </h3>
+                <ol className="mt-1">
+                  {parAnalyse.map((s) => (
+                    <li key={s.id}>
+                      <button
+                        type="button"
+                        onClick={() => onOpen(s.id)}
+                        className={cn(
+                          "grid grid-cols-[12px_minmax(0,1fr)_14px] items-center gap-x-1 px-2 py-1.5",
+                          TODAY_ROW,
+                        )}
+                      >
+                        <span aria-hidden className="h-0.5 w-2 bg-border" />
+                        <span className="flex min-w-0 items-baseline gap-2">
+                          <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
+                            {s.displayName}
+                          </span>
+                          <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                            {clockLabel(historyDate(s))}
+                          </span>
+                        </span>
+                        <ChevronRight aria-hidden className={ROW_CHEVRON} />
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )}
+          </div>
+        </>
+      )}
+    </section>
+  )
+}
+
+// Nœuds de la timeline : un rond plein par mail validé, un petit point pour le
+// groupe des écartés. Le statut est toujours écrit à côté (WCAG 1.4.1).
+const NODES = {
+  validee: "size-2.5 bg-success",
+  ecartes: "size-1.5 bg-border",
+} as const
+
+function TimelineEntry({
+  time,
+  node,
+  first,
+  last,
+  children,
+}: {
+  time: string | null
+  node: keyof typeof NODES
+  first: boolean
+  last: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <li className="grid grid-cols-[44px_20px_minmax(0,1fr)] gap-x-2.5">
+      <span className="pt-3 text-right text-xs text-muted-foreground tabular-nums">{time}</span>
+      {/* Fil continu d'un nœud à l'autre ; nœud centré sur la première ligne. */}
+      <span aria-hidden className="relative">
+        {!(first && last) && (
+          <span
+            className={cn(
+              "absolute left-1/2 w-px -translate-x-1/2 bg-border",
+              first ? "top-5 bottom-0" : last ? "top-0 h-5" : "inset-y-0",
+            )}
+          />
+        )}
+        <span
+          className={cn(
+            "absolute top-5 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ring-3 ring-background",
+            NODES[node],
+          )}
+        />
+      </span>
+      <div className="min-w-0 pb-2">{children}</div>
+    </li>
+  )
+}
+
+function fichesLabel(s: SuggestionSummary): string {
+  const n = (s.applied ?? s.actions).filter((a) => a.op !== "lien").length
+  return n === 0 ? "Aucune fiche" : plural(n, "fiche", "fiches")
+}
+
+function ValidatedCard({ s, onOpen }: { s: SuggestionSummary; onOpen: (id: string) => void }) {
+  const type = requestType(s)
+  const bien = bienOf(s)
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(s.id)}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-md border border-border bg-card px-3.5 py-2.5 text-left transition-colors hover:bg-muted/40 motion-reduce:transition-none",
+        FOCUS_RING,
+      )}
+    >
+      <span className="min-w-0 flex-1 truncate text-sm">
+        <span className="font-semibold text-foreground">{s.displayName}</span>
+        {type && <span className="text-foreground/80"> · {type}</span>}
+        {bien && <span className="text-muted-foreground"> · {bien}</span>}
+      </span>
+      <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{fichesLabel(s)}</span>
+      <span className="shrink-0 text-xs font-medium text-success-foreground">Validé</span>
+    </button>
+  )
+}
+
+function EcarteRow({
   s,
-  active,
+  detail,
   onOpen,
 }: {
   s: SuggestionSummary
-  active: boolean
+  detail: string | null
   onOpen: (id: string) => void
 }) {
   return (
@@ -153,123 +425,177 @@ function TimelineRow({
         type="button"
         onClick={() => onOpen(s.id)}
         className={cn(
-          "grid w-full grid-cols-[44px_12px_minmax(0,1fr)] items-baseline gap-x-3 px-5 py-2.5 text-left transition-colors hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none focus-visible:ring-inset",
-          active && "bg-muted/70",
+          "flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors hover:bg-card",
+          FOCUS_RING,
         )}
       >
-        <span suppressHydrationWarning className="text-xs text-muted-foreground tabular-nums">
-          {clockLabel(s.traiteLe ?? s.receivedAt)}
+        <span className="shrink-0 text-muted-foreground tabular-nums">
+          {clockLabel(historyDate(s))}
         </span>
-        <StatutDot statut={s.statut} className="translate-y-[-1px]" />
-        <span className="min-w-0">
-          <span
-            className={cn(
-              "block truncate text-sm",
-              s.statut === "ignoree" ? "text-muted-foreground" : "text-foreground",
-            )}
-          >
-            {s.displayName}
-          </span>
-          <span className="block truncate text-xs text-muted-foreground">{historyDetail(s)}</span>
+        <span className="min-w-0 truncate">
+          <span className="font-medium text-foreground">{s.displayName}</span>
+          {detail && <span className="text-muted-foreground"> · {detail}</span>}
         </span>
       </button>
     </li>
   )
 }
 
-// Les mails écartés par l'analyse (newsletters, notifications...) sont
-// repliés en une ligne par jour : visibles pour contrôler le tri, sans noyer
-// les mails réellement traités.
-function IgnoredFold({
-  items,
-  activeId,
+// Écartés d'un jour, repliés en une ligne : par vous (ignorés, analyses en
+// échec) et par l'analyse. Chaque ligne ouvre le drawer d'historique, où se
+// trouve "Remettre à traiter".
+function EcartesGroup({
+  parVous,
+  parAnalyse,
   onOpen,
 }: {
-  items: SuggestionSummary[]
-  activeId: string | null
+  parVous: SuggestionSummary[]
+  parAnalyse: SuggestionSummary[]
   onOpen: (id: string) => void
 }) {
   const [open, setOpen] = useState(false)
-  if (items.length === 0) return null
+  const listId = useId()
   return (
-    <div>
+    <>
       <button
         type="button"
         aria-expanded={open}
+        aria-controls={listId}
         onClick={() => setOpen((v) => !v)}
-        className="grid w-full grid-cols-[44px_12px_minmax(0,1fr)] items-center gap-x-3 px-5 py-2 text-left text-xs text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none focus-visible:ring-inset"
+        className={cn(
+          "flex items-center gap-1.5 rounded-md py-2.5 text-sm text-muted-foreground transition-colors hover:text-foreground",
+          FOCUS_RING,
+        )}
       >
         <ChevronRight
-          className={cn("h-3.5 w-3.5 justify-self-end transition-transform", open && "rotate-90")}
+          aria-hidden
+          className={cn(
+            "size-3.5 transition-transform motion-reduce:transition-none",
+            open && "rotate-90",
+          )}
         />
-        <StatutDot statut="ignoree" />
-        <span>
-          {items.length} mail{items.length > 1 ? "s" : ""} non pertinent
-          {items.length > 1 ? "s" : ""}
-        </span>
+        {ecartesLabel(parVous.length, parAnalyse.length)}
       </button>
-      {open && (
-        <ol>
-          {items.map((s) => (
-            <TimelineRow key={s.id} s={s} active={s.id === activeId} onOpen={onOpen} />
-          ))}
-        </ol>
+      <div id={listId} hidden={!open} className="pb-1">
+        {parVous.length > 0 && (
+          <section aria-labelledby={`${listId}-vous`}>
+            <h3 id={`${listId}-vous`} className={OVERLINE}>
+              Ignorés par vous
+            </h3>
+            <ul className="mt-1">
+              {parVous.map((s) => {
+                const by = s.traitePar?.split("@")[0]
+                return (
+                  <EcarteRow
+                    key={s.id}
+                    s={s}
+                    detail={
+                      s.statut === "erreur" ? "analyse échouée" : `ignoré${by ? ` par ${by}` : ""}`
+                    }
+                    onOpen={onOpen}
+                  />
+                )
+              })}
+            </ul>
+          </section>
+        )}
+        {parAnalyse.length > 0 && (
+          <section aria-labelledby={`${listId}-analyse`}>
+            <h3 id={`${listId}-analyse`} className={OVERLINE}>
+              Écartés par l&apos;analyse
+            </h3>
+            <ul className="mt-1">
+              {parAnalyse.map((s) => (
+                <EcarteRow key={s.id} s={s} detail={s.subject} onOpen={onOpen} />
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+    </>
+  )
+}
+
+function HistoryTimeline({
+  history,
+  moreHistoryHref,
+  onOpen,
+}: {
+  history: SuggestionSummary[]
+  moreHistoryHref: string | null
+  onOpen: (id: string) => void
+}) {
+  const days = groupByDay(history)
+
+  if (days.length === 0) {
+    return (
+      <p className="py-12 text-center text-sm text-muted-foreground">
+        Aucun mail traité pour l&apos;instant.
+      </p>
+    )
+  }
+
+  return (
+    <div className="flex max-w-[860px] flex-col gap-7">
+      {days.map((day) => {
+        const ecartes = day.parVous.length + day.parAnalyse.length
+        const entries = day.validees.length + (ecartes > 0 ? 1 : 0)
+        return (
+          <section key={day.key} aria-labelledby={`jour-${day.key}`}>
+            <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2
+                id={`jour-${day.key}`}
+                suppressHydrationWarning
+                className="text-sm font-semibold text-foreground"
+              >
+                {dayLabel(day.key + "T12:00:00-03:00")}
+              </h2>
+              <p className="text-xs text-muted-foreground">{daySummary(day)}</p>
+            </div>
+            <ol>
+              {day.validees.map((s, i) => (
+                <TimelineEntry
+                  key={s.id}
+                  time={clockLabel(historyDate(s))}
+                  node="validee"
+                  first={i === 0}
+                  last={i === entries - 1}
+                >
+                  <ValidatedCard s={s} onOpen={onOpen} />
+                </TimelineEntry>
+              ))}
+              {ecartes > 0 && (
+                <TimelineEntry time={null} node="ecartes" first={entries === 1} last>
+                  <EcartesGroup parVous={day.parVous} parAnalyse={day.parAnalyse} onOpen={onOpen} />
+                </TimelineEntry>
+              )}
+            </ol>
+          </section>
+        )
+      })}
+      {moreHistoryHref && (
+        <div className="flex justify-center">
+          <Link
+            href={moreHistoryHref}
+            scroll={false}
+            className={cn(buttonVariants({ variant: "outline" }))}
+          >
+            Afficher les jours précédents
+          </Link>
+        </div>
       )}
     </div>
   )
 }
 
-function Timeline({
-  items,
-  activeId,
-  onOpen,
-}: {
-  items: SuggestionSummary[]
-  activeId: string | null
-  onOpen: (id: string) => void
-}) {
-  // Regroupement par jour de traitement (date du mail pour ce que l'analyse a
-  // écarté d'elle-même) - l'ordre vient déjà trié de la requête.
-  const groups: { day: string; items: SuggestionSummary[] }[] = []
-  for (const item of items) {
-    const day = dayLabel(item.traiteLe ?? item.receivedAt)
-    const last = groups.at(-1)
-    if (last?.day === day) last.items.push(item)
-    else groups.push({ day, items: [item] })
-  }
-
-  return (
-    <div className="flex flex-col">
-      {groups.map((group) => (
-        <section key={group.day}>
-          <h3
-            suppressHydrationWarning
-            className="sticky top-0 z-10 border-b border-border bg-card/95 px-5 py-2 text-xs font-medium text-muted-foreground backdrop-blur"
-          >
-            {group.day}
-          </h3>
-          <ol>
-            {group.items
-              .filter((s) => s.statut !== "ignoree")
-              .map((s) => (
-                <TimelineRow key={s.id} s={s} active={s.id === activeId} onOpen={onOpen} />
-              ))}
-          </ol>
-          <IgnoredFold
-            items={group.items.filter((s) => s.statut === "ignoree")}
-            activeId={activeId}
-            onOpen={onOpen}
-          />
-        </section>
-      ))}
-    </div>
-  )
-}
+export type ProspectsVue = "a-traiter" | "historique"
 
 type BoardProps = {
+  vue: ProspectsVue
   pending: SuggestionSummary[]
   history: SuggestionSummary[]
-  historyTotal: number
+  // Lien vers l'onglet Historique, filtres et recherche conservés.
+  historyHref: string
   moreHistoryHref: string | null
   lastSyncAt: string | null
 }
@@ -291,7 +617,7 @@ async function postDecision(id: string, decision: "rejeter" | "rouvrir"): Promis
   return Boolean(res?.ok)
 }
 
-function Board({ pending, history, historyTotal, moreHistoryHref, lastSyncAt }: BoardProps) {
+function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt }: BoardProps) {
   const router = useRouter()
   const toast = useToast()
   const { openContact, openBien, openMandat } = useEntityDrawers()
@@ -394,29 +720,37 @@ function Board({ pending, history, historyTotal, moreHistoryHref, lastSyncAt }: 
 
   return (
     <>
-      <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
-        <section
-          aria-labelledby="queue-title"
-          className="flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card shadow-[var(--shadow-card)]"
-        >
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-5">
-            <h2 id="queue-title" className="text-sm font-semibold text-foreground">
-              À traiter
-            </h2>
-            <span className="text-sm text-muted-foreground tabular-nums">
-              {pending.length}
-              {/* La requête plafonne la file (cf. listProspectsBoard). */}
-              {pending.length >= 200 && " (200 plus récents affichés)"}
-            </span>
-            {lastSyncAt && (
-              <span className="ml-auto text-xs text-muted-foreground">
-                Analyse automatique · <TimeAgo iso={lastSyncAt} />
-              </span>
-            )}
-          </header>
-          <div className={cn("min-h-0 flex-1 overflow-auto", pending.length > 0 && "bg-muted/40")}>
+      {vue === "historique" ? (
+        <HistoryTimeline
+          history={history}
+          moreHistoryHref={moreHistoryHref}
+          onOpen={setHistoryId}
+        />
+      ) : (
+        <div className="flex flex-wrap items-start gap-6">
+          <section
+            aria-labelledby="queue-title"
+            className="flex min-w-0 flex-[999_1_560px] flex-col gap-3"
+          >
+            <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 id="queue-title" className="text-sm font-semibold text-foreground">
+                {plural(pending.length, "mail à traiter", "mails à traiter")}
+                {/* La requête plafonne la file (cf. listProspectsBoard). */}
+                {pending.length >= 200 && (
+                  <span className="font-normal text-muted-foreground">
+                    {" "}
+                    (200 plus récents affichés)
+                  </span>
+                )}
+              </h2>
+              {lastSyncAt && (
+                <span className="text-xs text-muted-foreground">
+                  Analyse automatique · <TimeAgo iso={lastSyncAt} />
+                </span>
+              )}
+            </header>
             {pending.length > 0 ? (
-              <ul className="flex flex-col gap-2 p-3">
+              <ul className="flex flex-col gap-2">
                 {groups.map(([s, ...others]) => (
                   <QueueRow
                     key={s.id}
@@ -429,48 +763,17 @@ function Board({ pending, history, historyTotal, moreHistoryHref, lastSyncAt }: 
                 ))}
               </ul>
             ) : (
-              <div className="flex h-full min-h-48 flex-col items-center justify-center gap-1 px-8 text-center">
+              <div className="flex min-h-48 flex-col items-center justify-center gap-1 rounded-md border border-border bg-card px-8 text-center">
                 <p className="text-sm font-medium text-foreground">Rien à traiter</p>
                 <p className="text-sm text-muted-foreground">
                   Les nouveaux mails de prospects apparaîtront ici après la prochaine analyse.
                 </p>
               </div>
             )}
-          </div>
-        </section>
-
-        <section
-          aria-labelledby="history-title"
-          className="flex min-h-0 flex-col overflow-hidden rounded-md border border-border bg-card shadow-[var(--shadow-card)]"
-        >
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-5">
-            <h2 id="history-title" className="text-sm font-semibold text-foreground">
-              Historique
-            </h2>
-            <span className="text-sm text-muted-foreground tabular-nums">{historyTotal}</span>
-          </header>
-          <div className="min-h-0 flex-1 overflow-auto">
-            {history.length > 0 ? (
-              <Timeline items={history} activeId={historyId} onOpen={setHistoryId} />
-            ) : (
-              <p className="px-5 py-12 text-center text-sm text-muted-foreground">
-                Aucun mail traité ne correspond à ces filtres.
-              </p>
-            )}
-            {moreHistoryHref && (
-              <div className="border-t border-border p-3 text-center">
-                <Link
-                  href={moreHistoryHref}
-                  scroll={false}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
-                >
-                  Afficher les plus anciens
-                </Link>
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
+          </section>
+          <TodayCard history={history} historyHref={historyHref} onOpen={setHistoryId} />
+        </div>
+      )}
 
       <ValidateModal id={validatingId} onClose={() => setValidatingId(null)} onDone={handleDone} />
       <HistoryPanel id={historyId} onClose={() => setHistoryId(null)} onOpenEntity={openEntity} />

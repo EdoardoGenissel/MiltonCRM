@@ -1,5 +1,6 @@
 import { Topbar } from "@/components/topbar"
 import { FilterBar } from "@/components/filter-bar"
+import { TabStrip } from "@/components/ui/tab-strip"
 import { buildQuery, toArray } from "@/lib/search-params"
 import {
   HISTORY_PAGE_SIZE,
@@ -15,11 +16,12 @@ export const dynamic = "force-dynamic"
 
 type ProspectsSearchParams = Record<string, string | string[] | undefined>
 
-// Page Prospects : à gauche les mails à traiter, à droite l'historique
-// (validés, rejetés, écartés par l'analyse, erreurs) - cf. lib/prospects-mail/.
-// L'analyse des boîtes tourne en tâche planifiée (netlify/functions/
-// prospects-mail-cron.mts) : pas de déclenchement manuel ici. Recherche et
-// filtres (bouton "Filtres") passent par l'URL.
+// Page Prospects : onglet "À traiter" (file + mails traités du jour) et onglet
+// "Historique" (timeline : validés, ignorés, écartés par l'analyse, erreurs) -
+// cf. lib/prospects-mail/. L'analyse des boîtes tourne en tâche planifiée
+// (netlify/functions/prospects-mail-cron.mts) : pas de déclenchement manuel
+// ici. Onglet (?vue=historique), recherche et filtres passent par l'URL ;
+// l'onglet ne change que l'affichage, pas la requête.
 export default async function ProspectsPage({
   searchParams,
 }: {
@@ -48,10 +50,13 @@ export default async function ProspectsPage({
       ? `?${buildQuery(params, { set: { hl: String(historyLimit + HISTORY_PAGE_SIZE) } }).toString()}`
       : null
 
+  const vue = toArray(params.vue)[0] === "historique" ? "historique" : "a-traiter"
+  const vueHref = (value?: string) => `?${buildQuery(params, { set: { vue: value } }).toString()}`
+
   return (
     <>
       <Topbar title="Prospects" />
-      <div className="flex min-h-0 flex-1 flex-col p-8 lg:h-[calc(100vh-4rem)]">
+      <div className="flex-1 overflow-auto p-8">
         <FilterBar
           searchParams={params}
           searchPlaceholder="Nom, objet, résumé…"
@@ -62,12 +67,39 @@ export default async function ProspectsPage({
             statut: Object.fromEntries(HISTORY_STATUTS.map((s) => [s.value, s.label])),
             par: Object.fromEntries(board.facets.par.map((p) => [p, p.split("@")[0]])),
           }}
-          tabs={<FiltersButton searchParams={params} facets={board.facets} />}
+          keepOnReset={["vue"]}
+          tabs={
+            <TabStrip
+              items={[
+                {
+                  key: "a-traiter",
+                  label: (
+                    <>
+                      À traiter{" "}
+                      <span className="text-muted-foreground tabular-nums">
+                        {board.pending.length}
+                      </span>
+                    </>
+                  ),
+                  active: vue === "a-traiter",
+                  href: vueHref(undefined),
+                },
+                {
+                  key: "historique",
+                  label: "Historique",
+                  active: vue === "historique",
+                  href: vueHref("historique"),
+                },
+              ]}
+            />
+          }
+          filters={<FiltersButton searchParams={params} facets={board.facets} vue={vue} />}
         />
         <ProspectsBoard
+          vue={vue}
           pending={board.pending}
           history={board.history}
-          historyTotal={board.historyTotal}
+          historyHref={vueHref("historique")}
           moreHistoryHref={moreHistoryHref}
           lastSyncAt={lastSync?.startedAt.toISOString() ?? null}
         />

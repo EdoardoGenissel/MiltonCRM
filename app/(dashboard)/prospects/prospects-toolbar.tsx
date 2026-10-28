@@ -65,24 +65,31 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   )
 }
 
-// Bouton "Filtres" de la page Prospects, logé dans l'emplacement gauche de
+// Bouton "Filtres" de la page Prospects, logé à gauche de la recherche dans
 // FilterBar (qui garde la recherche, les pastilles "Clé : valeur" et
 // "Réinitialiser" communes aux pages liste). Même comportement que
 // ColumnFilter : brouillon local, appliqué au clic sur "Appliquer".
+// Sur l'onglet "À traiter", Statut et Traité par (sans effet sur la file) sont
+// masqués ; leurs valeurs restent dans l'URL pour l'historique.
 export function FiltersButton({
   searchParams,
   facets,
+  vue,
 }: {
   searchParams: Params
   facets: { boites: string[]; par: string[] }
+  vue: "a-traiter" | "historique"
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<Draft>(() => readDraft(searchParams))
+  const historique = vue === "historique"
 
   const applied = readDraft(searchParams)
   const activeCount =
-    (applied.periode ? 1 : 0) + applied.statut.length + applied.boite.length + applied.par.length
+    (applied.periode ? 1 : 0) +
+    applied.boite.length +
+    (historique ? applied.statut.length + applied.par.length : 0)
 
   function handleOpenChange(next: boolean) {
     setOpen(next)
@@ -101,15 +108,27 @@ export function FiltersButton({
 
   return (
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
-      <Popover.Trigger render={<Button variant="outline" />}>
-        <ListFilter className={cn(activeCount > 0 && "text-primary")} />
+      {/* Logé dans le champ de recherche (slot `filters` de FilterBar) : bouton
+          discret, le compteur ne compte que les filtres utiles à la vue. */}
+      <Popover.Trigger
+        render={<Button type="button" variant="ghost" size="default" />}
+        aria-label={
+          activeCount > 0 ? `Filtres, ${activeCount} actif${activeCount > 1 ? "s" : ""}` : "Filtres"
+        }
+      >
+        <ListFilter aria-hidden />
         Filtres
         {activeCount > 0 && (
-          <span className="text-muted-foreground tabular-nums">({activeCount})</span>
+          <span
+            aria-hidden
+            className="inline-flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-primary-strong px-1 text-xs font-semibold text-primary-foreground tabular-nums"
+          >
+            {activeCount}
+          </span>
         )}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner sideOffset={6} align="start">
+        <Popover.Positioner sideOffset={6} align="end">
           <Popover.Popup className="w-72 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-lg">
             <div className="flex max-h-[60vh] flex-col gap-4 overflow-auto">
               <Group title="Reçus depuis">
@@ -133,13 +152,15 @@ export function FiltersButton({
                 </div>
               </Group>
 
-              <Group title="Statut (historique)">
-                <CheckList
-                  options={HISTORY_STATUTS.map((s) => ({ value: s.value, label: s.label }))}
-                  selected={draft.statut}
-                  onChange={(statut) => setDraft({ ...draft, statut })}
-                />
-              </Group>
+              {historique && (
+                <Group title="Statut (historique)">
+                  <CheckList
+                    options={HISTORY_STATUTS.map((s) => ({ value: s.value, label: s.label }))}
+                    selected={draft.statut}
+                    onChange={(statut) => setDraft({ ...draft, statut })}
+                  />
+                </Group>
+              )}
 
               {facets.boites.length > 1 && (
                 <Group title="Boîte mail">
@@ -151,7 +172,7 @@ export function FiltersButton({
                 </Group>
               )}
 
-              {facets.par.length > 0 && (
+              {historique && facets.par.length > 0 && (
                 <Group title="Traité par (historique)">
                   <CheckList
                     options={facets.par.map((p) => ({ value: p, label: p.split("@")[0] }))}
@@ -168,7 +189,13 @@ export function FiltersButton({
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground"
-                onClick={() => setDraft({ periode: "", statut: [], boite: [], par: [] })}
+                onClick={() =>
+                  setDraft(
+                    historique
+                      ? { periode: "", statut: [], boite: [], par: [] }
+                      : { ...draft, periode: "", boite: [] },
+                  )
+                }
               >
                 Effacer
               </Button>

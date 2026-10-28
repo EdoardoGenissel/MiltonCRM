@@ -25,7 +25,12 @@ export function TabStrip({ items, className }: { items: TabStripItem[]; classNam
     <div className={cn("flex items-center gap-1 border-b border-border", className)}>
       {items.map((item) =>
         item.href !== undefined ? (
-          <Link key={item.key} href={item.href} className={itemClass(item.active)}>
+          <Link
+            key={item.key}
+            href={item.href}
+            aria-current={item.active ? "page" : undefined}
+            className={itemClass(item.active)}
+          >
             {item.label}
           </Link>
         ) : (
