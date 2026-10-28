@@ -14,7 +14,7 @@ type Action = Pick<ProposedAction, "entity" | "op">
 export const STATUTS: Record<string, { label: string; dot: string }> = {
   en_attente: { label: "À traiter", dot: "bg-primary" },
   validee: { label: "Validé", dot: "bg-success" },
-  rejetee: { label: "Ignoré", dot: "bg-danger" },
+  rejetee: { label: "Ignoré", dot: "border-2 border-muted-foreground/60" },
   ignoree: { label: "Écarté par l'analyse", dot: "bg-muted-foreground/60" },
   erreur: { label: "Erreur d'analyse", dot: "bg-warning" },
 }

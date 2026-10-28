@@ -40,7 +40,7 @@ function ToastList() {
 }
 
 // Notifications de confirmation (ex. "Contact créé · Ouvrir la fiche",
-// "Mail rejeté · Annuler") - fournisseur + zone d'affichage en bas à droite.
+// "Mail ignoré · Annuler") - fournisseur + zone d'affichage en bas à droite.
 // Les composants enfants publient via `useToast().add({...})`.
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (

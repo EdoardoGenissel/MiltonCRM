@@ -6,8 +6,8 @@
 // filtrables depuis le bouton Filtres de la page.
 export const HISTORY_STATUTS = [
   { value: "validee", label: "Validés" },
-  { value: "rejetee", label: "Rejetés" },
-  { value: "ignoree", label: "Non pertinents" },
+  { value: "rejetee", label: "Ignorés" },
+  { value: "ignoree", label: "Écartés par l'analyse" },
   { value: "erreur", label: "Erreurs d'analyse" },
 ] as const
 
