@@ -10,6 +10,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-strong: var(--primary-strong);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -19,6 +20,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-success: var(--success);
@@ -48,6 +50,8 @@
 
   --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
   --shadow-card-hover: 0 4px 14px rgba(16, 24, 40, 0.09);
+  /* Carte cliquable (file "À traiter") : élévation au survol et au focus. */
+  --shadow-card-interactive: 0 1px 2px rgba(16, 24, 40, 0.05), 0 2px 6px -1px rgba(16, 24, 40, 0.08);
 }
 
 :root {
@@ -59,6 +63,9 @@
   --popover-foreground: #111827;
   --primary: #14b8a6;
   --primary-foreground: #ffffff;
+  /* Teal foncé : le blanc sur #14b8a6 ne passe pas WCAG AA (2,5:1), sur
+     celui-ci si (5,5:1). Fond plein avec texte blanc, texte sur fond pâle. */
+  --primary-strong: #0f766e;
   --secondary: #f3f4f6;
   --secondary-foreground: #374151;
   --muted: #f3f4f6;
@@ -68,6 +75,8 @@
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #e8eaed;
+  /* Bordure d'un élément cliquable au survol. */
+  --border-strong: #d5d8dd;
   --input: #e8eaed;
   --ring: #14b8a6;
 

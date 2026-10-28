@@ -61,13 +61,6 @@ export function appliedLabel(actions: Action[]): string {
   return parts.join(", ")
 }
 
-export function plannedLabel(actions: Action[]): string {
-  return actions
-    .filter((a) => a.op !== "lien")
-    .map(actionLabel)
-    .join(" · ")
-}
-
 const RELATIVE = new Intl.RelativeTimeFormat("fr", { numeric: "auto" })
 
 // "il y a 5 minutes", "hier"... - au-delà d'une semaine, la date courte.

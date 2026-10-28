@@ -4,37 +4,39 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useMemo, useState } from "react"
 import { ChevronRight } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ToastProvider, useToast } from "@/components/ui/toaster"
 import { useEntityDrawers } from "@/components/entity-drawers/entity-drawer-provider"
 import { cn } from "@/lib/utils"
+import { cardView } from "@/lib/prospects-mail/card"
 import type { SuggestionSummary } from "@/lib/prospects-mail/queries"
-import {
-  appliedLabel,
-  clockLabel,
-  dayLabel,
-  plannedLabel,
-  STATUTS,
-  StatutDot,
-  TimeAgo,
-} from "./shared"
+import { appliedLabel, clockLabel, dayLabel, STATUTS, StatutDot, TimeAgo } from "./shared"
 import { ValidateModal, type ValidateOutcome } from "./validate-modal"
 import { HistoryPanel, type OpenEntity } from "./history-panel"
+
+// Le focus clavier du titre allume toute la carte (ombre + anneau) ; celui
+// d'Ignorer / Valider reste sur le bouton seul.
+const TITLE_FOCUS =
+  "has-[h3_button:focus-visible]:shadow-[var(--shadow-card-interactive)] has-[h3_button:focus-visible]:ring-2 has-[h3_button:focus-visible]:ring-ring/50 has-[h3_button:focus-visible]:ring-offset-1"
 
 function QueueRow({
   suggestion,
   others,
+  open,
   onValidate,
   onReject,
 }: {
   suggestion: SuggestionSummary
   // Autres mails du même expéditeur en attente (affichés groupés).
   others: number
+  // Un mail de ce groupe est affiché dans la fenêtre de validation.
+  open: boolean
   onValidate: () => void
   onReject: () => Promise<void>
 }) {
   const [rejecting, setRejecting] = useState(false)
-  const planned = plannedLabel(suggestion.actions)
+  const { typeLabel, bienLine, contactStatus } = cardView(suggestion)
 
   async function reject() {
     setRejecting(true)
@@ -43,60 +45,81 @@ function QueueRow({
   }
 
   return (
-    <li
-      className={cn(
-        "group relative px-5 py-3 transition-colors hover:bg-muted/40",
-        rejecting && "opacity-40",
-      )}
-    >
-      {/* Toute la ligne ouvre la validation à la souris ; au clavier, seuls
-          "Rejeter" et "Valider" sont tabulables (pas de double arrêt). */}
-      <button
-        type="button"
-        tabIndex={-1}
-        onClick={onValidate}
-        aria-label={`Examiner le mail de ${suggestion.displayName}`}
-        className="absolute inset-0 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none focus-visible:ring-inset"
-      />
-      <div className="pointer-events-none relative flex flex-col gap-1">
+    <li>
+      {/* Titre étendu : le bouton du titre couvre toute la carte (::after),
+          Ignorer et Valider passent au-dessus (z-10). Au clavier : titre,
+          Ignorer, Valider. */}
+      <article
+        aria-current={open ? "true" : undefined}
+        className={cn(
+          "relative flex cursor-pointer flex-col gap-1 rounded-md border border-border bg-card px-3.5 py-3 transition-[box-shadow,border-color] duration-150 ease-[ease] pointer-coarse:shadow-[var(--shadow-card)] motion-reduce:transition-none",
+          TITLE_FOCUS,
+          !rejecting && "hover:shadow-[var(--shadow-card-interactive)]",
+          // La carte ouverte garde sa bordure teal au survol.
+          open
+            ? "border-primary bg-[color-mix(in_srgb,var(--primary)_4%,var(--card))]"
+            : !rejecting && "hover:border-border-strong",
+          rejecting && "opacity-40",
+        )}
+      >
         <div className="flex items-baseline justify-between gap-4">
-          <span className="truncate text-sm font-semibold text-foreground">
+          <p className="min-w-0 truncate text-sm text-foreground/80">
             {suggestion.displayName}
-            {others > 0 && (
-              <span className="ml-2 font-normal text-muted-foreground">{others + 1} mails</span>
-            )}
-          </span>
+            {others > 0 && <span className="text-muted-foreground"> · {others + 1} mails</span>}
+          </p>
           <TimeAgo iso={suggestion.receivedAt} className="shrink-0 text-xs text-muted-foreground" />
         </div>
-        <p className="truncate text-sm text-foreground/80">
-          {suggestion.subject || "(sans objet)"}
-        </p>
-        {suggestion.resume && (
-          <p className="truncate text-sm text-muted-foreground">{suggestion.resume}</p>
-        )}
-      </div>
-      <div className="relative mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <p className="pointer-events-none text-xs text-muted-foreground">
-          <span className="font-medium text-foreground/80">
-            {planned || "Aucune fiche déduite"}
-          </span>
-          {suggestion.origine && <> · via {suggestion.origine}</>}
-        </p>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={reject}
-            disabled={rejecting}
-            className="text-muted-foreground hover:text-danger"
+        <h3 className="min-w-0 text-base font-semibold text-foreground">
+          <button
+            type="button"
+            onClick={onValidate}
+            aria-label={`${typeLabel} · ${suggestion.displayName}`}
+            className="block w-full truncate text-left outline-hidden after:absolute after:inset-0 after:rounded-md after:content-['']"
           >
-            Rejeter
-          </Button>
-          <Button variant="outline" size="sm" onClick={onValidate}>
-            Valider
-          </Button>
+            {typeLabel}
+          </button>
+        </h3>
+        {(bienLine || suggestion.resume) && (
+          <p className="truncate text-sm text-muted-foreground">
+            {bienLine && <span className="font-medium text-foreground/80">{bienLine}</span>}
+            {bienLine && suggestion.resume && " — "}
+            {suggestion.resume}
+          </p>
+        )}
+        <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          {contactStatus === "nouveau" && (
+            <Badge
+              variant="primary"
+              className="self-start font-semibold text-primary-strong sm:self-auto"
+            >
+              Nouveau prospect
+            </Badge>
+          )}
+          {contactStatus === "existant" && (
+            <Badge variant="secondary" className="self-start sm:self-auto">
+              Déjà dans le CRM
+            </Badge>
+          )}
+          <div className="relative z-10 grid grid-cols-2 gap-2 sm:ml-auto sm:flex sm:gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={reject}
+              disabled={rejecting}
+              className="text-muted-foreground pointer-coarse:h-11"
+            >
+              Ignorer
+            </Button>
+            <Button
+              size="sm"
+              onClick={onValidate}
+              className="bg-primary-strong hover:bg-[color-mix(in_oklch,var(--primary-strong),var(--foreground)_15%)] pointer-coarse:h-11"
+            >
+              Valider
+            </Button>
+          </div>
         </div>
-      </div>
+      </article>
     </li>
   )
 }
@@ -316,7 +339,7 @@ function Board({ pending, history, historyTotal, moreHistoryHref, lastSyncAt }: 
   const notifyRejected = useCallback(
     (id: string, name: string) =>
       toast.add({
-        title: "Mail rejeté",
+        title: "Mail ignoré",
         description: name,
         actionProps: { children: "Annuler", onClick: () => undoReject(id) },
       }),
@@ -391,14 +414,15 @@ function Board({ pending, history, historyTotal, moreHistoryHref, lastSyncAt }: 
               </span>
             )}
           </header>
-          <div className="min-h-0 flex-1 overflow-auto">
+          <div className={cn("min-h-0 flex-1 overflow-auto", pending.length > 0 && "bg-muted/40")}>
             {pending.length > 0 ? (
-              <ul className="divide-y divide-border">
+              <ul className="flex flex-col gap-2 p-3">
                 {groups.map(([s, ...others]) => (
                   <QueueRow
                     key={s.id}
                     suggestion={s}
                     others={others.length}
+                    open={s.id === validatingId || others.some((o) => o.id === validatingId)}
                     onValidate={() => setValidatingId(s.id)}
                     onReject={() => rejectFromQueue(s)}
                   />

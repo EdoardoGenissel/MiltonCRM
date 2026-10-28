@@ -18,6 +18,49 @@ export type BoardFilters = {
 
 export const HISTORY_PAGE_SIZE = 40
 
+type Recherche = NonNullable<MailExtraction["recherche"]>
+type Bien = NonNullable<MailExtraction["bien"]>
+
+// Ce que la carte de la file "À traiter" lit de l'extraction pour dire de quoi
+// parle la demande sans ouvrir le mail (cf. lib/prospects-mail/card.ts).
+export type SuggestionCarte = {
+  personas: string[]
+  recherche: Pick<
+    Recherche,
+    "categorie" | "typeBien" | "pieces" | "prixMax" | "loyerMax" | "secteur"
+  > | null
+  bien: Pick<Bien, "role" | "typeBien" | "pieces" | "commune"> | null
+  aMandat: boolean
+  originePrecise: string | null
+}
+
+function toCarte(extraction: MailExtraction): SuggestionCarte {
+  const { recherche, bien } = extraction
+  return {
+    personas: extraction.contact?.personas ?? [],
+    recherche: recherche
+      ? {
+          categorie: recherche.categorie ?? null,
+          typeBien: recherche.typeBien ?? null,
+          pieces: recherche.pieces ?? null,
+          prixMax: recherche.prixMax ?? null,
+          loyerMax: recherche.loyerMax ?? null,
+          secteur: recherche.secteur ?? null,
+        }
+      : null,
+    bien: bien
+      ? {
+          role: bien.role,
+          typeBien: bien.typeBien ?? null,
+          pieces: bien.pieces ?? null,
+          commune: bien.commune ?? null,
+        }
+      : null,
+    aMandat: extraction.mandat != null,
+    originePrecise: extraction.origine?.precision ?? null,
+  }
+}
+
 // Vue sérialisable (props de composant client) d'une proposition - nom et
 // origine lus dans l'extraction IA : pour un mail relayé par un portail,
 // l'expéditeur technique (noreply@...) n'est pas le prospect.
@@ -36,6 +79,8 @@ export type SuggestionSummary = {
   error: string | null
   traiteLe: string | null
   traitePar: string | null
+  // null pour les mails sans extraction (anciens mails, erreur d'analyse).
+  carte: SuggestionCarte | null
 }
 
 export function toSummary(s: MailSuggestion): SuggestionSummary {
@@ -59,6 +104,7 @@ export function toSummary(s: MailSuggestion): SuggestionSummary {
     error: s.error,
     traiteLe: s.traiteLe?.toISOString() ?? null,
     traitePar: s.traitePar,
+    carte: extraction ? toCarte(extraction) : null,
   }
 }
 
