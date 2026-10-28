@@ -1,5 +1,8 @@
 "use client"
 
+import { Check } from "lucide-react"
+import { Toggle } from "@base-ui/react/toggle"
+import { ToggleGroup } from "@base-ui/react/toggle-group"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
@@ -23,31 +26,33 @@ export function FieldInput({
   className?: string
 }) {
   if (def.type === "list" && def.options) {
-    const selected = new Set(
-      value
-        .split(",")
-        .map((v) => v.trim())
-        .filter(Boolean),
-    )
+    const selected = value
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean)
+    // Puces sélectionnables (plusieurs à la fois), comportement ToggleGroup :
+    // aria-pressed, flèches pour passer d'une puce à l'autre. La hauteur passée
+    // par l'appelant (ex. h-9) est ignorée : les puces peuvent passer à la ligne.
     return (
-      <div className={cn("flex min-h-9 flex-wrap items-center gap-x-4 gap-y-1.5", className)}>
+      <ToggleGroup
+        id={id}
+        multiple
+        value={selected}
+        onValueChange={(next) => onChange(next.join(", "))}
+        aria-label={def.label}
+        className={cn("flex min-h-9 flex-wrap items-center gap-1.5", className, "h-auto")}
+      >
         {def.options.map((option) => (
-          <label key={option.value} className="flex cursor-pointer items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="h-3.5 w-3.5 rounded border-input"
-              checked={selected.has(option.value)}
-              onChange={(e) => {
-                const next = new Set(selected)
-                if (e.target.checked) next.add(option.value)
-                else next.delete(option.value)
-                onChange([...next].join(", "))
-              }}
-            />
+          <Toggle
+            key={option.value}
+            value={option.value}
+            className="group/chip inline-flex h-7 items-center gap-1 rounded-full border border-border bg-background px-3 text-sm text-foreground transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none data-[pressed]:border-primary data-[pressed]:bg-primary/10 data-[pressed]:font-medium data-[pressed]:text-primary-strong"
+          >
+            <Check aria-hidden className="hidden size-3.5 group-data-[pressed]/chip:block" />
             {option.label}
-          </label>
+          </Toggle>
         ))}
-      </div>
+      </ToggleGroup>
     )
   }
 

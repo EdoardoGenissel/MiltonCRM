@@ -74,7 +74,7 @@ export type HistoryDay<T extends Dated = SuggestionSummary> = {
   // Chaque liste du plus récent au plus ancien.
   validees: T[]
   // Écartés par un commercial ("rejetee") ou faute d'analyse ("erreur").
-  parVous: T[]
+  parEquipe: T[]
   // Écartés par l'analyse ("ignoree").
   parAnalyse: T[]
 }
@@ -82,7 +82,7 @@ export type HistoryDay<T extends Dated = SuggestionSummary> = {
 const emptyDay = <T extends Dated>(key: string): HistoryDay<T> => ({
   key,
   validees: [],
-  parVous: [],
+  parEquipe: [],
   parAnalyse: [],
 })
 
@@ -95,7 +95,7 @@ export function groupByDay<T extends Dated>(items: T[]): HistoryDay<T>[] {
     const day = days.get(key) ?? emptyDay<T>(key)
     if (s.statut === "validee") day.validees.push(s)
     else if (s.statut === "ignoree") day.parAnalyse.push(s)
-    else day.parVous.push(s)
+    else day.parEquipe.push(s)
     days.set(key, day)
   }
   const recentFirst = (a: T, b: T) => historyDate(b).localeCompare(historyDate(a))
@@ -104,7 +104,7 @@ export function groupByDay<T extends Dated>(items: T[]): HistoryDay<T>[] {
     .map((day) => ({
       key: day.key,
       validees: day.validees.sort(recentFirst),
-      parVous: day.parVous.sort(recentFirst),
+      parEquipe: day.parEquipe.sort(recentFirst),
       parAnalyse: day.parAnalyse.sort(recentFirst),
     }))
 }
@@ -114,22 +114,23 @@ export function treatedToday<T extends Dated>(items: T[], now: Date = new Date()
   return groupByDay(items).find((day) => day.key === key) ?? emptyDay<T>(key)
 }
 
-// "2 validés · 4 écartés" ; "Aucun mail validé · 3 écartés".
-export function daySummary(day: HistoryDay<Dated>): string {
-  const ecartes = day.parVous.length + day.parAnalyse.length
-  const parts = [
-    day.validees.length > 0
-      ? plural(day.validees.length, "validé", "validés")
-      : "Aucun mail validé",
-  ]
-  if (ecartes > 0) parts.push(plural(ecartes, "écarté", "écartés"))
-  return parts.join(" · ")
+// En-tête d'un jour : "2 validés" (porte le statut de la liste) puis "4 écartés"
+// (null si aucun) ; "Aucun mail validé" sans validé.
+export function daySummary(day: HistoryDay<Dated>): { validees: string; ecartes: string | null } {
+  const ecartes = day.parEquipe.length + day.parAnalyse.length
+  return {
+    validees:
+      day.validees.length > 0
+        ? plural(day.validees.length, "validé", "validés")
+        : "Aucun mail validé",
+    ecartes: ecartes > 0 ? plural(ecartes, "écarté", "écartés") : null,
+  }
 }
 
-// "4 écartés · 1 par vous, 3 par l'analyse" ; "3 écartés par l'analyse".
-export function ecartesLabel(parVous: number, parAnalyse: number): string {
-  const total = plural(parVous + parAnalyse, "écarté", "écartés")
-  if (parVous === 0) return `${total} par l'analyse`
-  if (parAnalyse === 0) return `${total} par vous`
-  return `${total} · ${parVous} par vous, ${parAnalyse} par l'analyse`
+// "4 écartés · 1 par l'équipe, 3 par l'analyse" ; "3 écartés par l'analyse".
+export function ecartesLabel(parEquipe: number, parAnalyse: number): string {
+  const total = plural(parEquipe + parAnalyse, "écarté", "écartés")
+  if (parEquipe === 0) return `${total} par l'analyse`
+  if (parAnalyse === 0) return `${total} par l'équipe`
+  return `${total} · ${parEquipe} par l'équipe, ${parAnalyse} par l'analyse`
 }

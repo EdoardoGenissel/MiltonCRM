@@ -53,6 +53,17 @@ export default async function ProspectsPage({
   const vue = toArray(params.vue)[0] === "historique" ? "historique" : "a-traiter"
   const vueHref = (value?: string) => `?${buildQuery(params, { set: { vue: value } }).toString()}`
 
+  // Recherche / filtres actifs : les listes vides disent "aucun résultat".
+  const queueFiltered = Boolean(toArray(params.periode)[0]) || toArray(params.boite).length > 0
+  const narrowing = {
+    search: toArray(params.search)[0] ?? "",
+    queueFiltered,
+    historyFiltered:
+      queueFiltered || toArray(params.statut).length > 0 || toArray(params.par).length > 0,
+    clearSearchHref: `?${buildQuery(params, { set: { search: undefined } }).toString()}`,
+    resetHref: `?${buildQuery({ vue: params.vue }).toString()}`,
+  }
+
   return (
     <>
       <Topbar title="Prospects" />
@@ -73,14 +84,8 @@ export default async function ProspectsPage({
               items={[
                 {
                   key: "a-traiter",
-                  label: (
-                    <>
-                      À traiter{" "}
-                      <span className="text-muted-foreground tabular-nums">
-                        {board.pending.length}
-                      </span>
-                    </>
-                  ),
+                  // Le nombre est dans le titre de la file, pas dans l'onglet.
+                  label: "À traiter",
                   active: vue === "a-traiter",
                   href: vueHref(undefined),
                 },
@@ -102,6 +107,7 @@ export default async function ProspectsPage({
           historyHref={vueHref("historique")}
           moreHistoryHref={moreHistoryHref}
           lastSyncAt={lastSync?.startedAt.toISOString() ?? null}
+          narrowing={narrowing}
         />
       </div>
     </>

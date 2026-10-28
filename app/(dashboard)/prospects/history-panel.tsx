@@ -79,7 +79,7 @@ function HistoryContent({
         <h3 className="text-lg font-semibold tracking-tight text-foreground">
           {detail.displayName}
         </h3>
-        <p className="text-sm text-muted-foreground">{detail.subject ?? "(sans objet)"}</p>
+        {detail.subject && <p className="text-sm text-muted-foreground">{detail.subject}</p>}
         <p className="mt-2 flex items-center gap-2 text-sm text-foreground">
           <StatutDot statut={detail.statut} />
           {statut.label}

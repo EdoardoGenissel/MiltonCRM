@@ -2,14 +2,15 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useCallback, useId, useMemo, useState } from "react"
-import { ChevronDown, ChevronRight } from "lucide-react"
+import { useCallback, useEffect, useId, useMemo, useState } from "react"
+import { ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ToastProvider, useToast } from "@/components/ui/toaster"
 import { useEntityDrawers } from "@/components/entity-drawers/entity-drawer-provider"
 import { cn } from "@/lib/utils"
 import { cardView } from "@/lib/prospects-mail/card"
+import { ContactAvatar } from "@/components/contact-avatar"
 import type { SuggestionSummary } from "@/lib/prospects-mail/queries"
 import { appliedLabel, TimeAgo } from "./shared"
 import {
@@ -22,7 +23,7 @@ import {
   plural,
   treatedToday,
 } from "./days"
-import { ValidateModal, type ValidateOutcome } from "./validate-modal"
+import { ValidateDrawer, type ValidateOutcome } from "./validate-drawer"
 import { HistoryPanel, type OpenEntity } from "./history-panel"
 
 // Le focus clavier du titre allume toute la carte (ombre + anneau) ; celui
@@ -150,6 +151,48 @@ function bienOf(s: SuggestionSummary): string | null {
 
 const FOCUS_RING = "focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
 
+// Recherche et filtres actifs : une liste vide veut alors dire "aucun
+// résultat", pas "rien à traiter".
+export type Narrowing = {
+  search: string
+  // Filtres actifs ayant un effet sur la file / sur l'historique.
+  queueFiltered: boolean
+  historyFiltered: boolean
+  clearSearchHref: string
+  resetHref: string
+}
+
+// " pour « marc »", " avec ces filtres", ou rien.
+function narrowSuffix(search: string, filtered: boolean): string {
+  return search ? ` pour « ${search} »` : filtered ? " avec ces filtres" : ""
+}
+
+function NoResults({
+  title,
+  text,
+  href,
+  action,
+}: {
+  title: string
+  text: string
+  href: string
+  action: string
+}) {
+  return (
+    <div className="flex min-h-48 flex-col items-center justify-center gap-1 rounded-md border border-border bg-card px-8 py-8 text-center">
+      <p className="text-sm font-medium text-foreground">{title}</p>
+      <p className="text-sm text-muted-foreground">{text}</p>
+      <Link
+        href={href}
+        scroll={false}
+        className={cn(buttonVariants({ variant: "outline", size: "default" }), "mt-3")}
+      >
+        {action}
+      </Link>
+    </div>
+  )
+}
+
 // Ligne cliquable de la carte "Aujourd'hui" : toute la ligne est la cible.
 // Survol en muted/60 (et non muted) pour garder le texte secondaire à 4,5:1.
 const TODAY_ROW = cn(
@@ -160,188 +203,195 @@ const ROW_CHEVRON =
   "size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover/row:opacity-100 group-focus-visible/row:opacity-100 motion-reduce:transition-none"
 const OVERLINE = "px-2 pt-2 text-xs font-medium tracking-wide text-muted-foreground uppercase"
 
+// Compteur des titres "Mails à traiter" et "Validés aujourd'hui" : pastille
+// ronde de la même taille que le compteur du bouton Filtres. Contour sur fond
+// blanc plutôt que la variante grise, qui se confond avec le fond de page
+// (#f3f4f6 sur #f7f8fa) et passerait pour un badge sans fond.
+function CountBadge({ count }: { count: number }) {
+  return (
+    <Badge
+      variant="outline"
+      className="h-4.5 min-w-4.5 justify-center rounded-full bg-card px-1.5 py-0 tabular-nums"
+    >
+      {count}
+    </Badge>
+  )
+}
+
+// Lignes affichées dans "Validés aujourd'hui" ; le reste est dans l'onglet
+// Historique.
+const TODAY_LIMIT = 5
+
+function MoreInHistory({ count, href }: { count: number; href: string }) {
+  if (count <= 0) return null
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "mx-2 mt-1 inline-block rounded-md py-1 text-xs font-medium text-primary-strong hover:underline",
+        FOCUS_RING,
+      )}
+    >
+      Voir {count === 1 ? "l'autre" : `les ${count} autres`} dans l&apos;historique
+    </Link>
+  )
+}
+
+// "par l'analyse", "analyse échouée", "ignoré par johan".
+function ecarteDetail(s: SuggestionSummary): string {
+  if (s.statut === "ignoree") return "par l'analyse"
+  if (s.statut === "erreur") return "analyse échouée"
+  const by = s.traitePar?.split("@")[0]
+  return by ? `ignoré par ${by}` : "ignoré"
+}
+
+// Ligne d'un mail écarté (bloc du jour, replié) : nom puis détail, sur une ligne.
+function TodayLine({
+  s,
+  detail,
+  onOpen,
+}: {
+  s: SuggestionSummary
+  detail: string | null
+  onOpen: (id: string) => void
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => onOpen(s.id)}
+        className={cn("flex items-center gap-2 px-2 py-1.5", TODAY_ROW)}
+      >
+        <span className="min-w-0 flex-1 truncate text-sm">
+          <span className="font-medium text-foreground/80 decoration-muted-foreground underline-offset-2 group-hover/row:underline">
+            {s.displayName}
+          </span>
+          {detail && <span className="text-xs text-muted-foreground"> · {detail}</span>}
+        </span>
+        <ChevronRight aria-hidden className={ROW_CHEVRON} />
+      </button>
+    </li>
+  )
+}
+
+// Mail validé du jour : avatar à initiales (repère visuel par personne, plus
+// petit que dans Contacts), nom puis type de demande sur deux lignes aérées.
+function TodayValidatedLine({ s, onOpen }: { s: SuggestionSummary; onOpen: (id: string) => void }) {
+  const [first = "", ...rest] = s.displayName.trim().split(/\s+/)
+  const type = requestType(s)
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => onOpen(s.id)}
+        className={cn("flex items-center gap-2.5 px-2 py-2", TODAY_ROW)}
+      >
+        <span aria-hidden>
+          {/* 30px : du haut du nom au bas de la description. */}
+          <ContactAvatar prenom={first} nom={rest.at(-1) ?? ""} size="sm" className="size-7.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-foreground decoration-muted-foreground underline-offset-2 group-hover/row:underline">
+            {s.displayName}
+          </span>
+          {type && <span className="block truncate text-xs text-muted-foreground">{type}</span>}
+        </span>
+        <ChevronRight aria-hidden className={ROW_CHEVRON} />
+      </button>
+    </li>
+  )
+}
+
+// Récap de la journée, discret (la file reste le cœur de la page) : posé sur le
+// fond de page, sans carte, pour passer au second plan derrière les cartes
+// blanches de la file. Les validés sur deux lignes, les écartés repliés. 5
+// lignes au plus par liste, le reste est dans l'onglet Historique.
 function TodayCard({
   history,
   historyHref,
+  narrowing,
   onOpen,
 }: {
   history: SuggestionSummary[]
   historyHref: string
+  narrowing: Narrowing
   onOpen: (id: string) => void
 }) {
   const [open, setOpen] = useState(false)
   const listId = useId()
-  const { validees, parVous, parAnalyse } = treatedToday(history)
+  const { validees, parEquipe, parAnalyse } = treatedToday(history)
+  const ecartes = [...parEquipe, ...parAnalyse].sort((a, b) =>
+    historyDate(b).localeCompare(historyDate(a)),
+  )
+  const suffix = narrowSuffix(narrowing.search, narrowing.historyFiltered)
 
   return (
-    <section
-      aria-labelledby="today-title"
-      className="max-w-[340px] flex-[1_1_300px] rounded-md border border-border bg-card px-2 pt-4 pb-2"
-    >
-      <div className="flex items-baseline justify-between gap-3 px-2 pb-2">
-        <h2 id="today-title" className="text-sm font-semibold text-foreground">
-          Aujourd&apos;hui
-        </h2>
-        <Link
-          href={historyHref}
-          className={cn(
-            "rounded-md text-sm font-medium text-primary-strong hover:underline",
-            FOCUS_RING,
-          )}
-        >
-          Historique →
-        </Link>
-      </div>
+    <section aria-labelledby="today-title" className="w-full pb-2 @4xl:w-[340px] @4xl:shrink-0">
+      <h2
+        id="today-title"
+        className="flex items-center gap-2 px-2 pb-1 text-sm font-semibold text-foreground"
+      >
+        Validés aujourd&apos;hui
+        <CountBadge count={validees.length} />
+      </h2>
 
-      {validees.length > 0 ? (
-        <ol className="flex flex-col gap-0.5">
-          {validees.map((s) => (
-            <li key={s.id}>
-              <button
-                type="button"
-                onClick={() => onOpen(s.id)}
-                className={cn("grid grid-cols-[12px_minmax(0,1fr)] gap-x-1 p-2", TODAY_ROW)}
-              >
-                <span aria-hidden className="mt-1.5 size-2 rounded-full bg-success" />
-                <span className="min-w-0">
-                  <span className="flex items-center gap-2">
-                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground decoration-muted-foreground underline-offset-2 group-hover/row:underline">
-                      {s.displayName}
-                    </span>
-                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                      {clockLabel(historyDate(s))}
-                    </span>
-                    <ChevronRight aria-hidden className={ROW_CHEVRON} />
-                  </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {["Validé", requestType(s), bienOf(s)].filter(Boolean).join(" · ")}
-                  </span>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <p className="px-2 py-2 text-xs text-muted-foreground">
-          Aucun mail validé aujourd&apos;hui.
+      {validees.length === 0 ? (
+        <p className="px-2 py-1 text-xs text-muted-foreground">
+          {suffix
+            ? `Aucun résultat aujourd'hui${suffix}.`
+            : "Les mails que vous validez apparaîtront ici."}
         </p>
+      ) : (
+        <>
+          <ol aria-labelledby="today-title" className="flex flex-col gap-0.5">
+            {validees.slice(0, TODAY_LIMIT).map((s) => (
+              <TodayValidatedLine key={s.id} s={s} onOpen={onOpen} />
+            ))}
+          </ol>
+          <MoreInHistory count={validees.length - TODAY_LIMIT} href={historyHref} />
+        </>
       )}
 
-      {parVous.length + parAnalyse.length > 0 && (
-        <>
-          <div aria-hidden className="mx-2 mt-2 border-t border-border" />
+      {ecartes.length > 0 && (
+        <div className="mt-2 border-t border-border pt-1">
           <button
             type="button"
             aria-expanded={open}
             aria-controls={listId}
             onClick={() => setOpen((v) => !v)}
             className={cn(
-              "mt-1 flex items-center justify-between gap-2 px-2 py-2.5 text-sm text-muted-foreground",
+              "flex items-center gap-1.5 px-2 py-1.5 text-sm text-muted-foreground",
               TODAY_ROW,
             )}
           >
-            {ecartesLabel(parVous.length, parAnalyse.length)}
-            <ChevronDown
+            <ChevronRight
               aria-hidden
               className={cn(
                 "size-3.5 shrink-0 transition-transform motion-reduce:transition-none",
-                open && "rotate-180",
+                open && "rotate-90",
               )}
             />
+            {plural(ecartes.length, "écarté", "écartés")}
           </button>
           <div id={listId} hidden={!open}>
-            {parVous.length > 0 && (
-              <section aria-labelledby={`${listId}-vous`}>
-                <h3 id={`${listId}-vous`} className={OVERLINE}>
-                  Ignorés par vous
-                </h3>
-                <ol className="mt-1">
-                  {parVous.map((s) => {
-                    const time = clockLabel(historyDate(s))
-                    return (
-                      <li key={s.id}>
-                        <button
-                          type="button"
-                          onClick={() => onOpen(s.id)}
-                          aria-label={
-                            s.statut === "erreur"
-                              ? `${s.displayName}, analyse échouée, ${time}`
-                              : undefined
-                          }
-                          className={cn(
-                            "grid grid-cols-[12px_minmax(0,1fr)_14px] items-center gap-x-1 px-2 py-1.5",
-                            TODAY_ROW,
-                          )}
-                        >
-                          <span
-                            aria-hidden
-                            className={cn(
-                              "size-2 rounded-full",
-                              s.statut === "erreur"
-                                ? "bg-warning"
-                                : "border-2 border-muted-foreground/60",
-                            )}
-                          />
-                          <span className="flex min-w-0 items-baseline gap-2">
-                            <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground/80">
-                              {s.displayName}
-                            </span>
-                            <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                              {time}
-                            </span>
-                          </span>
-                          <ChevronRight aria-hidden className={ROW_CHEVRON} />
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ol>
-              </section>
-            )}
-            {parAnalyse.length > 0 && (
-              <section aria-labelledby={`${listId}-analyse`}>
-                <h3 id={`${listId}-analyse`} className={OVERLINE}>
-                  Écartés par l&apos;analyse
-                </h3>
-                <ol className="mt-1">
-                  {parAnalyse.map((s) => (
-                    <li key={s.id}>
-                      <button
-                        type="button"
-                        onClick={() => onOpen(s.id)}
-                        className={cn(
-                          "grid grid-cols-[12px_minmax(0,1fr)_14px] items-center gap-x-1 px-2 py-1.5",
-                          TODAY_ROW,
-                        )}
-                      >
-                        <span aria-hidden className="h-0.5 w-2 bg-border" />
-                        <span className="flex min-w-0 items-baseline gap-2">
-                          <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
-                            {s.displayName}
-                          </span>
-                          <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                            {clockLabel(historyDate(s))}
-                          </span>
-                        </span>
-                        <ChevronRight aria-hidden className={ROW_CHEVRON} />
-                      </button>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            )}
+            <ol className="flex flex-col">
+              {ecartes.slice(0, TODAY_LIMIT).map((s) => (
+                <TodayLine key={s.id} s={s} detail={ecarteDetail(s)} onOpen={onOpen} />
+              ))}
+            </ol>
+            <MoreInHistory count={ecartes.length - TODAY_LIMIT} href={historyHref} />
           </div>
-        </>
+        </div>
       )}
     </section>
   )
 }
 
-// Nœuds de la timeline : un rond plein par mail validé, un petit point pour le
+// Nœuds de la timeline : un cercle vert (contour seul) par mail validé, un petit point pour le
 // groupe des écartés. Le statut est toujours écrit à côté (WCAG 1.4.1).
 const NODES = {
-  validee: "size-2.5 bg-success",
-  ecartes: "size-1.5 bg-border",
+  validee: "size-2.5 border-2 border-success bg-background",
+  ecartes: "size-1.5 bg-muted-foreground/50",
 } as const
 
 function TimelineEntry({
@@ -387,6 +437,9 @@ function fichesLabel(s: SuggestionSummary): string {
   return n === 0 ? "Aucune fiche" : plural(n, "fiche", "fiches")
 }
 
+// Deux lignes pour alléger la lecture : qui (nom + nombre de fiches), puis
+// quoi (type de demande · bien). Le statut "validé" est porté par l'en-tête du
+// jour, pas répété sur chaque carte.
 function ValidatedCard({ s, onOpen }: { s: SuggestionSummary; onOpen: (id: string) => void }) {
   const type = requestType(s)
   const bien = bienOf(s)
@@ -395,17 +448,21 @@ function ValidatedCard({ s, onOpen }: { s: SuggestionSummary; onOpen: (id: strin
       type="button"
       onClick={() => onOpen(s.id)}
       className={cn(
-        "flex w-full items-center gap-3 rounded-md border border-border bg-card px-3.5 py-2.5 text-left transition-colors hover:bg-muted/40 motion-reduce:transition-none",
+        "grid w-full grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-0.5 rounded-md border border-border bg-card px-3.5 py-2.5 text-left transition-colors hover:bg-muted/40 motion-reduce:transition-none",
         FOCUS_RING,
       )}
     >
-      <span className="min-w-0 flex-1 truncate text-sm">
-        <span className="font-semibold text-foreground">{s.displayName}</span>
-        {type && <span className="text-foreground/80"> · {type}</span>}
-        {bien && <span className="text-muted-foreground"> · {bien}</span>}
+      <span className="truncate text-sm font-semibold text-foreground">{s.displayName}</span>
+      <span className="text-right text-xs text-muted-foreground tabular-nums">
+        {fichesLabel(s)}
       </span>
-      <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{fichesLabel(s)}</span>
-      <span className="shrink-0 text-xs font-medium text-success-foreground">Validé</span>
+      {(type || bien) && (
+        <span className="col-span-2 truncate text-xs text-muted-foreground">
+          {type && <span className="text-foreground/80">{type}</span>}
+          {type && bien && " · "}
+          {bien}
+        </span>
+      )}
     </button>
   )
 }
@@ -445,11 +502,11 @@ function EcarteRow({
 // échec) et par l'analyse. Chaque ligne ouvre le drawer d'historique, où se
 // trouve "Remettre à traiter".
 function EcartesGroup({
-  parVous,
+  parEquipe,
   parAnalyse,
   onOpen,
 }: {
-  parVous: SuggestionSummary[]
+  parEquipe: SuggestionSummary[]
   parAnalyse: SuggestionSummary[]
   onOpen: (id: string) => void
 }) {
@@ -474,16 +531,16 @@ function EcartesGroup({
             open && "rotate-90",
           )}
         />
-        {ecartesLabel(parVous.length, parAnalyse.length)}
+        {ecartesLabel(parEquipe.length, parAnalyse.length)}
       </button>
       <div id={listId} hidden={!open} className="pb-1">
-        {parVous.length > 0 && (
+        {parEquipe.length > 0 && (
           <section aria-labelledby={`${listId}-vous`}>
             <h3 id={`${listId}-vous`} className={OVERLINE}>
-              Ignorés par vous
+              Ignorés par l&apos;équipe
             </h3>
             <ul className="mt-1">
-              {parVous.map((s) => {
+              {parEquipe.map((s) => {
                 const by = s.traitePar?.split("@")[0]
                 return (
                   <EcarteRow
@@ -519,14 +576,36 @@ function EcartesGroup({
 function HistoryTimeline({
   history,
   moreHistoryHref,
+  narrowing,
   onOpen,
 }: {
   history: SuggestionSummary[]
   moreHistoryHref: string | null
+  narrowing: Narrowing
   onOpen: (id: string) => void
 }) {
   const days = groupByDay(history)
 
+  if (days.length === 0 && narrowing.search) {
+    return (
+      <NoResults
+        title={`Aucun mail traité pour « ${narrowing.search} »`}
+        text="Vérifiez l'orthographe, ou cherchez un nom, un objet ou un mot du résumé."
+        href={narrowing.clearSearchHref}
+        action="Effacer la recherche"
+      />
+    )
+  }
+  if (days.length === 0 && narrowing.historyFiltered) {
+    return (
+      <NoResults
+        title="Aucun mail traité avec ces filtres"
+        text="Modifiez ou retirez des filtres pour voir plus de mails."
+        href={narrowing.resetHref}
+        action="Tout effacer"
+      />
+    )
+  }
   if (days.length === 0) {
     return (
       <p className="py-12 text-center text-sm text-muted-foreground">
@@ -538,8 +617,9 @@ function HistoryTimeline({
   return (
     <div className="flex max-w-[860px] flex-col gap-7">
       {days.map((day) => {
-        const ecartes = day.parVous.length + day.parAnalyse.length
+        const ecartes = day.parEquipe.length + day.parAnalyse.length
         const entries = day.validees.length + (ecartes > 0 ? 1 : 0)
+        const summary = daySummary(day)
         return (
           <section key={day.key} aria-labelledby={`jour-${day.key}`}>
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -550,9 +630,13 @@ function HistoryTimeline({
               >
                 {dayLabel(day.key + "T12:00:00-03:00")}
               </h2>
-              <p className="text-xs text-muted-foreground">{daySummary(day)}</p>
+              <p id={`resume-${day.key}`} className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground/80">{summary.validees}</span>
+                {summary.ecartes && ` · ${summary.ecartes}`}
+              </p>
             </div>
-            <ol>
+            {/* Nom de la liste pour les lecteurs d'écran : jour + "7 validés · 4 écartés". */}
+            <ol aria-labelledby={`jour-${day.key} resume-${day.key}`}>
               {day.validees.map((s, i) => (
                 <TimelineEntry
                   key={s.id}
@@ -566,7 +650,11 @@ function HistoryTimeline({
               ))}
               {ecartes > 0 && (
                 <TimelineEntry time={null} node="ecartes" first={entries === 1} last>
-                  <EcartesGroup parVous={day.parVous} parAnalyse={day.parAnalyse} onOpen={onOpen} />
+                  <EcartesGroup
+                    parEquipe={day.parEquipe}
+                    parAnalyse={day.parAnalyse}
+                    onOpen={onOpen}
+                  />
                 </TimelineEntry>
               )}
             </ol>
@@ -598,6 +686,7 @@ type BoardProps = {
   historyHref: string
   moreHistoryHref: string | null
   lastSyncAt: string | null
+  narrowing: Narrowing
 }
 
 export function ProspectsBoard(props: BoardProps) {
@@ -617,11 +706,22 @@ async function postDecision(id: string, decision: "rejeter" | "rouvrir"): Promis
   return Boolean(res?.ok)
 }
 
-function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt }: BoardProps) {
+function Board({
+  vue,
+  pending,
+  history,
+  historyHref,
+  moreHistoryHref,
+  lastSyncAt,
+  narrowing,
+}: BoardProps) {
   const router = useRouter()
   const toast = useToast()
   const { openContact, openBien, openMandat } = useEntityDrawers()
   const [validatingId, setValidatingId] = useState<string | null>(null)
+  // Dernier mail traité depuis le drawer, plus rien derrière : le drawer reste
+  // ouvert sur l'état "Plus aucun mail à traiter".
+  const [queueEnded, setQueueEnded] = useState(false)
   const [historyId, setHistoryId] = useState<string | null>(null)
 
   // Mails regroupés par expéditeur (une ligne par personne, la plus récente),
@@ -648,6 +748,24 @@ function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt
     [queueOrder],
   )
 
+  // Position du mail affiché dans la file et ses voisins (navigation du drawer).
+  const queueIndex = validatingId ? queueOrder.findIndex((s) => s.id === validatingId) : -1
+  const validating = queueIndex >= 0 ? queueOrder[queueIndex] : null
+
+  function closeDrawer() {
+    setValidatingId(null)
+    setQueueEnded(false)
+  }
+
+  // La carte du mail affiché reste visible dans la file, derrière le voile.
+  useEffect(() => {
+    if (!validatingId) return
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    document
+      .querySelector('article[aria-current="true"]')
+      ?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" })
+  }, [validatingId])
+
   const undoReject = useCallback(
     async (id: string) => {
       if (await postDecision(id, "rouvrir")) router.refresh()
@@ -656,7 +774,7 @@ function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt
           type: "error",
           title: "Annulation impossible",
           description:
-            "Le mail reste rejeté. Vous pouvez le remettre à traiter depuis l'historique.",
+            "Le mail reste ignoré. Vous pouvez le remettre à traiter depuis l'historique.",
         })
     },
     [router, toast],
@@ -679,14 +797,16 @@ function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt
     } else {
       toast.add({
         type: "error",
-        title: "Le rejet n'a pas été enregistré",
+        title: "Ce mail n'a pas pu être ignoré",
         description: "Vérifiez votre connexion puis réessayez.",
       })
     }
   }
 
   function handleDone(outcome: ValidateOutcome) {
-    setValidatingId(nextAfter(outcome.id))
+    const next = nextAfter(outcome.id)
+    setValidatingId(next)
+    setQueueEnded(next === null)
     if (outcome.decision === "rejeter") {
       notifyRejected(outcome.id, outcome.displayName)
       return
@@ -695,13 +815,13 @@ function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt
     const summary = appliedLabel(applied)
     const contactId = outcome.result?.contactId
     toast.add({
-      title: outcome.displayName,
+      title: `${outcome.displayName} validé`,
       description: `${summary[0].toUpperCase()}${summary.slice(1)}.`,
       actionProps: contactId
         ? {
             children: "Ouvrir la fiche",
             onClick: () => {
-              setValidatingId(null)
+              closeDrawer()
               openContact(contactId)
             },
           }
@@ -713,6 +833,7 @@ function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt
   // celle-ci ne s'empile pas derrière lui.
   const openEntity: OpenEntity = (entity, id) => {
     setHistoryId(null)
+    closeDrawer()
     if (entity === "bien") openBien(id)
     else if (entity === "mandat") openMandat(id)
     else openContact(id)
@@ -724,58 +845,94 @@ function Board({ vue, pending, history, historyHref, moreHistoryHref, lastSyncAt
         <HistoryTimeline
           history={history}
           moreHistoryHref={moreHistoryHref}
+          narrowing={narrowing}
           onOpen={setHistoryId}
         />
       ) : (
-        <div className="flex flex-wrap items-start gap-6">
-          <section
-            aria-labelledby="queue-title"
-            className="flex min-w-0 flex-[999_1_560px] flex-col gap-3"
-          >
-            <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h2 id="queue-title" className="text-sm font-semibold text-foreground">
-                {plural(pending.length, "mail à traiter", "mails à traiter")}
-                {/* La requête plafonne la file (cf. listProspectsBoard). */}
-                {pending.length >= 200 && (
-                  <span className="font-normal text-muted-foreground">
-                    {" "}
-                    (200 plus récents affichés)
+        // Requête de conteneur : à partir de 56rem de large, la carte du jour
+        // se range à droite de la file (340px) ; en dessous, elle passe sous
+        // la file, en pleine largeur.
+        <div className="@container">
+          <div className="flex flex-col gap-6 @4xl:flex-row @4xl:items-start">
+            <section aria-labelledby="queue-title" className="flex min-w-0 flex-1 flex-col gap-3">
+              <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h2
+                  id="queue-title"
+                  className="flex items-center gap-2 text-sm font-semibold text-foreground"
+                >
+                  {narrowing.search || narrowing.queueFiltered ? "Résultats" : "Mails à traiter"}
+                  <CountBadge count={pending.length} />
+                  {/* La requête plafonne la file (cf. listProspectsBoard). */}
+                  {pending.length >= 200 && (
+                    <span className="font-normal text-muted-foreground">
+                      (200 plus récents affichés)
+                    </span>
+                  )}
+                </h2>
+                {lastSyncAt && (
+                  <span className="text-xs text-muted-foreground">
+                    Analyse automatique · <TimeAgo iso={lastSyncAt} />
                   </span>
                 )}
-              </h2>
-              {lastSyncAt && (
-                <span className="text-xs text-muted-foreground">
-                  Analyse automatique · <TimeAgo iso={lastSyncAt} />
-                </span>
+              </header>
+              {pending.length > 0 ? (
+                <ul className="flex flex-col gap-2">
+                  {groups.map(([s, ...others]) => (
+                    <QueueRow
+                      key={s.id}
+                      suggestion={s}
+                      others={others.length}
+                      open={s.id === validatingId || others.some((o) => o.id === validatingId)}
+                      onValidate={() => setValidatingId(s.id)}
+                      onReject={() => rejectFromQueue(s)}
+                    />
+                  ))}
+                </ul>
+              ) : narrowing.search ? (
+                <NoResults
+                  title={`Aucun mail à traiter pour « ${narrowing.search} »`}
+                  text="Vérifiez l'orthographe, ou cherchez un nom, un objet ou un mot du résumé."
+                  href={narrowing.clearSearchHref}
+                  action="Effacer la recherche"
+                />
+              ) : narrowing.queueFiltered ? (
+                <NoResults
+                  title="Aucun mail à traiter avec ces filtres"
+                  text="Modifiez ou retirez des filtres pour voir plus de mails."
+                  href={narrowing.resetHref}
+                  action="Tout effacer"
+                />
+              ) : (
+                <div className="flex min-h-48 flex-col items-center justify-center gap-1 rounded-md border border-border bg-card px-8 text-center">
+                  <p className="text-sm font-medium text-foreground">Rien à traiter</p>
+                  <p className="text-sm text-muted-foreground">
+                    Les nouveaux mails de prospects apparaîtront ici après la prochaine analyse.
+                  </p>
+                </div>
               )}
-            </header>
-            {pending.length > 0 ? (
-              <ul className="flex flex-col gap-2">
-                {groups.map(([s, ...others]) => (
-                  <QueueRow
-                    key={s.id}
-                    suggestion={s}
-                    others={others.length}
-                    open={s.id === validatingId || others.some((o) => o.id === validatingId)}
-                    onValidate={() => setValidatingId(s.id)}
-                    onReject={() => rejectFromQueue(s)}
-                  />
-                ))}
-              </ul>
-            ) : (
-              <div className="flex min-h-48 flex-col items-center justify-center gap-1 rounded-md border border-border bg-card px-8 text-center">
-                <p className="text-sm font-medium text-foreground">Rien à traiter</p>
-                <p className="text-sm text-muted-foreground">
-                  Les nouveaux mails de prospects apparaîtront ici après la prochaine analyse.
-                </p>
-              </div>
-            )}
-          </section>
-          <TodayCard history={history} historyHref={historyHref} onOpen={setHistoryId} />
+            </section>
+            <TodayCard
+              history={history}
+              historyHref={historyHref}
+              narrowing={narrowing}
+              onOpen={setHistoryId}
+            />
+          </div>
         </div>
       )}
 
-      <ValidateModal id={validatingId} onClose={() => setValidatingId(null)} onDone={handleDone} />
+      <ValidateDrawer
+        id={validatingId}
+        summary={validating}
+        position={validating ? { index: queueIndex + 1, total: queueOrder.length } : null}
+        previous={queueIndex > 0 ? queueOrder[queueIndex - 1] : null}
+        next={queueIndex >= 0 ? (queueOrder[queueIndex + 1] ?? null) : null}
+        ended={queueEnded}
+        onNavigate={setValidatingId}
+        onClose={closeDrawer}
+        onDone={handleDone}
+        onOpenEntity={openEntity}
+      />
       <HistoryPanel id={historyId} onClose={() => setHistoryId(null)} onOpenEntity={openEntity} />
     </>
   )

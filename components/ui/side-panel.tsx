@@ -16,6 +16,8 @@ export function SidePanel({
   title,
   subtitle,
   actions,
+  toolbar,
+  footer,
   children,
 }: {
   open: boolean
@@ -25,6 +27,10 @@ export function SidePanel({
   subtitle?: React.ReactNode
   // Boutons d'en-tête à gauche de la croix (ex. "Modifier").
   actions?: React.ReactNode
+  // Bandeau fixe sous l'en-tête (ex. navigation entre mails à traiter).
+  toolbar?: React.ReactNode
+  // Pied fixe sous la zone qui défile, toujours visible (ex. boutons d'action).
+  footer?: React.ReactNode
   children: React.ReactNode
 }) {
   const [mounted, setMounted] = useState(false)
@@ -81,9 +87,12 @@ export function SidePanel({
               </Button>
             )}
             <div className="min-w-0">
+              {/* tabIndex -1 : le titre peut recevoir le focus par script (ex.
+                  après un changement de mail), sans entrer dans la tabulation. */}
               <h2
                 id={titleId}
-                className="truncate text-base font-semibold tracking-tight text-foreground"
+                tabIndex={-1}
+                className="truncate text-base font-semibold tracking-tight text-foreground outline-none"
               >
                 {title}
               </h2>
@@ -103,7 +112,13 @@ export function SidePanel({
             </Button>
           </div>
         </div>
+        {toolbar && <div className="shrink-0">{toolbar}</div>}
         <div className="flex-1 overflow-auto p-6">{children}</div>
+        {footer && (
+          <div className="shrink-0 border-t border-border bg-card shadow-[var(--shadow-panel-footer)]">
+            {footer}
+          </div>
+        )}
       </aside>
     </div>,
     document.body,

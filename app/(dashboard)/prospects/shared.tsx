@@ -32,7 +32,7 @@ export function StatutDot({ statut, className }: { statut: string; className?: s
   )
 }
 
-const NOUNS: Record<ProposalEntity, { one: string; feminine: boolean }> = {
+export const NOUNS: Record<ProposalEntity, { one: string; feminine: boolean }> = {
   contact: { one: "contact", feminine: false },
   prospectDetail: { one: "qualification", feminine: true },
   bien: { one: "bien", feminine: false },
