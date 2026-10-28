@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Phone, X } from "lucide-react"
 import { useEntityDrawers } from "@/components/entity-drawers/entity-drawer-provider"
 import { usePolling } from "@/lib/use-polling"
+import { Button } from "@/components/ui/button"
 
 type ActiveCall = {
   id: string
@@ -43,22 +44,24 @@ export function IncomingCallBanner() {
 
       <div className="flex items-center gap-4">
         {call.matchedContact && (
-          <button
-            type="button"
+          <Button
+            variant="link"
+            size="default"
             onClick={() => openContact(call.matchedContact!.id)}
-            className="text-sm font-medium text-primary hover:underline"
+            className="px-0"
           >
             Voir sa fiche contact
-          </button>
+          </Button>
         )}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => setDismissedId(call.id)}
           aria-label="Masquer le bandeau"
-          className="text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground"
         >
-          <X className="h-4 w-4" />
-        </button>
+          <X />
+        </Button>
       </div>
     </div>
   )

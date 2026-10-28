@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react"
 import { createPortal } from "react-dom"
 import { ArrowLeft, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 // Panneau latéral générique (drawer) utilisé par les fiches contact/bien/mandat
 // (cf. components/entity-drawers/*) - remplace la navigation vers une page
@@ -69,14 +70,15 @@ export function SidePanel({
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border bg-card px-6 py-4">
           <div className="flex min-w-0 items-center gap-2">
             {onBack && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={onBack}
                 aria-label="Retour"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="text-muted-foreground"
               >
-                <ArrowLeft className="h-4 w-4" />
-              </button>
+                <ArrowLeft />
+              </Button>
             )}
             <div className="min-w-0">
               <h2
@@ -90,14 +92,15 @@ export function SidePanel({
           </div>
           <div className="flex shrink-0 items-center gap-1">
             {actions}
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
               aria-label="Fermer"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="text-muted-foreground"
             >
-              <X className="h-4 w-4" />
-            </button>
+              <X />
+            </Button>
           </div>
         </div>
         <div className="flex-1 overflow-auto p-6">{children}</div>

@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react"
 import { Pencil } from "lucide-react"
 import { SidePanel } from "@/components/ui/side-panel"
+import { Button } from "@/components/ui/button"
 import { ContactDrawerContent } from "@/components/entity-drawers/contact-drawer-content"
 import { BienDrawerContent } from "@/components/entity-drawers/bien-drawer-content"
 import { MandatDrawerContent } from "@/components/entity-drawers/mandat-drawer-content"
@@ -146,14 +147,15 @@ function EntityPanel({
       }
       actions={
         !editing && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="default"
             onClick={() => setEditing(true)}
-            className="flex h-8 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="text-muted-foreground"
           >
-            <Pencil className="h-3.5 w-3.5" />
+            <Pencil className="size-3.5" />
             Modifier
-          </button>
+          </Button>
         )
       }
     >

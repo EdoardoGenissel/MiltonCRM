@@ -3,6 +3,7 @@
 import { PanelLeft } from "lucide-react"
 import { NotificationBell } from "@/components/notification-bell"
 import { useSidebar } from "@/components/sidebar-context"
+import { Button } from "@/components/ui/button"
 
 export function Topbar({ title }: { title: string }) {
   const { toggle } = useSidebar()
@@ -10,13 +11,15 @@ export function Topbar({ title }: { title: string }) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-8">
       <div className="flex items-center gap-3.5">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={toggle}
-          className="cursor-pointer text-[#aab0ba] hover:text-foreground"
+          className="text-nav-icon"
           aria-label="Afficher/masquer le menu"
         >
-          <PanelLeft className="h-4.5 w-4.5" />
-        </button>
+          <PanelLeft className="size-4.5" />
+        </Button>
         <h1 className="text-base font-semibold tracking-tight text-foreground">{title}</h1>
       </div>
       <NotificationBell />

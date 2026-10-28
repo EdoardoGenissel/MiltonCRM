@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Users, FileText, Building2, Upload, Calculator, LogOut, Inbox } from "lucide-react"
 import { signOut } from "@/app/(auth)/actions"
 import { useSidebar } from "@/components/sidebar-context"
+import { Button } from "@/components/ui/button"
 
 type SidebarUser = { fullName: string; email: string }
 
@@ -39,13 +40,13 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-3 rounded-[9px] px-3 py-2.5 text-sm font-medium transition-colors",
+        "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
         active
-          ? "bg-[#f1f3f5] text-foreground"
-          : "text-[#4b5563] hover:bg-[#f5f6f8] hover:text-foreground",
+          ? "bg-nav-active text-foreground"
+          : "text-nav-foreground hover:bg-nav-hover hover:text-foreground",
       )}
     >
-      <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-[#8b93a1]")} />
+      <Icon className={cn("h-[18px] w-[18px]", active ? "text-primary" : "text-nav-icon")} />
       {label}
     </Link>
   )
@@ -85,24 +86,24 @@ export function Sidebar({ user }: { user: SidebarUser | null }) {
 
         {user && (
           <div className="flex items-center gap-3 border-t border-border p-3.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[9px] bg-primary text-xs font-bold text-primary-foreground">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
               {initialsFor(user.fullName)}
             </div>
             <div className="min-w-0 flex-1 text-left">
-              <div className="truncate text-[13.5px] font-semibold text-foreground">
-                {user.fullName}
-              </div>
+              <div className="truncate text-sm font-semibold text-foreground">{user.fullName}</div>
               <div className="truncate text-xs text-muted-foreground">{user.email}</div>
             </div>
             <form action={signOut}>
-              <button
+              <Button
                 type="submit"
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-danger"
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-danger"
                 aria-label="Déconnexion"
                 title="Déconnexion"
               >
-                <LogOut className="h-4 w-4" />
-              </button>
+                <LogOut />
+              </Button>
             </form>
           </div>
         )}

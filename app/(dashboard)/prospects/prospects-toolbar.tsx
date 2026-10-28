@@ -163,13 +163,15 @@ export function FiltersButton({
             </div>
 
             <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
-              <button
+              <Button
                 type="button"
-                className="text-xs text-muted-foreground hover:text-foreground"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
                 onClick={() => setDraft({ periode: "", statut: [], boite: [], par: [] })}
               >
                 Effacer
-              </button>
+              </Button>
               <div className="flex gap-2">
                 <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                   Annuler

@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -32,6 +30,10 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
   --color-warning-bg: var(--warning-bg);
+  --color-nav-foreground: var(--nav-foreground);
+  --color-nav-icon: var(--nav-icon);
+  --color-nav-hover: var(--nav-hover);
+  --color-nav-active: var(--nav-active);
 
   /* Un seul radius partout dans l'app (boutons, inputs, cards, popovers, tags,
      hover sidebar...) : les tailles rounded-sm/md/lg/xl/2xl pointent toutes vers
@@ -49,8 +51,6 @@
 }
 
 :root {
-  --radius: 0.875rem;
-
   --background: #f7f8fa;
   --foreground: #111827;
   --card: #ffffff;
@@ -80,6 +80,12 @@
   --warning: #ea580c;
   --warning-foreground: #9a3412;
   --warning-bg: #ffedd5;
+
+  /* Navigation (sidebar, topbar) : gris dédiés, plus doux que muted-foreground. */
+  --nav-foreground: #4b5563;
+  --nav-icon: #8b93a1;
+  --nav-hover: #f5f6f8;
+  --nav-active: #f1f3f5;
 
   --font-inter-stack: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif;
