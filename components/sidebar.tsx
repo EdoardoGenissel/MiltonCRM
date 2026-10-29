@@ -3,7 +3,16 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Users, FileText, Building2, Upload, Calculator, LogOut, Inbox } from "lucide-react"
+import {
+  Users,
+  FileText,
+  Building2,
+  CalendarDays,
+  Upload,
+  Calculator,
+  LogOut,
+  Inbox,
+} from "lucide-react"
 import { signOut } from "@/app/(auth)/actions"
 import { useSidebar } from "@/components/sidebar-context"
 
@@ -20,6 +29,7 @@ const navItems = [
   { label: "Contacts", href: "/contacts", icon: Users },
   { label: "Mandats", href: "/mandats", icon: FileText },
   { label: "Biens", href: "/biens", icon: Building2 },
+  { label: "Visites", href: "/visites", icon: CalendarDays },
   { label: "Estimations", href: "/estimations", icon: Calculator },
   { label: "Prospects", href: "/prospects", icon: Inbox },
 ]
