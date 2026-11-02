@@ -13,9 +13,7 @@ export function TextLink({
       type="button"
       className={cn(
         "text-left hover:underline",
-        tone === "link"
-          ? "text-link hover:text-link-hover"
-          : "text-muted-foreground hover:text-foreground",
+        tone === "link" ? "text-primary-strong" : "text-muted-foreground hover:text-foreground",
         className,
       )}
       {...props}

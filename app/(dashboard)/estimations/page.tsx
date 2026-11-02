@@ -127,7 +127,7 @@ export default async function EstimationsPage({
                     <Link
                       href={estimation.cityscanReportUrl}
                       target="_blank"
-                      className="text-link hover:text-link-hover hover:underline"
+                      className="text-primary-strong hover:underline"
                     >
                       Voir le rapport
                     </Link>

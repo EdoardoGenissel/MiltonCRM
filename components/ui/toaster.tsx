@@ -27,7 +27,7 @@ function ToastList() {
         <Toast.Description className="mt-0.5 text-sm text-muted-foreground" />
       </div>
       {toast.actionProps && (
-        <Toast.Action className="shrink-0 text-sm font-medium text-link hover:text-link-hover hover:underline focus-visible:underline focus-visible:outline-none" />
+        <Toast.Action className="shrink-0 text-sm font-medium text-primary-strong hover:underline focus-visible:underline focus-visible:outline-none" />
       )}
       <Toast.Close
         aria-label="Fermer la notification"
@@ -40,7 +40,7 @@ function ToastList() {
 }
 
 // Notifications de confirmation (ex. "Contact créé · Ouvrir la fiche",
-// "Mail rejeté · Annuler") - fournisseur + zone d'affichage en bas à droite.
+// "Mail ignoré · Annuler") - fournisseur + zone d'affichage en bas à droite.
 // Les composants enfants publient via `useToast().add({...})`.
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (

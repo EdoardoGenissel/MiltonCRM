@@ -14,8 +14,8 @@ type Action = Pick<ProposedAction, "entity" | "op">
 export const STATUTS: Record<string, { label: string; dot: string }> = {
   en_attente: { label: "À traiter", dot: "bg-primary" },
   validee: { label: "Validé", dot: "bg-success" },
-  rejetee: { label: "Rejeté", dot: "bg-danger" },
-  ignoree: { label: "Non pertinent", dot: "bg-muted-foreground/60" },
+  rejetee: { label: "Ignoré", dot: "border-2 border-muted-foreground/60" },
+  ignoree: { label: "Écarté par l'analyse", dot: "bg-muted-foreground/60" },
   erreur: { label: "Erreur d'analyse", dot: "bg-warning" },
 }
 
@@ -32,7 +32,7 @@ export function StatutDot({ statut, className }: { statut: string; className?: s
   )
 }
 
-const NOUNS: Record<ProposalEntity, { one: string; feminine: boolean }> = {
+export const NOUNS: Record<ProposalEntity, { one: string; feminine: boolean }> = {
   contact: { one: "contact", feminine: false },
   prospectDetail: { one: "qualification", feminine: true },
   bien: { one: "bien", feminine: false },
@@ -61,13 +61,6 @@ export function appliedLabel(actions: Action[]): string {
   return parts.join(", ")
 }
 
-export function plannedLabel(actions: Action[]): string {
-  return actions
-    .filter((a) => a.op !== "lien")
-    .map(actionLabel)
-    .join(" · ")
-}
-
 const RELATIVE = new Intl.RelativeTimeFormat("fr", { numeric: "auto" })
 
 // "il y a 5 minutes", "hier"... - au-delà d'une semaine, la date courte.
@@ -93,28 +86,6 @@ export function TimeAgo({ iso, className }: { iso: string; className?: string })
       {relativeDate(iso)}
     </time>
   )
-}
-
-// Libellé de jour pour regrouper l'historique : "Aujourd'hui", "Hier",
-// "jeudi 22 octobre".
-export function dayLabel(iso: string): string {
-  const date = new Date(iso)
-  const today = new Date()
-  const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
-  const days = Math.round((startOf(today) - startOf(date)) / 86_400_000)
-  if (days === 0) return "Aujourd'hui"
-  if (days === 1) return "Hier"
-  const label = date.toLocaleDateString("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    ...(date.getFullYear() !== today.getFullYear() ? { year: "numeric" } : {}),
-  })
-  return label[0].toUpperCase() + label.slice(1)
-}
-
-export function clockLabel(iso: string): string {
-  return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
 }
 
 export type ThreadMessage = { headers: Record<string, string>; body: string }
