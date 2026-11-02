@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { SidePanel } from "@/components/ui/side-panel"
 import { Button } from "@/components/ui/button"
+import { TextLink } from "@/components/ui/text-link"
 import { DrawerState } from "@/components/entity-drawers/drawer-state"
 import { useFetchJson } from "@/lib/use-fetch-json"
 import { dateTimeLabel } from "@/lib/format"
@@ -115,13 +116,12 @@ function HistoryContent({
             <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2.5">
               <span className="text-sm font-medium text-foreground">{block.title}</span>
               {block.targetId && (
-                <button
-                  type="button"
+                <TextLink
                   onClick={() => onOpenEntity(block.entity, block.targetId!)}
-                  className="text-xs font-medium text-primary hover:underline"
+                  className="text-xs font-medium"
                 >
                   Ouvrir la fiche
-                </button>
+                </TextLink>
               )}
             </div>
             {block.rows.length > 0 ? (

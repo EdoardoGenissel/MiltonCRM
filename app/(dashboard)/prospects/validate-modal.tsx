@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { Modal } from "@/components/ui/modal"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { TextLink } from "@/components/ui/text-link"
 import { FieldInput } from "@/components/field-input"
 import { cn } from "@/lib/utils"
 import { useFetchJson } from "@/lib/use-fetch-json"
@@ -79,11 +81,10 @@ function RecordReview({
           </p>
         </div>
         <label className="flex shrink-0 cursor-pointer items-center gap-2 text-xs text-muted-foreground select-none">
-          <input
-            type="checkbox"
+          <Checkbox
             checked={form.enabled}
             onChange={(e) => onChange({ ...form, enabled: e.target.checked })}
-            className="h-4 w-4 accent-primary"
+            className="size-4"
           />
           Enregistrer cette fiche
         </label>
@@ -144,22 +145,21 @@ function RecordReview({
                     className="h-9"
                   />
                   {proposal !== undefined && proposal !== form.values[def.key] && (
-                    <button
-                      type="button"
+                    <TextLink
                       onClick={() => setValue(def.key, proposal)}
-                      className="w-fit max-w-full truncate text-left text-xs text-primary hover:underline"
+                      className="w-fit max-w-full truncate text-xs"
                     >
                       Utiliser la valeur du mail : « {proposal} »
-                    </button>
+                    </TextLink>
                   )}
                   {changed && current && proposal === form.values[def.key] && !isCreate && (
-                    <button
-                      type="button"
+                    <TextLink
+                      tone="muted"
                       onClick={() => setValue(def.key, current)}
-                      className="w-fit text-left text-xs text-muted-foreground hover:text-foreground hover:underline"
+                      className="w-fit text-xs"
                     >
                       Garder la valeur actuelle
-                    </button>
+                    </TextLink>
                   )}
                 </div>
               </div>
@@ -404,7 +404,7 @@ function ValidateForm({
 // le formulaire), plutôt qu'un texte seul.
 function ModalSkeleton({ error }: { error: string | null }) {
   if (error) return <p className="p-6 text-sm text-danger">{error}</p>
-  const bar = "rounded bg-muted motion-safe:animate-pulse"
+  const bar = "rounded-md bg-muted motion-safe:animate-pulse"
   return (
     <div
       role="status"

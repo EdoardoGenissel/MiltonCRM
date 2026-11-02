@@ -1,5 +1,6 @@
 import { Topbar } from "@/components/topbar"
 import { TableCard, TableHeadRow, TableEmpty } from "@/components/ui/data-table"
+import { Card } from "@/components/detail-card"
 import {
   getLatestApimoSync,
   listImportRuns,
@@ -52,7 +53,7 @@ export default async function ImportsPage() {
     <>
       <Topbar title="Imports" />
       <div className="flex-1 overflow-auto p-8">
-        <div className="mb-6 flex items-center justify-between gap-4 rounded-md border border-border bg-card p-4">
+        <Card className="mb-6 flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1">
             <p className="text-sm font-semibold text-foreground">Synchro Apimo</p>
             <p className="text-xs text-muted-foreground">
@@ -78,7 +79,7 @@ export default async function ImportsPage() {
             </p>
           </div>
           <ApimoSyncButton />
-        </div>
+        </Card>
 
         <div className="mb-6 grid grid-cols-2 gap-4">
           <LastImportStat label="Dernier import - Contacts" log={latestByKind.contacts} />
@@ -89,10 +90,9 @@ export default async function ImportsPage() {
         </div>
 
         <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-1 rounded-md border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-            <h2 className="mb-4 text-sm font-semibold text-foreground">Nouvel import</h2>
+          <Card title="Nouvel import" className="col-span-1">
             <ImportForm />
-          </div>
+          </Card>
 
           <TableCard className="col-span-2">
             <TableHeadRow>

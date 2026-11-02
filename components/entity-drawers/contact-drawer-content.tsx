@@ -503,7 +503,7 @@ export function ContactDrawerContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-md border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <ContactAvatar prenom={contact.prenom} nom={contact.nom} size="lg" />
           <div>
@@ -549,7 +549,7 @@ export function ContactDrawerContent({
             </Button>
           )}
         </div>
-      </div>
+      </Card>
 
       <DrawerTabs tabs={tabs} />
     </div>

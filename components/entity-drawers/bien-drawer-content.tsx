@@ -306,7 +306,7 @@ export function BienDrawerContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
             <Building2 className="h-5 w-5" />
@@ -342,7 +342,7 @@ export function BienDrawerContent({
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
       <DrawerTabs tabs={tabs} />
     </div>

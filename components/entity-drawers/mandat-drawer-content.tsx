@@ -51,7 +51,7 @@ export function MandatDrawerContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+      <Card className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
           <MandatTypeBadge type={mandatBadgeLabel(mandat)} />
           {typeComplement && (
@@ -71,7 +71,7 @@ export function MandatDrawerContent({
             {mandat.bien.titre || mandat.bien.adresse || mandat.bien.commune || "Bien sans adresse"}
           </button>
         )}
-      </div>
+      </Card>
 
       <Card title="Détails du mandat" icon={FileText}>
         <MandatSummary

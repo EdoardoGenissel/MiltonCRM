@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Popover } from "@base-ui/react/popover"
 import { ListFilter } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { buildQuery, toArray } from "@/lib/search-params"
 import { HISTORY_STATUTS, PERIODES } from "@/lib/prospects-mail/filters"
@@ -35,11 +36,9 @@ function CheckList({
       {options.map((option) => (
         <label
           key={option.value}
-          className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted"
+          className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-muted"
         >
-          <input
-            type="checkbox"
-            className="h-3.5 w-3.5 rounded border-input"
+          <Checkbox
             checked={selected.includes(option.value)}
             onChange={(e) =>
               onChange(
@@ -121,7 +120,7 @@ export function FiltersButton({
                       aria-pressed={draft.periode === p.value}
                       onClick={() => setDraft({ ...draft, periode: p.value })}
                       className={cn(
-                        "rounded px-2 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
+                        "rounded-md px-2 py-1 text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
                         draft.periode === p.value
                           ? "bg-card text-foreground shadow-sm"
                           : "text-muted-foreground hover:text-foreground",

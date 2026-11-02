@@ -7,7 +7,24 @@
 // identifiants DIFFÉRENTS côté Apimo. Confondre les deux fait échouer tous les
 // endpoints `/agencies/{id}/...` en 403 alors que l'auth elle-même est valide.
 // Récupérer l'agency_id via `GET /agencies` plutôt que de réutiliser le provider.
+//
+// Apimo filtre les appels par IP (whitelist) : les IP de Netlify changeant, tous
+// les appels passent par le proxy QuotaGuard Static (IP fixes, à déclarer chez
+// Apimo) dès que QUOTAGUARDSTATIC_URL est défini. On utilise le `fetch` d'undici
+// et non celui de Node pour que le ProxyAgent et le fetch soient de la même
+// version (mélanger les deux casse sur certaines versions de Node).
+import { fetch, ProxyAgent, type RequestInit, type Response } from "undici"
+
 const API_BASE = "https://api.apimo.pro"
+
+let proxyAgent: ProxyAgent | undefined
+
+function apimoFetch(url: string | URL, init: RequestInit = {}): Promise<Response> {
+  const proxyUrl = process.env.QUOTAGUARDSTATIC_URL
+  if (!proxyUrl) return fetch(url, init)
+  proxyAgent ??= new ProxyAgent(proxyUrl)
+  return fetch(url, { ...init, dispatcher: proxyAgent })
+}
 
 export class ApimoAuthError extends Error {
   constructor(
@@ -22,8 +39,9 @@ export class ApimoForbiddenError extends Error {
   constructor(detail: string) {
     super(
       `Apimo a répondu 403 Forbidden : ${detail}. Vérifier d'abord APIMO_AGENCY_ID ` +
-        "(doit être l'id retourné par GET /agencies, pas APIMO_PROVIDER) avant de " +
-        "suspecter une whitelist IP ou un scope manquant.",
+        "(doit être l'id retourné par GET /agencies, pas APIMO_PROVIDER), puis que " +
+        "QUOTAGUARDSTATIC_URL est défini et que les IP QuotaGuard sont whitelistées " +
+        "chez Apimo, avant de suspecter un scope manquant.",
     )
   }
 }
@@ -46,7 +64,9 @@ function authHeader(): string {
 }
 
 async function parseAndCheck<T>(response: Response): Promise<T> {
-  const body = await response.json().catch(() => null)
+  // `any` comme le fetch natif : la forme dépend de l'endpoint, validée par l'appelant.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body: any = await response.json().catch(() => null)
 
   if (response.status === 401 || response.status === 400) {
     throw new ApimoAuthError(response.status, body?.detail ?? response.statusText)
@@ -75,7 +95,7 @@ export async function apimoGet<T = unknown>(
     url.searchParams.set(key, String(value))
   }
 
-  const response = await fetch(url, {
+  const response = await apimoFetch(url, {
     headers: { Authorization: authHeader(), Accept: "application/json" },
   })
   return parseAndCheck<T>(response)
@@ -118,7 +138,7 @@ export async function apimoPost<T = unknown>(path: string, body: unknown): Promi
   const { agencyId } = getCredentials()
   const url = `${API_BASE}/agencies/${agencyId}${path}`
 
-  const response = await fetch(url, {
+  const response = await apimoFetch(url, {
     method: "POST",
     headers: {
       Authorization: authHeader(),
@@ -143,7 +163,7 @@ export async function apimoGetAbsolute<T = unknown>(
     url.searchParams.set(key, String(value))
   }
 
-  const response = await fetch(url, {
+  const response = await apimoFetch(url, {
     headers: { Authorization: authHeader(), Accept: "application/json" },
   })
   return parseAndCheck<T>(response)

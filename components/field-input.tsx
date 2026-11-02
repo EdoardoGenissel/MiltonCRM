@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import type { FieldDef } from "@/lib/prospects-mail/fields"
+import { Checkbox } from "@/components/ui/checkbox"
 
 // Saisie d'un champ décrit par le registre (cf. lib/prospects-mail/fields.ts) -
 // partagée par le bouton "Modifier" des drawers et la modale de validation de
@@ -33,9 +34,7 @@ export function FieldInput({
       <div className={cn("flex min-h-9 flex-wrap items-center gap-x-4 gap-y-1.5", className)}>
         {def.options.map((option) => (
           <label key={option.value} className="flex cursor-pointer items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              className="h-3.5 w-3.5 rounded border-input"
+            <Checkbox
               checked={selected.has(option.value)}
               onChange={(e) => {
                 const next = new Set(selected)

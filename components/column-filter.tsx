@@ -7,6 +7,8 @@ import { ListFilter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { TextLink } from "@/components/ui/text-link"
 import { buildQuery } from "@/lib/search-params"
 
 type ColumnValuesResponse = { values?: string[]; hasMore?: boolean; error?: string }
@@ -110,7 +112,7 @@ export function ColumnFilter({
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger
         className={cn(
-          "rounded p-0.5 text-muted-foreground hover:text-foreground",
+          "rounded-md p-0.5 text-muted-foreground hover:text-foreground",
           isActive && "text-primary",
         )}
         aria-label={`Filtrer ${label}`}
@@ -129,20 +131,10 @@ export function ColumnFilter({
             />
 
             <div className="mb-2 flex items-center justify-between text-xs">
-              <button
-                type="button"
-                className="text-primary hover:underline"
-                onClick={() => setPending(new Set(values))}
-              >
-                Tout sélectionner
-              </button>
-              <button
-                type="button"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => setPending(new Set())}
-              >
+              <TextLink onClick={() => setPending(new Set(values))}>Tout sélectionner</TextLink>
+              <TextLink tone="muted" onClick={() => setPending(new Set())}>
                 Effacer
-              </button>
+              </TextLink>
             </div>
 
             <div className="max-h-56 overflow-auto rounded-md border border-border">
@@ -156,12 +148,7 @@ export function ColumnFilter({
                     key={value}
                     className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-sm hover:bg-muted"
                   >
-                    <input
-                      type="checkbox"
-                      checked={pending.has(value)}
-                      onChange={() => toggle(value)}
-                      className="h-3.5 w-3.5 rounded border-input"
-                    />
+                    <Checkbox checked={pending.has(value)} onChange={() => toggle(value)} />
                     <span className="truncate">{labelMap?.[value] ?? value}</span>
                   </label>
                 ))}

@@ -6,20 +6,30 @@
 // Ré-export : `Badge` reste importable depuis ce module pour ne pas casser les
 // appels existants (cf. components/ui/badge.tsx).
 export { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 export function Card({
   title,
   icon: Icon,
+  className,
   children,
 }: {
   // Titre optionnel : sans titre, simple panneau (remplace les `<div>` de carte
   // recopiés en tête des drawers).
   title?: string
   icon?: React.ComponentType<{ className?: string }>
+  // Mise en page du contenu (flex, gap, grille...) - le gabarit de la carte
+  // (bord, fond, padding, ombre) reste commun.
+  className?: string
   children: React.ReactNode
 }) {
   return (
-    <div className="rounded-md border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+    <div
+      className={cn(
+        "rounded-md border border-border bg-card p-6 shadow-[var(--shadow-card)]",
+        className,
+      )}
+    >
       {title && (
         <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-foreground">
           {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}

@@ -27,11 +27,11 @@ function ToastList() {
         <Toast.Description className="mt-0.5 text-sm text-muted-foreground" />
       </div>
       {toast.actionProps && (
-        <Toast.Action className="shrink-0 text-sm font-medium text-primary hover:underline focus-visible:underline focus-visible:outline-none" />
+        <Toast.Action className="shrink-0 text-sm font-medium text-link hover:text-link-hover hover:underline focus-visible:underline focus-visible:outline-none" />
       )}
       <Toast.Close
         aria-label="Fermer la notification"
-        className="-mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="-mr-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
       >
         <X className="h-3.5 w-3.5" />
       </Toast.Close>
